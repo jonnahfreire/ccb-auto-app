@@ -3,3 +3,5 @@ document_models/__pycache__/*
 files/1000/3008/*
 files/1000/3026/*
 files/1010/*
+chrome_driver/chromedriver_linux64.zip
+selenium/__pycache__/*
