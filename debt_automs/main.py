@@ -1,9 +1,8 @@
 import os
 
-from document_models.models import *
 
 def get_data_from_filename(document_model, file):
-
+    document_model["file-name"] = file.split("-")[0]
     file_data = [os.path.splitext(f.strip())[0] for f in file.split("-")]
 
     for data in file_data:
@@ -37,10 +36,15 @@ def get_data_from_filename(document_model, file):
     return document_model
 
 
-if __name__ == "__main__":
-    files = []
-    for file in os.listdir("files/1000/3026"):
-        files.append(get_data_from_filename(model3026, file))
+def get_files_from(path):
+    return os.listdir(path)
+
+def get_data_by_model(model, files):
+    return [
+        get_data_from_filename(model, file)
+        for file in files
+    ]
         
-    for f in files:
-        print(f)
+
+if __name__ == "__main__":
+    pass

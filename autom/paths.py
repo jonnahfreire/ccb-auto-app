@@ -1,3 +1,5 @@
+ccb_siga = "https://appl2.ccbsiga.congregacao.org.br/index.aspx"
+
 input_user =  '//*[@id="f_usuario"]'
 input_pass ='//*[@id="f_senha"]'
 login_confirm = '//*[@id="form1"]/div[4]/div[1]/button'
