@@ -5,3 +5,4 @@ files/1000/3026/*
 files/1010/*
 chrome_driver/chromedriver_linux64.zip
 selenium/__pycache__/*
+dev/*

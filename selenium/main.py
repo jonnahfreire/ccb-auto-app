@@ -37,6 +37,7 @@ class Selenium:
 
 
 if __name__ == "__main__":
+    from dev.config import *
     target = "https://appl2.ccbsiga.congregacao.org.br/index.aspx"
     selenium = Selenium(target)
     selenium.start()
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     siga = Siga(selenium.get_driver())
 
     sleep(2)
-    siga.login("jonas.freire.3", "@nopass1726")
+    siga.login(user, passw)
     sleep(5)
     selenium.close()
     # siga.open_tesouraria()
