@@ -24,6 +24,7 @@ class Selenium:
         self.driver = webdriver.Chrome(
             service=Service(CHROMEDRIVER_PATH), 
             options=self.chrome_options)
+        
         self.driver.get(self.target)
 
     def close(self):

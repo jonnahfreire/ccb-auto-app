@@ -7,3 +7,5 @@ chrome_driver/chromedriver_linux64.zip
 autom/__pycache__/*
 dev/*
 debt_automs/__pycache__/*
+utils/__pycache__/*
+test.py
