@@ -55,19 +55,32 @@ class Siga:
     def debt_3026(self, debt):
         for i in range(3): pyautogui.write(debt["date"][i])
         pyautogui.press("enter")
+        sleep(2)
         pyautogui.write(debt["type"])
+        sleep(2)
         for _ in range(2): pyautogui.press("enter")
+        sleep(2)
         pyautogui.write(debt["num"])
+        sleep(2)
         pyautogui.press("enter")
+        sleep(2)
         pyautogui.write(debt["value"])
+        sleep(2)
         pyautogui.press("enter")
+        sleep(2)
         pyautogui.write(debt["expenditure"])
 
         sleep(5)
         for _ in range(2): pyautogui.press("enter")
         pyautogui.write(debt["cost-center"])
+        sleep(2)
         pyautogui.press("enter")
-        self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-14"]').click()
+        sleep(2)
+        try:
+            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-14"]').click()
+        except NoSuchElementException:
+            self.driver.find_element(By.XPATH, '//*[@id="s2id_f_centrocusto_rateio"]').click()
+        
         sleep(2)
         pyautogui.write(debt["emitter"])
         for _ in range(3): 

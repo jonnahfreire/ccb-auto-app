@@ -4,13 +4,13 @@ from debt_automs.main import *
 from document_models.models import *
 from utils.main import WIN, clear
 
-from dev.config import *
-
 from autom.paths import ccb_siga
 from autom.main import Selenium
 from autom.routes import Siga
 
-from utils.main import WIN
+from config.user import User
+from config.credentials import Credential
+
 from config.globals import get_files_path, unix_sist_path, struct_dirs
 
 
@@ -43,7 +43,7 @@ def set_work_month():
     set_work_month()
 
 
-def list_files(base_path):
+def list_files(base_path: str) -> list:
     base_accounts = []
 
     if os.path.exists(base_path):
@@ -62,7 +62,7 @@ def list_files(base_path):
     return account_files
 
 
-def get_files_by_account(files: list) -> tuple:
+def get_files_by_account(files: list) -> tuple[list]:
     debts_1000, debts_1010 = [], []
 
     for debts in files:
@@ -105,6 +105,9 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> list:
     
     files_sent_successfull = []
     files_not_sent = []
+    user, passw = Credential().get_user_credentials()
+    files_path = get_files_path(work_month_path)
+
     sleep(2)
 
     if siga.login(user, passw):
@@ -118,9 +121,9 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> list:
         for debt in data:
             siga.debt_3026(debt)
 
-            files_path = get_files_path(work_month_path)
             file_name = debt["file-name"]
             file_path = None
+
             for fp in files_path:
                 if file_name in fp:
                     file_path = files_path[files_path.index(fp)]
@@ -131,18 +134,33 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> list:
                 else:
                     files_not_sent.append(file_path)
 
+                sleep(3)
                 if len(data) > 0:
+                    print("\n\n\nSalvando e iniciando novo lançamento..\n\n\n")
                     siga.save_and_new_debt()
                 else:
+                    print("\n\n\nSalvando lançamento..\n\n\n")
                     siga.save_debt()
 
             sleep(10)
-    # sleep(1000)
+
     selenium.close()
     return files_sent_successfull, files_not_sent
 
 
+def reset_db():
+    Credential().reset_all()
+
+
 def main():
+    user_credential = Credential()
+    user_data = user_credential.get_user_credentials()
+    if len(user_data) == 0:
+        new_user = input("Informe seu usuário do siga: ").strip()
+        new_pass = input("Infrome sua senha do siga: ").strip()
+        user = User(new_user, new_pass)
+        user_credential.set_user_credential(user.get_user(), user.get_pass())
+    
     work_month = set_work_month()
     work_month_path = os.path.join(unix_sist_path, work_month.replace("/", "-"))
 
@@ -172,6 +190,7 @@ def main():
     print(modelized_data_1000[2])
     
     # return
+    # return
 
     clear()
     print("\n*** Selecione os lançamentos que deseja efetuar ***\n")
@@ -180,13 +199,13 @@ def main():
     print("1010 - Banco")
     print(f"\tEncontrados {len(modelized_data_1010)} arquivos para lançar.\n")
 
-    print("\n 1 - Todos")
+    print("\n 1 - Todos\n")
 
     option = input("Digite o código dos lançamentos: ")
-    # return
 
     if "1000" in option.strip():
-        insert_debt(work_month, work_month_path, modelized_data_1000)
+        debt_1000, debt_1010 = insert_debt(work_month, work_month_path, modelized_data_1000)
+        print(debt_1000, debt_1010)
 
     elif "1" in option.strip():
         insert_debt(work_month, work_month_path, files_data)

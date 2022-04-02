@@ -9,3 +9,5 @@ dev/*
 debt_automs/__pycache__/*
 utils/__pycache__/*
 test.py
+config/user.db 
+config/__pycache__/*

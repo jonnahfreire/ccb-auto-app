@@ -1,5 +1,6 @@
 import os
 
+
 def get_data_from_filename(model, file: str) -> dict:
     model.file_name = file.split("-")[0].strip()
     file_data = [os.path.splitext(f.strip())[0] for f in file.split("-")]
@@ -20,6 +21,9 @@ def get_data_from_filename(model, file: str) -> dict:
         if len(data) > 0 and "CH" in data:
             model.check_num = data.replace("CH", "").strip()
             model.hist2 = "011"
+        
+        if len(data) > 0 and "DB AT" in data:
+            model.hist2 = "DÉBITO AUTOMÁTICO"
 
         if len(data) > 0 and ":" in data:
             model.date = data.split(":")

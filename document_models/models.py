@@ -7,7 +7,7 @@ class Model3026:
         self.date: list = []
         self.emitter: str = None
         self.value: str = None
-        self.expenditure: str = None
+        self.expenditure: str = "3026"
         self.hist1: str = "021"
         self.hist2: str = "023"
         self.cost_center: str = "ADM"
@@ -35,9 +35,12 @@ class Model3026:
 # ----------------------------------
 class Model3008(Model3026):
 
-    def __init__(self) -> None:
+    def __init__(self, banco: bool = False) -> None:
         super().__init__()
         self.expenditure: str = "3008"
+
+        if banco:
+            self.hist2 = "DÉBITO AUTOMÁTICO"
 
 
 # ----------------------------------
