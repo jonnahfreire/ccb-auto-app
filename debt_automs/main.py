@@ -7,34 +7,51 @@ def get_data_from_filename(model, file: str) -> dict:
 
     for data in file_data:
 
-        if len(data) > 0 and "CF" in data:
+        if len(data) > 0 and "NF" in data or "NF RC" in data \
+            or "CF" in data or "CF RC" in data or "CP" in data\
+            or "CP RC" in data:
             model.type = "NOTA FISCAL"
-            model.num = data.replace("CF", "").strip()
-        
-        if len(data) > 0 and "NF" in data or "NF RC" in data:
-            model.type = "NOTA FISCAL"
+            model.hist1 = "021"
+            model.hist2 = "023"
             model.num = data.replace("CF", "")\
-                                        .replace("NF", "")\
-                                        .replace("RC", "")\
-                                        .replace("NF RC", "").strip()
+                            .replace("CF RC", "")\
+                            .replace("NF", "")\
+                            .replace("NF RC", "")\
+                            .replace("RC", "")\
+                            .replace("CP", "")\
+                            .replace("CP RC", "").strip()
 
-        if len(data) > 0 and "CH" in data:
+        elif len(data) > 0 and "05_" in data:
+            model.cost_center = data.replace("_", "-").strip()
+
+        elif len(data) > 0 and "CH" in data:
             model.check_num = data.replace("CH", "").strip()
-            model.hist2 = "011"
-        
-        if len(data) > 0 and "DB AT" in data:
-            model.hist2 = "DÉBITO AUTOMÁTICO"
+            model.payment_form = "CHEQUE"
+            model.hist2 = "011" # CH Nº
+            model.cost_account = "1010"
 
-        if len(data) > 0 and ":" in data:
+        elif len(data) > 0 and "DB AT" in data:
+            model.type = "NOTA FISCAL"
+            model.num = data.replace("DB AT", "")\
+                            .replace("LUZ", "")\
+                            .replace("FONE", "").strip()
+            model.hist1 = "021"
+            model.hist2 = "007" #"AVISO DE DÉBITO"
+            model.cost_account = "1010"
+            model.payment_form = "DEBITO AUTOMATICO"
+            if "LUZ" in data:
+                model.doc_num = "200118"
+            if "FONE" in data:
+                model.doc_num = "300200"
+
+
+        elif len(data) > 0 and ":" in data:
             model.date = data.split(":")
 
-        if len(data) > 0 and "R$" in data:
+        elif len(data) > 0 and "R$" in data:
             model.value = data.replace("R$", "").strip()
         
-        if len(data) > 0 and not "R$" in data \
-            or not "CF" in data or not ":" in data\
-                or not "NF" in data or not "RC" in data\
-                    or not "CH" in data:
+        else:
             model.emitter = data.strip()
 
     return model.get_mapped_data()

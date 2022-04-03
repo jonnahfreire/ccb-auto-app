@@ -80,25 +80,31 @@ def get_modelized_data(debt_list: list) -> list:
     debt_data = []
     
     for debt in debt_list:
+        debt_3006 = debt.get("3006")
         debt_3026 = debt.get("3026")
         debt_3008 = debt.get("3008")
         debt_3014 = debt.get("3014")
+        debt_11102 = debt.get("11102")
         
         def loop(model, iterator: list):
             for db in iterator:
                 debt_data.append(get_data_from_filename(model, db))
-
+        
+        if debt_3006:
+            loop(Model3006(), debt_3006)
         if debt_3026:
             loop(Model3026(), debt_3026)
         if debt_3008:
             loop(Model3008(), debt_3008)
         if debt_3014:
             loop(Model3014(), debt_3014)
+        if debt_11102:
+            loop(Model11102(), debt_11102)
     
     return debt_data
 
 
-def insert_debt(work_month: str, work_month_path:str, data: list) -> list:
+def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
     selenium = Selenium(ccb_siga)
     selenium.start()
     siga = Siga(selenium.get_driver())
@@ -116,36 +122,35 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> list:
         sleep(5)
         siga.open_tesouraria()
         sleep(4)
-        siga.new_debt()
 
-        for debt in data:
-            siga.debt_3026(debt)
+        if siga.new_debt():
+            for debt in data:
+                if siga.debt(debt):
+                    file_name = debt["file-name"]
+                    file_path = None
 
-            file_name = debt["file-name"]
-            file_path = None
+                    for fp in files_path:
+                        if file_name in fp:
+                            file_path = files_path[files_path.index(fp)]
 
-            for fp in files_path:
-                if file_name in fp:
-                    file_path = files_path[files_path.index(fp)]
+                    if file_path is not None:
+                        if siga.file_upload(file_path):
+                            files_sent_successfull.append(file_path)
+                        else:
+                            files_not_sent.append(file_path)
 
-            if file_path is not None:
-                if siga.file_upload(file_path):
-                    files_sent_successfull.append(file_path)
-                else:
-                    files_not_sent.append(file_path)
-
-                sleep(3)
-                if len(data) > 0:
-                    print("\n\n\nSalvando e iniciando novo lançamento..\n\n\n")
-                    siga.save_and_new_debt()
-                else:
-                    print("\n\n\nSalvando lançamento..\n\n\n")
-                    siga.save_debt()
-
-            sleep(10)
-
+                        sleep(3)
+                        if len(data) > 1:
+                            print("\n\n\nSalvando e iniciando novo lançamento..\n\n\n")
+                            if siga.save_and_new_debt():
+                                print(f"{debt['file-name']}: salvo com sucesso.")
+                        else:
+                            print("\n\n\nSalvando lançamento..\n\n\n")
+                            if siga.save_debt():
+                                print(f"{debt['file-name']}: salvo com sucesso.")
+                sleep(10)
     selenium.close()
-    return files_sent_successfull, files_not_sent
+    return {"success": files_sent_successfull, "error": files_not_sent}
 
 
 def reset_db():
@@ -161,7 +166,7 @@ def main():
         user = User(new_user, new_pass)
         user_credential.set_user_credential(user.get_user(), user.get_pass())
     
-    work_month = set_work_month()
+    work_month = "03/2022"#set_work_month()
     work_month_path = os.path.join(unix_sist_path, work_month.replace("/", "-"))
 
     if not WIN:
@@ -187,37 +192,27 @@ def main():
 
     files_data = modelized_data_1000 + modelized_data_1010
     
-    print(modelized_data_1000[2])
-    
-    # return
-    # return
-
     clear()
     print("\n*** Selecione os lançamentos que deseja efetuar ***\n")
     print("1000 - Caixa 1000")
     print(f"\tEncontrados {len(modelized_data_1000)} arquivos para lançar.\n")
     print("1010 - Banco")
     print(f"\tEncontrados {len(modelized_data_1010)} arquivos para lançar.\n")
-
     print("\n 1 - Todos\n")
 
     option = input("Digite o código dos lançamentos: ")
 
-    if "1000" in option.strip():
-        debt_1000, debt_1010 = insert_debt(work_month, work_month_path, modelized_data_1000)
-        print(debt_1000, debt_1010)
+    for i in modelized_data_1010: print(i, "\n")
 
-    elif "1" in option.strip():
+    if option.strip() == "1000":
+        insert_debt(work_month, work_month_path, modelized_data_1000)
+
+    elif option.strip() == "1":
         insert_debt(work_month, work_month_path, files_data)
 
-    elif "1010" in option:
+    elif option == "1010":
         insert_debt(work_month, work_month_path, modelized_data_1010)
 
 
 if __name__ == "__main__":
     main()
-
-    modal_header_success_confirm = '/html/body/div[17]/div[3]/a' # Modal que aparece quando confirma o lançamento
-    modal_header = '/html/body/div[17]/div[1]' # Modal que aparece quando confirma o lançamento e já existe um documento lançado com o mesmo número
-    confirm_modal_header = '/html/body/div[17]/div[3]/a[1]' # Botão de confirmar o modal que aparece quando já existe um lançamento com o mesmo número
-    reject_modal_header = '/html/body/div[17]/div[3]/a[2]' # Botão de cancelar o modal que aparece quando já existe um lançamento com o mesmo número

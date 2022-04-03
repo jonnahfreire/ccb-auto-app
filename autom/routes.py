@@ -2,7 +2,12 @@ from time import sleep
 import pyautogui
 
 from autom.paths import *
+from utils.main import WIN, enter
+
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.support.wait import WebDriverWait
 
 from selenium.common.exceptions import NoSuchElementException
 
@@ -30,97 +35,170 @@ class Siga:
             print(e)
             return False
 
-    def change_work_month_date(self, month: str):
-        
+    def change_work_month_date(self, month: str) -> bool:
         try:
             self.driver.find_element(By.XPATH, work_month_date_select).click()
             sleep(3)
-            self.driver.find_element_by_link_text("Outros Meses").click()
-            # self.driver.find_element(By.XPATH, open_month_date_options).click()
+            self.driver.find_element_by_link_text(open_month_date_options).click()
             sleep(4)
             self.driver.find_element(By.XPATH, open_select_month_date).click()
             sleep(2)
             pyautogui.write(month)
-            for _ in range(4): pyautogui.press("enter")
-        except NoSuchElementException as e:
-            print("Change work month exception: ", e)
+            enter(4)
+            return True
+        except NoSuchElementException as err:
+            print("Change work month exception: ", err)
             sleep(5)
-            # self.change_work_month_date(month)
+            return False
 
-    def open_tesouraria(self):
-        self.driver.find_element(By.XPATH, menu_tesouraria).click()
-        sleep(2)
-        self.driver.find_element(By.XPATH, caixa_bancos).click()
-        
-    def debt_3026(self, debt):
-        for i in range(3): pyautogui.write(debt["date"][i])
-        pyautogui.press("enter")
-        sleep(2)
-        pyautogui.write(debt["type"])
-        sleep(2)
-        for _ in range(2): pyautogui.press("enter")
-        sleep(2)
-        pyautogui.write(debt["num"])
-        sleep(2)
-        pyautogui.press("enter")
-        sleep(2)
-        pyautogui.write(debt["value"])
-        sleep(2)
-        pyautogui.press("enter")
-        sleep(2)
-        pyautogui.write(debt["expenditure"])
-
-        sleep(5)
-        for _ in range(2): pyautogui.press("enter")
-        pyautogui.write(debt["cost-center"])
-        sleep(2)
-        pyautogui.press("enter")
-        sleep(2)
+    def open_tesouraria(self) -> bool:
         try:
-            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-14"]').click()
-        except NoSuchElementException:
-            self.driver.find_element(By.XPATH, '//*[@id="s2id_f_centrocusto_rateio"]').click()
-        
-        sleep(2)
-        pyautogui.write(debt["emitter"])
-        for _ in range(3): 
+            self.driver.find_element(By.XPATH, menu_tesouraria).click()
             sleep(2)
-            pyautogui.press("enter")
-        pyautogui.write(debt["hist-1"])
-        for _ in range(3): pyautogui.press("enter")
-        
-        for i in range(3): 
-            sleep(0.3)
-            pyautogui.write(debt["date"][i])
+            self.driver.find_element(By.XPATH, caixa_bancos).click()
+            return True
+        except Exception as err:
+            print("Open tesouraria exception: ", err)
+            return False
 
-        pyautogui.press("enter")
-        sleep(2)
-        pyautogui.write(debt["bill-form"])
-        sleep(1)
-        pyautogui.press("enter")
-        sleep(2)
-        pyautogui.press("enter")
-        pyautogui.write(debt["cost-account"])
-        sleep(2)
-        pyautogui.press("enter")
-        sleep(2)
-        pyautogui.press("enter")
-        pyautogui.write(debt["hist-2"])
-        sleep(2)
-        pyautogui.press("enter")
-        sleep(2)
+    def debt(self, debt: dict) -> bool:
+        try:
+            WebDriverWait(self.driver, 7)\
+                        .until(expected_conditions\
+                            .presence_of_element_located((By.ID, "f_data")))
+
+            # Inserts document date
+            data_documento = self.driver.find_element_by_id("f_data")
+            data_documento.send_keys(debt["date"])
+            enter()
+
+            # Inserts document type
+            pyautogui.write(debt["type"])
+            enter(2)
+            sleep(2)
+
+            # Inserts document number
+            pyautogui.write(debt["num"])
+            sleep(0.5)
+            enter()
+            sleep(2)
+
+            # Inserts document value
+            pyautogui.write(debt["value"])
+            sleep(0.5)
+            enter()
+            sleep(1)
+
+            # Inserts document expenditure (Tipo de Despesa)
+            pyautogui.write(debt["expenditure"])
+            sleep(3)
+            enter(2)
+
+            # Inserts document cost center
+            pyautogui.write(debt["cost-center"])
+            sleep(1)
+            enter()
+
+            # Inserts document emitter
+            try:
+                self.driver.find_element(By.XPATH, select_doc_emitter_opt1).click()
+            except NoSuchElementException:
+                self.driver.find_element(By.XPATH, select_doc_emitter_opt2).click()
+            
+            sleep(2)
+            pyautogui.write(debt["emitter"])
+            enter(3, 1)
+
+            # Inserts document historic 1 
+            pyautogui.write(debt["hist-1"])
+            enter(3)
+
+            # Inserts document payment date
+            sleep(1)
+            for i in range(3): 
+                pyautogui.write(debt["date"][i])
+                sleep(0.5)
+            enter()
+
+            # Inserts payment form
+            if debt["payment-form"] == "CHEQUE"\
+                and debt["check-num"] is not None:
+                # Inserts payment form
+                pyautogui.write(debt["payment-form"])
+                sleep(2)
+                enter(3)
+
+                # Inserts check number
+                pyautogui.write(debt["check-num"])
+                enter(4)
+                
+                # Inserts document cost account
+                pyautogui.write(debt["cost-account"])
+                enter()
+
+                # Inserts payment historic
+                pyautogui.write(debt["hist-2"])
+                enter()
+
+            elif debt["payment-form"] == "DEBITO AUTOMATICO":
+                pass
+                # Inserts payment form
+                pyautogui.write(debt["payment-form"])
+                sleep(2)
+                enter(2)
+
+                # Inserts document number
+                pyautogui.write(debt["doc-num"])
+                sleep(0.5)
+                enter()
+                
+                # Inserts document cost account
+                pyautogui.write(debt["cost-account"])
+                enter(2)
+
+                # Inserts document historic 2
+                pyautogui.write(debt["hist-2"])
+                enter()
+
+            else:
+                sleep(1)
+                pyautogui.write(debt["payment-form"])
+                sleep(1)
+                enter(2)
+
+                # Inserts document cost account
+                pyautogui.write(debt["cost-account"])
+                enter(2)
+            
+                # Inserts payment historic
+                pyautogui.write(debt["hist-2"])
+                sleep(0.5)
+                enter()
+            
+            return True
+
+        except Exception as err:
+            print("Debt exception: ", err)
+            return False
         
     def file_upload(self, file_path) -> bool:
-        self.driver.find_element(By.XPATH, '//*[@id="tabAnexoAnexar"]/div/label').click()
-        sleep(3)
-        pyautogui.write(file_path)
-        pyautogui.press("enter")
-        return True
+        try:
+            if not WIN:
+                self.driver.find_element(By.XPATH, file_upload_place).click()
+                sleep(3)
+                pyautogui.write(file_path)
+                enter()
+                return True
+            
+            # Windows implementation
+            return True
+        except Exception as err:
+            print("File upload Exception: ", err)
+            return False
 
     def save_debt(self) -> bool:
         try:
-            self.driver.find_element(By.XPATH, '//*[@id="f_main"]/div[11]/button[1]').click()
-            modal_header_success_confirm = '/html/body/div[17]/div[3]/a'
+            self.driver.find_element(By.XPATH, save_debt_btn).click()
 
             sleep(4)
             confirm_modal = self.driver.find_element(By.XPATH, modal_header_success_confirm)
@@ -133,17 +211,21 @@ class Siga:
 
     def save_and_new_debt(self) -> bool:
         try:
-            self.driver.find_element(By.XPATH, '//*[@id="f_main"]/div[11]/button[2]').click()
+            self.driver.find_element(By.XPATH, save_and_new_debt_btn).click()
             return True
         except NoSuchElementException:
             return False
 
-    def new_debt(self):
-        self.driver.find_element(By.XPATH, new_debt_select_box).click()
-        sleep(3)
-        self.driver.find_element_by_link_text("Despesa").click()
-        # self.driver.find_element(By.XPATH, new_debt_select_element).click()
-        sleep(2)
+    def new_debt(self) -> bool:
+        try:
+            self.driver.find_element_by_css_selector(new_debt_select_box).click()
+            sleep(3)
+            self.driver.find_element_by_link_text(new_debt_select_element).click()
+            sleep(2)
+            return True
+        except Exception as err:
+            print("New debt exception: ", err)
+            return False
 
     def new_group_debt(self):
         self.driver.find_element(By.XPATH, new_group_debt_select_box).click()
