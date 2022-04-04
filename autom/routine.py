@@ -6,7 +6,7 @@ from autom.siga import Siga
 
 from config.credentials import Credential
 
-from utils.main import get_files_path
+from utils.filemanager import get_files_path
 
 
 
