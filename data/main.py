@@ -1,8 +1,9 @@
 import os
 
-from config.globals import struct_dirs
-from document_models import models
-from document_models.models import *
+from models import debt_models
+from models.debt_models import *
+
+from utils.main import get_debt_models_list
 
 def get_data_from_filename(model, file: str) -> dict:
     model.file_name = file.split("-")[0].strip()
@@ -60,27 +61,11 @@ def get_data_from_filename(model, file: str) -> dict:
     return model.get_mapped_data()
 
 
-def get_class_list_by_module(module):
-    md = module.__dict__
-    return [
-        md[c] for c in md if (
-            isinstance(md[c], type) and md[c].__module__ == module.__name__
-        )
-    ]
-
-
-def get_mapped_models(models) -> list[dict]:
-    return [
-        _class.__name__[5:]
-        for _class in get_class_list_by_module(models)    
-    ][1:]
-
-
-def get_modelized_data(debt_list: list) -> list[dict]:
+def get_modelized_debts(debt_list: list) -> list[dict]:
     if not debt_list: return []
 
     debts_data:list = []
-    account_codes:list = get_mapped_models(models)
+    account_codes:list = get_debt_models_list(debt_models)
     
     def loop(model, iterator: list):
         for db in iterator:
