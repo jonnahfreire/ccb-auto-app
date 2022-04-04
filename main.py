@@ -1,5 +1,6 @@
 from time import sleep
-from debt_automs.main import *
+import os
+from debt_automs.main import get_modelized_data
 
 from document_models.models import *
 from utils.main import WIN, clear
@@ -74,34 +75,6 @@ def get_files_by_account(files: list) -> tuple[list]:
                 debts_1010.append(debts[key])
         
     return debts_1000, debts_1010
-
-
-def get_modelized_data(debt_list: list) -> list:
-    debt_data = []
-    
-    for debt in debt_list:
-        debt_3006 = debt.get("3006")
-        debt_3026 = debt.get("3026")
-        debt_3008 = debt.get("3008")
-        debt_3014 = debt.get("3014")
-        debt_11102 = debt.get("11102")
-        
-        def loop(model, iterator: list):
-            for db in iterator:
-                debt_data.append(get_data_from_filename(model, db))
-        
-        if debt_3006:
-            loop(Model3006(), debt_3006)
-        if debt_3026:
-            loop(Model3026(), debt_3026)
-        if debt_3008:
-            loop(Model3008(), debt_3008)
-        if debt_3014:
-            loop(Model3014(), debt_3014)
-        if debt_11102:
-            loop(Model11102(), debt_11102)
-    
-    return debt_data
 
 
 def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
@@ -191,6 +164,7 @@ def main():
     modelized_data_1010 = get_modelized_data(debts_1010)
 
     files_data = modelized_data_1000 + modelized_data_1010
+
     
     clear()
     print("\n*** Selecione os lançamentos que deseja efetuar ***\n")
@@ -202,7 +176,6 @@ def main():
 
     option = input("Digite o código dos lançamentos: ")
 
-    for i in modelized_data_1010: print(i, "\n")
 
     if option.strip() == "1000":
         insert_debt(work_month, work_month_path, modelized_data_1000)

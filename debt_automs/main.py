@@ -1,5 +1,8 @@
 import os
 
+from config.globals import struct_dirs
+from document_models import models
+from document_models.models import *
 
 def get_data_from_filename(model, file: str) -> dict:
     model.file_name = file.split("-")[0].strip()
@@ -57,12 +60,38 @@ def get_data_from_filename(model, file: str) -> dict:
     return model.get_mapped_data()
 
 
-def get_files_from(path):
-    return os.listdir(path)
+def get_class_list_by_module(module):
+    md = module.__dict__
+    return [
+        md[c] for c in md if (
+            isinstance(md[c], type) and md[c].__module__ == module.__name__
+        )
+    ]
 
-def get_data_by_model(model: dict, file: list) -> list:
-    return [get_data_from_filename(model, f) for f in file]
-        
+
+def get_mapped_models(models) -> list[dict]:
+    return [
+        _class.__name__[5:]
+        for _class in get_class_list_by_module(models)    
+    ][1:]
+
+
+def get_modelized_data(debt_list: list) -> list[dict]:
+    if not debt_list: return []
+
+    debts_data:list = []
+    account_codes:list = get_mapped_models(models)
+    
+    def loop(model, iterator: list):
+        for db in iterator:
+            debts_data.append(get_data_from_filename(model, db))
+
+    for debt in debt_list:
+        model = [eval(f"Model{code}") for code in account_codes if debt.get(code)][0]
+        if model: loop(model(), debt.get(model.__name__[5:]))
+    
+    return debts_data
+
 
 if __name__ == "__main__":
     pass
