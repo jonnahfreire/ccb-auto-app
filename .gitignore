@@ -8,4 +8,5 @@ utils/__pycache__/*
 test.py
 config/user.db 
 config/__pycache__/*
- cli/__pycache__/*
+cli/__pycache__/*
+ANOTACOES.txt 
