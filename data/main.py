@@ -66,14 +66,16 @@ def get_modelized_debts(debt_list: list) -> list[dict]:
 
     debts_data:list = []
     account_codes:list = get_debt_models_list(debt_models)
+
+    print("Account codes: ", account_codes)
     
     def loop(model, iterator: list):
         for db in iterator:
             debts_data.append(get_data_from_filename(model, db))
 
     for debt in debt_list:
-        model = [eval(f"Model{code}") for code in account_codes if debt.get(code)][0]
-        if model: loop(model(), debt.get(model.__name__[5:]))
+        model = [eval(f"Model{code}") for code in account_codes if debt.get(code)]
+        if model: loop(model[0](), debt.get(model[0].__name__[5:]))
     
     return debts_data
 

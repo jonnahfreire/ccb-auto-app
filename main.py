@@ -26,19 +26,17 @@ def main():
 
     all_debts = modelized_debts_1000 + modelized_debts_1010
 
+
     option = select_initial_routine(modelized_debts_1000, modelized_debts_1010)
 
     if option.strip() == "1000":
-        print("Despesas 1000")
-        # insert_debt(work_month, work_month_path, modelized_debts_1000)
+        insert_debt(work_month, work_month_path, modelized_debts_1000)
 
     elif option.strip() == "1":
-        print("Todas as despesas")
-        # insert_debt(work_month, work_month_path, all_debts)
+        insert_debt(work_month, work_month_path, all_debts)
 
     elif option == "1010":
-        print("Despesas 1010")
-        # insert_debt(work_month, work_month_path, modelized_debts_1010)
+        insert_debt(work_month, work_month_path, modelized_debts_1010)
 
 
 if __name__ == "__main__":

@@ -81,8 +81,18 @@ class Model3014(Model3026):
 
 
 # ----------------------------------
-class Model3030(Model3026):
+class Model3030(BaseModel):
 
     def __init__(self) -> None:
         super().__init__()
+        self.cost_center: str = "ADM"
         self.expenditure: str = "3030"
+
+
+# ----------------------------------
+class Model3301(BaseModel):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.cost_center: str = "ADM"
+        self.expenditure: str = "3301"

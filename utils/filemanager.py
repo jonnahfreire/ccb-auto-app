@@ -1,15 +1,17 @@
 import os
 
-from config.globals import struct_dirs
+from config.globals import struct_dirs, debt_code_list
 
 
-def create_struct_dir(path: str, struct_dirs: list, top_dir: str) -> None:
+def create_struct_dir(path: str, sub_dirs: list, top_dir: str) -> None:
     try:
         os.makedirs(os.path.join(path, top_dir))
         
-        for struct in struct_dirs:
-            os.mkdir(os.path.join(path, top_dir, struct))
-
+        for dir in sub_dirs:
+            for index, debt_code in enumerate(debt_code_list):
+                if dir == debt_code.split("-")[0].strip():
+                    os.mkdir(os.path.join(path, top_dir, debt_code_list[index]))
+                    
     except FileExistsError as e:
         print(e)
 
@@ -41,7 +43,7 @@ def list_files(base_path: str) -> list:
         for acc in accounts:
             files_by_account = os.listdir(os.path.join(base_path, account, acc))
             if files_by_account:
-                account_files.append({account: {acc: files_by_account}})
+                account_files.append({account: {acc.split("-")[0].strip(): files_by_account}})
 
     return account_files
 
