@@ -23,7 +23,7 @@ class Credential:
         db = LocalDB()
         db.connect()
 
-        db.cursor.execute("DELETE * FROM user")
+        db.cursor.execute("DELETE FROM user")
         db.commit()
 
     def set_user_credential(self, username: str, userpass: str):

@@ -181,17 +181,31 @@ class Siga:
             print("Debt exception: ", err)
             return False
         
-    def file_upload(self, file_path) -> bool:
+    def file_upload(self, file_path, debt: dict) -> bool:
         try:
+            self.driver.find_element(By.XPATH, file_upload_place).click()
+            sleep(3)
+
             if not WIN:
-                self.driver.find_element(By.XPATH, file_upload_place).click()
-                sleep(3)
                 pyautogui.write(file_path)
                 enter()
-                return True
-            
-            # Windows implementation
+
+            else:
+                # Windows implementation
+                pass
+
+            # VERIFICAR SE O MODAL DE IMPRIMIR CÓPIA DE CHEQUE APARECEU E LIDAR COM A SIATUAÇÃO
+            if debt["payment-form"] == "CHEQUE":
+                form_print_check_header = '/html/body/div[12]/div/div/h3' or 'Imprimir Cheque?'
+                form_print_check_xpath = '//*[@id="f-main-73231798-72CB-4443-80E7-6E2414CDF6B8"]'\
+                    or '#f-main-73231798-72CB-4443-80E7-6E2414CDF6B8'
+                form_print_check_close = '/html/body/div[12]/div/div/a[1]'
+                form_print_check_cancel = '//*[@id="f-main-73231798-72CB-4443-80E7-6E2414CDF6B8"]/div[2]/a'\
+                    or 'Não'
+                pass
+
             return True
+
         except Exception as err:
             print("File upload Exception: ", err)
             return False

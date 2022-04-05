@@ -9,4 +9,6 @@ test.py
 config/user.db 
 config/__pycache__/*
 cli/__pycache__/*
+execlogs/__pycache__/*
+execlogs/logs.db
 ANOTACOES.txt 

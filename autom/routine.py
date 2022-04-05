@@ -40,7 +40,7 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
                             file_path = files_path[files_path.index(fp)]
 
                     if file_path is not None:
-                        if siga.file_upload(file_path):
+                        if siga.file_upload(file_path, debt):
                             files_sent_successfull.append(file_path)
                         else:
                             files_not_sent.append(file_path)

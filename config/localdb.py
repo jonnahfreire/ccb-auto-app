@@ -14,9 +14,9 @@ class LocalDB:
     def connect(self) -> None:
         self.conn = sqlite3.connect(self.dbname)
         self.cursor = self.conn.cursor()
-        self.create_table()
+        self.create_table_user()
     
-    def create_table(self):
+    def create_table_user(self):
         query = """CREATE TABLE IF NOT EXISTS user (
             username VARCHAR(50) NOT NULL, userpass VARCHAR(200) NOT NULL)
             """
