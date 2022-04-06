@@ -2,7 +2,7 @@ import os, sys
 from time import sleep
 import pyautogui
 
-from PyPDF2 import PdfFileMerger
+# from PyPDF2 import PdfFileMerger
 from config.credentials import Credential
 
 from execlogs.logs import *
@@ -11,14 +11,14 @@ from cli.colors import *
 WIN = sys.platform == "win32" 
 
 
-def merge_pdf(merge_list: list, filename: str):
-    merger = PdfFileMerger()
+# def merge_pdf(merge_list: list, filename: str):
+#     merger = PdfFileMerger()
 
-    for pdf in merge_list:
-        merger.append(pdf)
+#     for pdf in merge_list:
+#         merger.append(pdf)
 
-    merger.write(filename)
-    merger.close()
+#     merger.write(filename)
+#     merger.close()
 
 
 def reset_db():

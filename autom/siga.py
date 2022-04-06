@@ -11,6 +11,8 @@ from selenium.webdriver.support.wait import WebDriverWait
 
 from selenium.common.exceptions import NoSuchElementException
 
+from execlogs.logs import *
+from cli.colors import *
 
 
 class Siga:
@@ -31,8 +33,8 @@ class Siga:
             login_btn = self.driver.find_element(By.XPATH, login_confirm)
             login_btn.click()
             return True
-        except Exception as e:
-            print(e)
+        except Exception as err:
+            insert_execlog(f"{red}Login Error: {yellow}\n\t{err}{bg}\n")
             return False
 
     def change_work_month_date(self, month: str) -> bool:
@@ -47,7 +49,7 @@ class Siga:
             enter(4)
             return True
         except NoSuchElementException as err:
-            print("Change work month exception: ", err)
+            insert_execlog(f"{red}ChangeWorkMonth Error: {yellow}\n\t{err}{bg}\n")
             sleep(5)
             return False
 
@@ -58,7 +60,7 @@ class Siga:
             self.driver.find_element(By.XPATH, caixa_bancos).click()
             return True
         except Exception as err:
-            print("Open tesouraria exception: ", err)
+            insert_execlog(f"{red}Open Tesouraria Error: {yellow}\n\t{err}{bg}\n")
             return False
 
     def debt(self, debt: dict) -> bool:
@@ -129,6 +131,7 @@ class Siga:
                 enter(3)
 
                 # Inserts check number
+                sleep(1)
                 pyautogui.write(debt["check-num"])
                 enter(4)
                 
@@ -179,55 +182,80 @@ class Siga:
 
         except Exception as err:
             print("Debt exception: ", err)
+            insert_execlog(f"{red}Debt Insertion Error: {yellow}\n\t{err}{bg}\n")
             return False
         
-    def file_upload(self, file_path, debt: dict) -> bool:
+    def file_upload(self, file_path) -> bool:
         try:
             self.driver.find_element(By.XPATH, file_upload_place).click()
             sleep(3)
 
             if not WIN:
                 pyautogui.write(file_path)
+                sleep(2)
                 enter()
 
             else:
                 # Windows implementation
                 pass
 
-            # VERIFICAR SE O MODAL DE IMPRIMIR CÓPIA DE CHEQUE APARECEU E LIDAR COM A SIATUAÇÃO
-            if debt["payment-form"] == "CHEQUE":
-                form_print_check_header = '/html/body/div[12]/div/div/h3' or 'Imprimir Cheque?'
-                form_print_check_xpath = '//*[@id="f-main-73231798-72CB-4443-80E7-6E2414CDF6B8"]'\
-                    or '#f-main-73231798-72CB-4443-80E7-6E2414CDF6B8'
-                form_print_check_close = '/html/body/div[12]/div/div/a[1]'
-                form_print_check_cancel = '//*[@id="f-main-73231798-72CB-4443-80E7-6E2414CDF6B8"]/div[2]/a'\
-                    or 'Não'
-                pass
-
             return True
 
         except Exception as err:
-            print("File upload Exception: ", err)
+            insert_execlog(f"{red}File Upload Error: {yellow}\n\t{err}{bg}\n")
             return False
 
-    def save_debt(self) -> bool:
+    def save_debt(self, debt: dict) -> bool:
         try:
             self.driver.find_element(By.XPATH, save_debt_btn).click()
 
             sleep(4)
+            # modal ja existe documento com o mesmo numero
+            modal_header = '/html/body/div[17]/div[1]/h3' 
+            modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
+
+            modal_header_title = self.driver.find_element(By.XPATH, modal_header)
+            if modal_header_title.size != 0 or modal_header_title.is_diplayed():
+                self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
+                
+            if debt["payment-form"] == "CHEQUE":
+                form_print_check_header = '/html/body/div[12]/div/div/h3'
+                form_print_check_close = '/html/body/div[12]/div/div/a[1]' 
+                sleep(4)
+                pyautogui.press("tab")
+                enter()
+
+            sleep(3)
             confirm_modal = self.driver.find_element(By.XPATH, modal_header_success_confirm)
             if confirm_modal.size != 0 or confirm_modal.is_diplayed():
                 confirm_modal.click()
 
             return True
-        except NoSuchElementException:
+        except NoSuchElementException as err:
+            insert_execlog(f"{red}Save Debt Error: {yellow}\n\t{err}{bg}\n")
             return False
 
-    def save_and_new_debt(self) -> bool:
+    def save_and_new_debt(self, debt: dict) -> bool:
         try:
             self.driver.find_element(By.XPATH, save_and_new_debt_btn).click()
+
+            # modal ja existe documento com o mesmo numero
+            sleep(4)
+            modal_header = '/html/body/div[17]/div[1]/h3' 
+            modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
+
+            modal_header_title = self.driver.find_element(By.XPATH, modal_header)
+            if modal_header_title.size != 0 or modal_header_title.is_diplayed():
+                self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
+                
+            if debt["payment-form"] == "CHEQUE":
+                sleep(4)
+                pyautogui.press("tab")
+                enter()
+
             return True
-        except NoSuchElementException:
+        except NoSuchElementException as err:
+            insert_execlog(f"{red}Save New Debt Error: {yellow}\n\t{err}{bg}\n")
             return False
 
     def new_debt(self) -> bool:
@@ -238,7 +266,7 @@ class Siga:
             sleep(2)
             return True
         except Exception as err:
-            print("New debt exception: ", err)
+            insert_execlog(f"{red}New Debt Error: {yellow}\n\t{err}{bg}\n")
             return False
 
     def new_group_debt(self):
