@@ -1,3 +1,4 @@
+__pycache__
 venv/*
 models/__pycache__/*
 chrome_driver/*
@@ -11,4 +12,8 @@ config/__pycache__/*
 cli/__pycache__/*
 execlogs/__pycache__/*
 execlogs/logs.db
+build
+dist
+main.spec
+compile.sh
 ANOTACOES.txt 

@@ -2,17 +2,12 @@ import os
 import sqlite3
 from sqlite3 import Connection, Cursor
 
-
-errors:list = []
-model_not_found:list = []
-
-
-logs = errors + model_not_found
+from config.globals import log_path
 
 class Log:
 
     def __init__(self) -> None:
-        self.logdb: str = os.path.join(os.getcwd(), "execlogs/logs.db") 
+        self.logdb: str = log_path
         self.cursor: Cursor = None
         self.conn: Connection = None
 

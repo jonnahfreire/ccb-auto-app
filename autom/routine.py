@@ -1,5 +1,4 @@
 from time import sleep
-import os
 
 from autom.main import Selenium
 from autom.strings import ccb_siga

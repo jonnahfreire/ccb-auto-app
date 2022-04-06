@@ -1,8 +1,43 @@
 import os
-
-from config.globals import WIN, struct_dirs, debt_code_list
+from tkinter import Tk, messagebox, filedialog
+from utils.main import WIN
+from config.globals import struct_dirs, debt_code_list, sist_path, config
 from execlogs.logs import *
 from cli.colors import *
+
+
+def create_config_path() -> bool:
+    config_dir = os.path.join(sist_path, config)
+    try:
+        if not os.path.exists(sist_path):
+            os.mkdir(sist_path)
+
+        if not os.path.exists(config_dir):
+            os.mkdir(config_dir)
+            return True
+    except Exception:
+        return False
+
+
+def set_initial_struct_dirs(work_month_path: str) -> bool:
+    try:
+        if not os.path.exists(sist_path):
+            os.mkdir(sist_path)
+        
+        if WIN:
+            if os.path.exists(config):
+                os.system("attrib -h {}".format(config))
+        
+        # Create ccb-autom/03-2022 Ex.
+        if not os.path.exists(work_month_path):
+            os.makedirs(work_month_path)
+        
+            for struct in struct_dirs:
+                create_struct_dir(work_month_path, struct[1:], struct[0])
+        return True
+    except Exception:
+        return False
+
 
 def create_struct_dir(path: str, sub_dirs: list, top_dir: str) -> None:
     try:
@@ -31,33 +66,33 @@ def create_dir(path: str, dirname: str) -> bool:
     return False
 
 
-def get_files_path(work_path: str) -> list:
-    files_path = []
+def get_files_path(work_path: str) -> list[str]:
+    files_path: list[str] = []
 
     for dir in struct_dirs:
         for sub_dir in os.listdir(os.path.join(work_path, dir[0])):
             for file_name in os.listdir(os.path.join(work_path, dir[0], sub_dir)):
                 if file_name:
-                    full_path = os.path.join(work_path, dir[0], 
+                    full_path:str = os.path.join(work_path, dir[0], 
                         os.path.join(work_path, dir[0], sub_dir), file_name)
                     files_path.append(full_path)
     return files_path
 
 
-def list_files(base_path: str) -> list:
-    base_accounts = []
+def list_files(base_path: str) -> list[dict]:
+    base_accounts:list = []
 
     if os.path.exists(base_path):
-        dirs = os.listdir(base_path)
-        base_accounts = [a for a in dirs]
+        dirs:list[str] = os.listdir(base_path)
+        base_accounts:list[str] = [a for a in dirs]
 
-    account_files = []
+    account_files:list[dict] = []
     for account in base_accounts:
-        accounts = os.listdir(os.path.join(base_path, account))
+        accounts:list[str] = os.listdir(os.path.join(base_path, account))
 
         for acc in accounts:
-            files_by_account = os.listdir(os.path.join(base_path, account, acc))
-            files_by_account = [file for file in files_by_account if file != "Lancados"]
+            files_by_account:list[str] = os.listdir(os.path.join(base_path, account, acc))
+            files_by_account:list[str] = [file for file in files_by_account if file != "Lancados"]
             if files_by_account:
                 account_files.append({account: {acc.split("-")[0].strip(): files_by_account}})
 
@@ -83,7 +118,9 @@ def move_file_to(path: str, filename: str) -> bool:
         if not WIN: 
             os.system(f"mv '{filename}' {path}")
             return True
-        else: pass # Windows Implementation
+        else: # Windows Implementation
+            os.system(f"move '{filename}' {path}")
+            return True 
     return False
 
 
@@ -92,7 +129,9 @@ def copy_file_to(path: str, filename: str) -> bool:
         if not WIN: 
             os.system(f"cp '{filename}' '{path}'")
             return True
-        else: pass # Windows Implementation
+        else: # Windows Implementation
+            os.system(f"copy '{filename}' '{path}'")
+            return True
     return False
 
 
@@ -101,9 +140,22 @@ def rename_file_to(filename: str, newname: str) -> bool:
         if not WIN: 
             os.system(f"mv '{filename}' '{newname}'")
             return True
-        else: pass # Windows Implementation
+        else: # Windows Implementation
+            os.rename(filename, newname)
+            return True
     return False
 
 
-def path_scape_space(path: str) -> str:
-    pass
+def select_dir() -> str:
+    root = Tk()
+    # root.iconbitmap('static/src/images/downloader.ico')
+    root.withdraw()
+    dirpath = filedialog.askdirectory(title="Selecione o diretório das despesas")
+    root.destroy()
+    return dirpath
+
+
+def open_dir(dirpath: str) -> None:
+    path = os.path.realpath(dirpath)
+    if not WIN: os.system(f"xdg-open {path}")
+    else: os.startfile(path)

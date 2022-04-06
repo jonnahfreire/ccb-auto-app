@@ -1,13 +1,13 @@
-from os import path, getcwd
 import sqlite3
 from sqlite3 import Cursor, Connection
 
+from config.globals import db_path
 
 
 class LocalDB:
 
     def __init__(self) -> None:
-        self.dbname: str = path.join(getcwd(), "config/user.db")
+        self.dbname: str = db_path
         self.cursor: Cursor = None
         self.conn: Connection = None
     

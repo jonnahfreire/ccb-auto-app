@@ -1,13 +1,20 @@
-from os import environ, path
-from utils.main import WIN
+from os import environ, path, sys
+
 
 sist_name = "ccb-autom"
 
-chrome_driver_path = "/usr/local/bin/chromedriver" if not WIN else ""
+chrome_driver_path = "/usr/local/bin/chromedriver" if not sys.platform == "win32" else ""
 chrome_window_size = "1920,1080"
 
-unix_user_path = path.join("/home", environ["USER"], "Documentos" or "Documents")
-unix_sist_path = path.join(unix_user_path, sist_name)
+user_docs_path = path.join("/home", environ["USER"], "Documentos" or "Documents")\
+    if not sys.platform == "win32" else path.join(environ['USERPROFILE'], "Documentos" or "Documents")
+
+
+sist_path = path.join(user_docs_path, sist_name)
+
+config = ".config" if not sys.platform == "win32" else "config"
+db_path = path.join(sist_path, config, "user.db")
+log_path = path.join(sist_path, config, "logs.db")
 
 struct_dirs_1000 = ["1000", "3026", "3006",
                     "3007",  "3008", "3014"]
