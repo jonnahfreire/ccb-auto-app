@@ -10,3 +10,4 @@ class User:
 
     def get_pass(self):
         return self.userpass
+

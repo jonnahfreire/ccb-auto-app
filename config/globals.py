@@ -28,6 +28,8 @@ struct_dirs_1010 = ["1010", "3010", "3011", "3012",
 
 struct_dirs = [struct_dirs_1000, struct_dirs_1010]
 
+extensions = [".pdf", ".png", ".jpg", ".jpeg"]
+
 debt_code_list = [
     '104 - DIREITOS REALIZAVEIS',
     '1041 - TITULOS A RECEBER',
@@ -174,3 +176,4 @@ debt_code_list = [
     "3500- PERDAS EVENTUAIS",
     "3501- INDENIZACOES"
 ]
+

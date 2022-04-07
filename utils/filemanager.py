@@ -159,3 +159,5 @@ def open_dir(dirpath: str) -> None:
     path = os.path.realpath(dirpath)
     if not WIN: os.system(f"xdg-open {path}")
     else: os.startfile(path)
+
+

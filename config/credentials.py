@@ -45,3 +45,4 @@ class Credential:
         else:
             db.cursor.execute("UPDATE user SET username=?, userpass=?", (self.username, self.userpass))
         db.commit()
+

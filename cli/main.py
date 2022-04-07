@@ -45,6 +45,7 @@ def set_work_month() -> str:
     except KeyboardInterrupt:
         exit(0)
 
+
 def set_initial_user_config() -> None:
     try:
         banner()
@@ -79,3 +80,4 @@ def select_initial_routine(debts_1000: list[dict], debts_1010: list[dict]) -> st
         return option
     except KeyboardInterrupt:
         exit(0)
+

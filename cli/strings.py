@@ -5,3 +5,4 @@ no_debts_found = cyan + "Nenhuma despesa encontrada no diretório:\n\t"+yellow+"
                         \n"+cyan+"Por favor insira despesas e tente novamente."+bg+"\n"
 
 restart = f"{yellow} Reiniciando, aguarde..."
+
