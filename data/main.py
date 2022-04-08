@@ -6,7 +6,7 @@ from models.debt_models import *
 from config.globals import sist_path, extensions
 
 from utils.main import get_debt_models_list
-from utils.filemanager import move_file_to
+from utils.filemanager import copy_file_to
 
 
 def get_data_from_filename(model, file: str) -> dict:
@@ -80,8 +80,6 @@ def get_data_from_filename(model, file: str) -> dict:
     return model.get_mapped_data()
 
 
-
-
 def get_modelized_debts(debt_list: list[dict]) -> list[dict]:
     if not debt_list: return []
 
@@ -99,46 +97,63 @@ def get_modelized_debts(debt_list: list[dict]) -> list[dict]:
     return debts_data
 
 
-def file_classify(path: str, work_month:str) -> bool:
+def get_unclassified_files_from_path(path: str) -> list:
+    files: list[str] = [
+        file for file in os.listdir(path)
+        if os.path.splitext(file)[1] in extensions
+    ]
+    return files
+
+
+def get_classified_files(path: str, work_month:str) -> list[dict]:
 
     if os.path.exists(path) and work_month is not None:
 
-        files: list[str] = [
-            file for file in os.listdir(path)
-            if os.path.splitext(file)[1] in extensions
-        ]
+        files: list[str] = get_unclassified_files_from_path(path)
 
         file_data_list: list[dict] = [
-            get_data_from_filename(BaseModel(), file) 
-            for file in files
+            _ for _ in [
+                get_data_from_filename(BaseModel(), file) 
+                for file in files
+            ]
+            if _["expenditure"] is not None
         ]
 
-        for file in file_data_list:
-            if file["expenditure"] is not None:
-                base_account = file["cost-account"]
-                debt_account = file["expenditure"]
+        return file_data_list
+    return []
 
-                base_account_path = os.path.join(sist_path, work_month, base_account)
 
-                debt_account_path = [
-                    p for p in os.listdir(base_account_path)
-                    if debt_account in p    
-                ][0]
-                base_account_path = os.path.join(base_account_path, debt_account_path)
+def move_classified_files_to_sist_path(
+    path: str, work_month:str, file_data_list: list[dict]) -> bool:
+    
+    files: list[str] = get_unclassified_files_from_path(path)
 
-                filename = [
-                    _ for _ in files
-                    if file["file-name"] in _
-                    and ":".join(file["date"]) in _
-                    or "_".join(file["date"]) in _
-                    and file["emitter"] in _
-                ][0]
-                filepath = os.path.join(path, filename)
-                move_file_to(base_account_path, filepath)
+    for file in file_data_list:
+        if file["expenditure"] is not None:
+            base_account = file["cost-account"]
+            debt_account = file["expenditure"]
+
+            base_account_path = os.path.join(sist_path, work_month, base_account)
+
+            debt_account_path = [
+                p for p in os.listdir(base_account_path)
+                if debt_account in p    
+            ][0]
+            base_account_path = os.path.join(base_account_path, debt_account_path)
+
+            filename = [
+                _ for _ in files
+                if file["file-name"] in _
+                and ":".join(file["date"]) in _
+                or "_".join(file["date"]) in _
+                and file["emitter"] in _
+                and file["value"] in _
+            ][0]
+            filepath = os.path.join(path, filename)
+            copy_file_to(base_account_path, filepath)
 
         return True
     return False
-
 
 
 if __name__ == "__main__":
