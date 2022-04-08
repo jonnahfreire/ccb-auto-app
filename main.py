@@ -61,7 +61,9 @@ def main():
         print(restart)
         sleep(10)
 
+    clear_logs()
 
+    
 if __name__ == "__main__":
     while True: main()
 
