@@ -181,7 +181,6 @@ class Siga:
             return True
 
         except Exception as err:
-            print("Debt exception: ", err)
             insert_execlog(f"{red}Debt Insertion Error: {yellow}\n\t{err}{bg}\n")
             return False
         
@@ -197,7 +196,8 @@ class Siga:
 
             else:
                 # Windows implementation
-                pass
+                msg = "UPLOAD para Windows não foi implementado"
+                insert_execlog(f"{red}File Upload Error: {yellow}\n\t{msg}{bg}\n")
 
             return True
 
