@@ -28,6 +28,8 @@ struct_dirs_1010 = ["1010", "3010", "3011", "3012",
 
 struct_dirs = [struct_dirs_1000, struct_dirs_1010]
 
+accepted_accounts = struct_dirs_1000 + struct_dirs_1010
+
 extensions = [".pdf", ".png", ".jpg", ".jpeg"]
 
 debt_code_list = [
