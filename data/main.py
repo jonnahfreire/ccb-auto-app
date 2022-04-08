@@ -3,7 +3,7 @@ import os
 from models import debt_models
 from models.debt_models import *
 
-from config.globals import sist_path, extensions
+from config.globals import sist_path, extensions, accepted_accounts
 
 from utils.main import get_debt_models_list
 from utils.filemanager import copy_file_to
@@ -105,9 +105,9 @@ def get_unclassified_files_from_path(path: str) -> list:
     return files
 
 
-def get_classified_files(path: str, work_month:str) -> list[dict]:
+def get_classified_files(path:str) -> list[dict]:
 
-    if os.path.exists(path) and work_month is not None:
+    if os.path.exists(path):
 
         files: list[str] = get_unclassified_files_from_path(path)
 
@@ -117,6 +117,7 @@ def get_classified_files(path: str, work_month:str) -> list[dict]:
                 for file in files
             ]
             if _["expenditure"] is not None
+            and _["expenditure"] in accepted_accounts
         ]
 
         return file_data_list
@@ -124,35 +125,35 @@ def get_classified_files(path: str, work_month:str) -> list[dict]:
 
 
 def move_classified_files_to_sist_path(
-    path: str, work_month:str, file_data_list: list[dict]) -> bool:
+    path: str, file: list[dict], work_month:str = None) -> bool:
     
     files: list[str] = get_unclassified_files_from_path(path)
 
-    for file in file_data_list:
-        if file["expenditure"] is not None:
-            base_account = file["cost-account"]
-            debt_account = file["expenditure"]
+    if file["expenditure"] is not None:
+        base_account: str = file["cost-account"]
+        debt_account: str = file["expenditure"]
+        work_month: str = "-".join(file["date"])[3:]
 
-            base_account_path = os.path.join(sist_path, work_month, base_account)
+        base_account_path = os.path.join(sist_path, work_month, base_account)
 
-            debt_account_path = [
-                p for p in os.listdir(base_account_path)
-                if debt_account in p    
-            ][0]
-            base_account_path = os.path.join(base_account_path, debt_account_path)
+        debt_account_path = [
+            p for p in os.listdir(base_account_path)
+            if debt_account in p    
+        ][0]
+        base_account_path = os.path.join(base_account_path, debt_account_path)
 
-            filename = [
-                _ for _ in files
-                if file["file-name"] in _
-                and ":".join(file["date"]) in _
-                or "_".join(file["date"]) in _
-                and file["emitter"] in _
-                and file["value"] in _
-            ][0]
-            filepath = os.path.join(path, filename)
-            copy_file_to(base_account_path, filepath)
-
-        return True
+        filename = [
+            _ for _ in files
+            if file["file-name"] in _
+            and ":".join(file["date"]) in _
+            or "_".join(file["date"]) in _
+            and file["emitter"] in _
+            and file["value"] in _
+        ][0]
+        filepath = os.path.join(path, filename)
+        if copy_file_to(base_account_path, filepath):
+            return True
+    
     return False
 
 
