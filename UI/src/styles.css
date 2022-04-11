@@ -1,0 +1,46 @@
+#container-form-user-config {
+    width: 400px;
+    height: max-content;
+    margin: 10% auto;
+    padding: 20px;
+
+    background-color: rgba(10, 10, 10, .1);
+    
+    border-radius: 5px;
+    box-sizing: border-box;
+    box-shadow: 2px 2px 2px 2px rgba(10, 10, 10, .3);
+}
+
+#user-config-form {
+    display: flex;
+    flex-direction: column;
+}
+
+#user-config-form-title {
+    text-align: center;
+}
+.user-config-input {
+    font-size: 12pt;
+}
+
+#user-config-save {
+    margin-top: 30px;
+}
+
+#user-success-inserted-alert, .user-config-form-alert {
+    margin: 20px auto 0 auto;
+    width: 400px;
+}
+
+.loading-alert {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 20px auto 0 auto;
+    width: 400px;
+}
+
+.loading-icon {
+    margin-right: 10px;
+}

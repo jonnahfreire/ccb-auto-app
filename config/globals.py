@@ -16,8 +16,10 @@ config = ".config" if not sys.platform == "win32" else "config"
 db_path = path.join(sist_path, config, "user.db")
 log_path = path.join(sist_path, config, "logs.db")
 
-struct_dirs_1000 = ["1000", "3026", "3006",
-                    "3007",  "3008", "3014"]
+struct_dirs_1000 = ["1000", "3006", "3007", "3008", 
+                    "3010", "3011", "3012", "3014", 
+                    "3015", "3016", "3023", "3026", 
+                    "3027"]
 
 struct_dirs_1010 = ["1010", "3010", "3011", "3012",
                     "3016", "3020", "3021", "3023", 

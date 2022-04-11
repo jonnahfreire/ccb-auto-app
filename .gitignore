@@ -11,6 +11,7 @@ config/user.db
 config/__pycache__/*
 cli/__pycache__/*
 execlogs/__pycache__/*
+UI/__pycache__/*
 execlogs/logs.db
 build
 dist

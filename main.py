@@ -14,14 +14,16 @@ from autom.routine import insert_debt
 from cli.colors import *
 from cli.strings import *
 
+from UI.main import *
 
 
-def main():
+
+def cli_main():
     
     set_initial_user_config() 
     
-    work_month: str = set_work_month()
-    if work_month is None: main()
+    work_month: str = "03-2022"#set_work_month()
+    if work_month is None: cli_main()
     work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))
 
     set_initial_struct_dirs(work_month_path)
@@ -35,6 +37,9 @@ def main():
         modelized_debts_1010: list[dict] = get_modelized_debts(debts_1010)
 
         all_debts: list[dict] = modelized_debts_1000 + modelized_debts_1010
+
+        # for i in all_debts: print(i)
+        # return
         option: str = select_initial_routine(modelized_debts_1000, modelized_debts_1010)
 
         if option.strip() == "1000":
@@ -59,11 +64,15 @@ def main():
         banner()
         print(no_debts_found.format(work_month_path))
         print(restart)
-        sleep(10)
+        # sleep(10)
+        sleep(2)
 
     clear_logs()
 
     
 if __name__ == "__main__":
-    while True: main()
+    # while True: main()
+    # cli_main()
+    main()
+
 

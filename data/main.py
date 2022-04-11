@@ -17,7 +17,7 @@ def get_data_from_filename(model, file: str) -> dict:
 
         if len(data) > 0 and "NF" in data or "NF RC" in data \
             or "CF" in data or "CF RC" in data or "CP" in data\
-            or "CP RC" in data:
+            or "CP RC" in data or "RC" in data:
             model.type = "NOTA FISCAL"
             model.hist1 = "021"
             model.hist2 = "023"
@@ -52,7 +52,6 @@ def get_data_from_filename(model, file: str) -> dict:
             if "FONE" in data:
                 model.doc_num = "300200"
 
-
         if len(data) > 0 and ":" in data:
             model.date = data.split(":")
         
@@ -71,8 +70,16 @@ def get_data_from_filename(model, file: str) -> dict:
         if len(data) > 0 and not "NF" in data\
             and not "CF" in data and not "CH" in data\
             and not "DB AT" in data and not "05_" in data\
-            and not data.count("_") == 2 and not "DP" in data:
+            and not data.count("_") == 2 and not "DP" in data\
+            and not "RC" in data:
             model.emitter = data.strip()
+        
+        if len(data) > 0 and not "NF" in data\
+            and not "CF" in data and not "CH" in data\
+            and not "DB AT" in data\
+            and "RC" in data:
+            model.type = "RECIBO"
+            model.hist1, model.hist2 = "024", "024"
         
         if len(data) > 0 and "DP" in data:
             model.expenditure = data.replace("DP", "").strip()
@@ -125,7 +132,7 @@ def get_classified_files(path:str) -> list[dict]:
 
 
 def move_classified_files_to_sist_path(
-    path: str, file: list[dict], work_month:str = None) -> bool:
+    path: str, file: list[dict]) -> bool:
     
     files: list[str] = get_unclassified_files_from_path(path)
 
@@ -142,6 +149,9 @@ def move_classified_files_to_sist_path(
         ][0]
         base_account_path = os.path.join(base_account_path, debt_account_path)
 
+        if not os.path.exists(base_account_path):
+            return False
+
         filename = [
             _ for _ in files
             if file["file-name"] in _
@@ -151,8 +161,7 @@ def move_classified_files_to_sist_path(
             and file["value"] in _
         ][0]
         filepath = os.path.join(path, filename)
-        if copy_file_to(base_account_path, filepath):
-            return True
+        return copy_file_to(base_account_path, filepath)
     
     return False
 
