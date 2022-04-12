@@ -34,6 +34,10 @@ accepted_accounts = struct_dirs_1000 + struct_dirs_1010
 
 extensions = [".pdf", ".png", ".jpg", ".jpeg"]
 
+form_ids = ['form-competencias', 'form-executar-programa', 
+            'f-calendar', 'f_main', 'form-competencia', 'f_fecharacessoremoto', 
+            'form-selecionarlocalpadrao', 'form-selecionarlocalidade']
+            
 debt_code_list = [
     '104 - DIREITOS REALIZAVEIS',
     '1041 - TITULOS A RECEBER',

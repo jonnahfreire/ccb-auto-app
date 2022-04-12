@@ -11,7 +11,11 @@ from utils.filemanager import create_dir, get_files_path, move_file_to
 
 
 def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
-    # ccb_siga = "file:///home/tesouraria/Downloads/CCBSiga.html"
+   
+    if len(data) == 0: 
+        print("Insert debt error: No debts found")
+        return
+
     selenium = Selenium(ccb_siga)
     selenium.start()
     siga = Siga(selenium.get_driver())
@@ -20,16 +24,14 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
     files_not_sent = []
     user, passw = Credential().get_user_credentials()
     files_path = get_files_path(work_month_path)
-
     sleep(2)
     
     if siga.login(user, passw):
         sleep(10)
         siga.change_work_month_date(work_month)
-        sleep(599)
-        return
-        siga.open_tesouraria()
         sleep(4)
+        siga.open_tesouraria()
+        sleep(2)
 
         if siga.new_debt():
             for debt in data:
@@ -46,19 +48,19 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
                             files_sent_successfull.append(file_path)
                         else:
                             files_not_sent.append(file_path)
-                        sleep(3000)
-                        return
+
                         sleep(3)
                         if len(data) > 1:
                             print("\n\n\nSalvando e iniciando novo lançamento..\n\n\n")
                             if siga.save_and_new_debt(debt):
                                 print(f"{debt['file-name']}: salvo com sucesso.")
+                            else: siga.new_debt()
                         else:
                             print("\n\n\nSalvando lançamento..\n\n\n")
                             if siga.save_debt(debt):
                                 print(f"{debt['file-name']}: salvo com sucesso.")
+                            
                 sleep(10)
-
 
     for file in files_path:
         if file in files_sent_successfull:

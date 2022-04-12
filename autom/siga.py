@@ -3,6 +3,7 @@ import pyautogui
 
 from autom.strings import *
 from utils.main import WIN, enter
+from config.globals import form_ids
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -50,10 +51,6 @@ class Siga:
             input_month.send_keys(Keys.RETURN)
             sleep(0.5)
 
-            form_ids = ['form-competencias', 'form-executar-programa', 
-                        'f-calendar', 'f_main', 'form-competencia', 'f_fecharacessoremoto', 
-                        'form-selecionarlocalpadrao', 'form-selecionarlocalidade']
-
             forms = self.driver.find_elements(By.TAG_NAME, 'form')
             ids = [form.get_attribute("id") for form in forms]
 
@@ -64,6 +61,7 @@ class Siga:
 
             return True
         except NoSuchElementException as err:
+            print(err)
             insert_execlog(f"{red}ChangeWorkMonth Error: {yellow}\n\t{err}{bg}\n")
             sleep(5)
             return False
@@ -85,9 +83,11 @@ class Siga:
                             .presence_of_element_located((By.ID, "f_data")))
 
             # Inserts document date
+            sleep(1)
             self.driver.find_element_by_id("f_data").send_keys(debt["date"])
             
             # Inserts document type
+            sleep(1)
             self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-7"]').click()
             doc = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen7_search"]')
             doc.click()
@@ -95,23 +95,27 @@ class Siga:
             doc.send_keys(Keys.RETURN)
             
             # Inserts document number
+            sleep(1)
             doc  = self.driver.find_element(By.ID, "f_documento")
             doc.click()
             doc.send_keys(debt["num"])
 
             # Inserts document value
+            sleep(1)
             doc  = self.driver.find_element(By.ID, "f_valor")
             doc.click()
             doc.send_keys(debt["value"])
             doc.send_keys(Keys.RETURN)
 
-            # Inserts document expenditure (Tipo de Despesa)            
+            # Inserts document expenditure (Tipo de Despesa)  
+            sleep(1)          
             doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen8_search"]')
             doc.click()
             doc.send_keys(debt["expenditure"])
             doc.send_keys(Keys.RETURN)
 
             # Inserts document cost center
+            sleep(1)
             doc  = self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-9"]')
             doc.click()
 
@@ -121,6 +125,7 @@ class Siga:
             doc.send_keys(Keys.RETURN)
 
             # Inserts document emitter
+            sleep(1)
             self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-14"]').click()
             doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen14_search"]')
             doc.click()
@@ -130,6 +135,7 @@ class Siga:
             doc.send_keys(Keys.RETURN)
 
             # Inserts document historic 1
+            sleep(1)
             self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-10"]').click()
             doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen10_search"]')
             doc.click()
@@ -137,10 +143,12 @@ class Siga:
             doc.send_keys(Keys.RETURN)
 
             # Inserts payment date
+            sleep(1)
             doc = self.driver.find_element_by_id("f_datapagamento")
             doc.send_keys(debt["date"])
 
             # Inserts payment form
+            sleep(1)
             self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-11"]').click()
             doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen11_search"]')
             doc.click()
@@ -148,6 +156,7 @@ class Siga:
             doc.send_keys(Keys.RETURN)
 
             # Inserts payment form
+            sleep(1)
             if debt["payment-form"] == "CHEQUE"\
                 and debt["check-num"] is not None:
                 self.driver.find_element_by_id("f_numerocheque").click()
@@ -158,6 +167,7 @@ class Siga:
                 self.driver.find_element_by_id("f_documento2").send_keys(debt["doc-num"])
 
             # Inserts payment cost account
+            sleep(1)
             self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-12"]').click()
             doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen12_search"]')
             doc.click()
@@ -165,11 +175,13 @@ class Siga:
             doc.send_keys(Keys.RETURN)
 
             # Inserts document historic 2
+            sleep(1)
             self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-13"]').click()
             doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen13_search"]')
             doc.click()
             doc.send_keys(debt["hist-2"])
             doc.send_keys(Keys.RETURN)
+            sleep(1)
             
             return True
 
@@ -180,24 +192,11 @@ class Siga:
         
     def file_upload(self, file_path) -> bool:
         try:
-            # self.driver.find_element(By.XPATH, file_upload_place).click()
             documento  = self.driver.find_element(By.ID, 'f_anexos')
             documento.send_keys(file_path)
-
             sleep(3)
 
-            # if not WIN:
-            #     pyautogui.write(file_path)
-            #     sleep(2)
-            #     enter()
-
-            # else:
-            #     # Windows implementation
-            #     msg = "UPLOAD para Windows não foi implementado"
-            #     insert_execlog(f"{red}File Upload Error: {yellow}\n\t{msg}{bg}\n")
-
             return True
-
         except Exception as err:
             insert_execlog(f"{red}File Upload Error: {yellow}\n\t{err}{bg}\n")
             return False
@@ -211,16 +210,21 @@ class Siga:
             modal_header = '/html/body/div[17]/div[1]/h3' 
             modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
 
-            modal_header_title = self.driver.find_element(By.XPATH, modal_header)
-            if modal_header_title.size != 0 or modal_header_title.is_diplayed():
-                self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
+            try:
+                modal_header_title = self.driver.find_element(By.XPATH, modal_header)
+                if modal_header_title.size != 0 or modal_header_title.is_diplayed():
+                    self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
+            
+                    return False
+            except NoSuchElementException:
+                pass
                 
             if debt["payment-form"] == "CHEQUE":
-                form_print_check_header = '/html/body/div[12]/div/div/h3'
-                form_print_check_close = '/html/body/div[12]/div/div/a[1]' 
-                sleep(4)
-                pyautogui.press("tab")
-                enter()
+                close = '/html/body/div[18]/div/div/a[1]'
+                try:
+                    self.driver.find_element(By.XPATH, close).click()
+                except NoSuchElementException:
+                    pyautogui.press("tab")
 
             sleep(3)
             confirm_modal = self.driver.find_element(By.XPATH, modal_header_success_confirm)
@@ -241,14 +245,24 @@ class Siga:
             modal_header = '/html/body/div[17]/div[1]/h3' 
             modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
 
-            modal_header_title = self.driver.find_element(By.XPATH, modal_header)
-            if modal_header_title.size != 0 or modal_header_title.is_diplayed():
-                self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
+            try:
+                modal_header_title = self.driver.find_element(By.XPATH, modal_header)
+                if modal_header_title.size != 0 or modal_header_title.is_diplayed():
+                    self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
                 
-            if debt["payment-form"] == "CHEQUE":
+                    return False
+            except NoSuchElementException: 
+                pass
+            
+            # Não imprimir copia de cheque
+            if debt["payment-form"] == "CHEQUE": 
+                close = '/html/body/div[18]/div/div/a[1]'
+                try:
+                    self.driver.find_element(By.XPATH, close).click()
+                except NoSuchElementException:
+                    pyautogui.press("tab")
+                
                 sleep(4)
-                pyautogui.press("tab")
-                enter()
 
             return True
         except NoSuchElementException as err:
@@ -257,10 +271,14 @@ class Siga:
 
     def new_debt(self) -> bool:
         try:
+            WebDriverWait(self.driver, 7)\
+                        .until(expected_conditions\
+                            .presence_of_element_located((By.CSS_SELECTOR, new_debt_select_box)))
+
             self.driver.find_element_by_css_selector(new_debt_select_box).click()
             sleep(3)
             self.driver.find_element_by_link_text(new_debt_select_element).click()
-            sleep(2)
+            sleep(5)
             return True
         except Exception as err:
             insert_execlog(f"{red}New Debt Error: {yellow}\n\t{err}{bg}\n")

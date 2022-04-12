@@ -39,6 +39,12 @@ def cli_main():
         all_debts: list[dict] = modelized_debts_1000 + modelized_debts_1010
 
         insert_debt(work_month, work_month_path, modelized_debts_1010)
+        logs: list = get_execlogs()
+        for log in logs:
+            sleep(1)
+            print(log[1])
+        
+        clear_logs()
         return
 
         option: str = select_initial_routine(modelized_debts_1000, modelized_debts_1010)
