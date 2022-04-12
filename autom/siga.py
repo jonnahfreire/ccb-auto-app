@@ -1,5 +1,4 @@
 from time import sleep
-import pyautogui
 
 from autom.strings import *
 from config.globals import form_ids

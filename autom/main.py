@@ -5,14 +5,17 @@ from selenium.webdriver.chrome.service import Service
 
 from config.globals import chrome_driver_path, chrome_window_size
 
-# chrome_options.add_argument("--headless") # no pop window
-# chrome_options.add_argument('--no-sandbox')
 
 class Selenium:
     chrome_options = Options()
     chrome_options.add_argument("--window-size=%s" % chrome_window_size)
+    
 
-    def __init__(self, target: str) -> None:
+    def __init__(self, target: str, no_window: bool = False) -> None:
+        if no_window:
+            self.chrome_options.add_argument("--headless") # no pop window
+            self.chrome_options.add_argument('--no-sandbox')
+            
         self.target = target
         self.driver = None
 
