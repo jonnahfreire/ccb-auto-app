@@ -15,7 +15,7 @@ select_doc_emitter_opt1 = '//*[@id="select2-chosen-14"]'
 select_doc_emitter_opt2 = '//*[@id="s2id_f_centrocusto_rateio"]'
 
 # Despesa
-new_debt_select_box = '#mainContent > div.page-content > div:nth-child(3) > div > div:nth-child(1) > div > div > div:nth-child(1) > button > span.hidden-phone'
+new_debt_select_box = '//*[@id="mainContent"]/div[2]/div[3]/div/div[1]/div/div/div[1]/button/span[2]'
 new_debt_select_element =  'Despesa'
 
 new_group_debt_select_box = '//*[@id="mainContent"]/div[2]/div[2]/div/div[1]/div/div/div[1]/button/span[2]'

@@ -54,16 +54,25 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
                             print("\n\n\nSalvando e iniciando novo lançamento..\n\n\n")
                             if siga.save_and_new_debt(debt):
                                 print(f"{debt['file-name']}: salvo com sucesso.")
-                            else: siga.new_debt()
+                            else:
+                                try:
+                                    files_sent_successfull.remove(file_path)
+                                except ValueError: pass
+                                files_not_sent.append(file_path)
+                                siga.new_debt()
                         else:
                             print("\n\n\nSalvando lançamento..\n\n\n")
                             if siga.save_debt(debt):
                                 print(f"{debt['file-name']}: salvo com sucesso.")
-                            
+                            else:
+                                files_not_sent.append(file_path)
+                                print("\n\nNão foi possível salvar o lançamento devido à uma exceção.")
+                                print("Finalizando automação..")
                 sleep(10)
 
     for file in files_path:
-        if file in files_sent_successfull:
+        if file in files_sent_successfull\
+            and not file in files_not_sent:
             basedir = file[:file.rfind("/")]
             create_dir(basedir, "Lancados")
             move_file_to(f"{basedir}/Lancados/", file)

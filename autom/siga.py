@@ -2,7 +2,6 @@ from time import sleep
 import pyautogui
 
 from autom.strings import *
-from utils.main import WIN, enter
 from config.globals import form_ids
 
 from selenium.webdriver.common.by import By
@@ -10,7 +9,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from execlogs.logs import *
 from cli.colors import *
@@ -41,9 +40,9 @@ class Siga:
     def change_work_month_date(self, month: str) -> bool:
         try:
             self.driver.find_element(By.XPATH, work_month_date_select).click()
-            sleep(3)
+            sleep(1)
             self.driver.find_element_by_link_text(open_month_date_options).click()
-            sleep(2)
+            sleep(1.5)
             self.driver.find_element(By.XPATH, open_select_month_date).click()
             sleep(2)
             input_month = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen10_search"]')
@@ -58,11 +57,10 @@ class Siga:
             btn_save_xpath = f'//*[@id="{btn_save_id}"]/div[2]/button'
 
             self.driver.find_element(By.XPATH, btn_save_xpath).click()
-
             return True
-        except NoSuchElementException as err:
-            print(err)
-            insert_execlog(f"{red}ChangeWorkMonth Error: {yellow}\n\t{err}{bg}\n")
+
+        except NoSuchElementException as ex:
+            insert_execlog(f"{red}ChangeWorkMonth Exception: {yellow}\n\t{ex}{bg}\n")
             sleep(5)
             return False
 
@@ -72,8 +70,8 @@ class Siga:
             sleep(2)
             self.driver.find_element(By.XPATH, caixa_bancos).click()
             return True
-        except Exception as err:
-            insert_execlog(f"{red}Open Tesouraria Error: {yellow}\n\t{err}{bg}\n")
+        except Exception as ex:
+            insert_execlog(f"{red}Open Tesouraria Exception: {yellow}\n\t{ex}{bg}\n")
             return False
 
     def debt(self, debt: dict) -> bool:
@@ -116,9 +114,7 @@ class Siga:
 
             # Inserts document cost center
             sleep(1)
-            doc  = self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-9"]')
-            doc.click()
-
+            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-9"]').click()
             doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen9_search"]')
             doc.click()
             doc.send_keys(debt["cost-center"])
@@ -185,9 +181,8 @@ class Siga:
             
             return True
 
-        except Exception as err:
-            print(err)
-            insert_execlog(f"{red}Debt Insertion Error: {yellow}\n\t{err}{bg}\n")
+        except Exception as ex:
+            insert_execlog(f"{red}Debt Insertion Exception: {yellow}\n\t{ex}{bg}\n")
             return False
         
     def file_upload(self, file_path) -> bool:
@@ -197,13 +192,17 @@ class Siga:
             sleep(3)
 
             return True
-        except Exception as err:
-            insert_execlog(f"{red}File Upload Error: {yellow}\n\t{err}{bg}\n")
+        except Exception as ex:
+            insert_execlog(f"{red}File Upload Exception: {yellow}\n\t{ex}{bg}\n")
             return False
 
-    def save_debt(self, debt: dict) -> bool:
+    def save_debt(self, debt: dict, save_btn: str = None) -> bool:
+        document_already_exists: bool = False
         try:
-            self.driver.find_element(By.XPATH, save_debt_btn).click()
+            if save_btn is not None:
+                self.driver.find_element(By.XPATH, save_btn).click()
+            else:
+                self.driver.find_element(By.XPATH, save_debt_btn).click()
 
             sleep(4)
             # modal ja existe documento com o mesmo numero
@@ -211,71 +210,77 @@ class Siga:
             modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
 
             try:
+                WebDriverWait(self.driver, 3)\
+                        .until(expected_conditions\
+                            .presence_of_element_located((By.XPATH, modal_header)))
+
                 modal_header_title = self.driver.find_element(By.XPATH, modal_header)
                 if modal_header_title.size != 0 or modal_header_title.is_diplayed():
+                    document_already_exists = True
                     self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
             
-                    return False
-            except NoSuchElementException:
-                pass
+            except NoSuchElementException as ex:
+                message = "Falha ao fechar modal de 'Documento já existe'"
+                if document_already_exists:
+                    message += f"\n\t'Documento com o mesmo número já existe'"
+                insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
                 
             if debt["payment-form"] == "CHEQUE":
+                message = "Falha ao fechar modal de imprimir cópia de cheque"
                 close = '/html/body/div[18]/div/div/a[1]'
                 try:
-                    self.driver.find_element(By.XPATH, close).click()
-                except NoSuchElementException:
-                    pyautogui.press("tab")
+                    try:
+                        WebDriverWait(self.driver, 4)\
+                            .until(expected_conditions\
+                                .presence_of_element_located((By.XPATH, close)))
+
+                        self.driver.find_element(By.XPATH, close).click()
+    
+                    except TimeoutException as ex:
+                        if document_already_exists:
+                            message += f"\n\t'Documento com o mesmo número já existe'"
+                        insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
+                        
+                except NoSuchElementException as ex:
+                    insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
 
             sleep(3)
-            confirm_modal = self.driver.find_element(By.XPATH, modal_header_success_confirm)
-            if confirm_modal.size != 0 or confirm_modal.is_diplayed():
-                confirm_modal.click()
+            message = "Falha ao confirmar modal 'lançamento com sucesso'"
+            try:
+                try:
+                    WebDriverWait(self.driver, 4)\
+                        .until(expected_conditions\
+                            .presence_of_element_located((By.XPATH, modal_header_success_confirm)))
 
-            return True
-        except NoSuchElementException as err:
-            insert_execlog(f"{red}Save Debt Error: {yellow}\n\t{err}{bg}\n")
+                except TimeoutException as ex:
+                    insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
+
+                confirm_modal = self.driver.find_element(By.XPATH, modal_header_success_confirm)
+                if confirm_modal.size != 0 or confirm_modal.is_diplayed():
+                    confirm_modal.click()
+                    return True
+
+            except NoSuchElementException as ex:
+                insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
+                return False
+
+        except NoSuchElementException as ex:
+            insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{ex.msg}{bg}\n")
             return False
 
     def save_and_new_debt(self, debt: dict) -> bool:
-        try:
-            self.driver.find_element(By.XPATH, save_and_new_debt_btn).click()
-
-            # modal ja existe documento com o mesmo numero
-            sleep(4)
-            modal_header = '/html/body/div[17]/div[1]/h3' 
-            modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
-
-            try:
-                modal_header_title = self.driver.find_element(By.XPATH, modal_header)
-                if modal_header_title.size != 0 or modal_header_title.is_diplayed():
-                    self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
-                
-                    return False
-            except NoSuchElementException: 
-                pass
-            
-            # Não imprimir copia de cheque
-            if debt["payment-form"] == "CHEQUE": 
-                close = '/html/body/div[18]/div/div/a[1]'
-                try:
-                    self.driver.find_element(By.XPATH, close).click()
-                except NoSuchElementException:
-                    pyautogui.press("tab")
-                
-                sleep(4)
-
-            return True
-        except NoSuchElementException as err:
-            insert_execlog(f"{red}Save New Debt Error: {yellow}\n\t{err}{bg}\n")
-            return False
-
+        return self.save_debt(debt, save_and_new_debt_btn)  
+        
     def new_debt(self) -> bool:
         try:
-            WebDriverWait(self.driver, 7)\
-                        .until(expected_conditions\
-                            .presence_of_element_located((By.CSS_SELECTOR, new_debt_select_box)))
+            try:
+                WebDriverWait(self.driver, 7)\
+                            .until(expected_conditions\
+                                .presence_of_element_located((By.XPATH, new_debt_select_box)))
+            except TimeoutException as ex:
+                insert_execlog(f"{red}New Debt Exception: {yellow}\n\t{ex}{bg}\n")
 
-            self.driver.find_element_by_css_selector(new_debt_select_box).click()
+            self.driver.find_element(By.XPATH, new_debt_select_box).click()
             sleep(3)
             self.driver.find_element_by_link_text(new_debt_select_element).click()
             sleep(5)
