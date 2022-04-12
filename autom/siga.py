@@ -5,7 +5,7 @@ from autom.strings import *
 from utils.main import WIN, enter
 
 from selenium.webdriver.common.by import By
-# from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -42,11 +42,26 @@ class Siga:
             self.driver.find_element(By.XPATH, work_month_date_select).click()
             sleep(3)
             self.driver.find_element_by_link_text(open_month_date_options).click()
-            sleep(4)
+            sleep(2)
             self.driver.find_element(By.XPATH, open_select_month_date).click()
             sleep(2)
-            pyautogui.write(month)
-            enter(4)
+            input_month = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen10_search"]')
+            input_month.send_keys(month)
+            input_month.send_keys(Keys.RETURN)
+            sleep(0.5)
+
+            form_ids = ['form-competencias', 'form-executar-programa', 
+                        'f-calendar', 'f_main', 'form-competencia', 'f_fecharacessoremoto', 
+                        'form-selecionarlocalpadrao', 'form-selecionarlocalidade']
+
+            forms = self.driver.find_elements(By.TAG_NAME, 'form')
+            ids = [form.get_attribute("id") for form in forms]
+
+            btn_save_id = [_id for _id in ids if _id not in form_ids][0]
+            btn_save_xpath = f'//*[@id="{btn_save_id}"]/div[2]/button'
+
+            self.driver.find_element(By.XPATH, btn_save_xpath).click()
+
             return True
         except NoSuchElementException as err:
             insert_execlog(f"{red}ChangeWorkMonth Error: {yellow}\n\t{err}{bg}\n")
@@ -70,134 +85,116 @@ class Siga:
                             .presence_of_element_located((By.ID, "f_data")))
 
             # Inserts document date
-            data_documento = self.driver.find_element_by_id("f_data")
-            data_documento.send_keys(debt["date"])
-            enter()
-
+            self.driver.find_element_by_id("f_data").send_keys(debt["date"])
+            
             # Inserts document type
-            pyautogui.write(debt["type"])
-            enter(2)
-            sleep(2)
-
+            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-7"]').click()
+            doc = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen7_search"]')
+            doc.click()
+            doc.send_keys(debt["type"])
+            doc.send_keys(Keys.RETURN)
+            
             # Inserts document number
-            pyautogui.write(debt["num"])
-            sleep(0.5)
-            enter()
-            sleep(2)
+            doc  = self.driver.find_element(By.ID, "f_documento")
+            doc.click()
+            doc.send_keys(debt["num"])
 
             # Inserts document value
-            pyautogui.write(debt["value"])
-            sleep(0.5)
-            enter()
-            sleep(1)
+            doc  = self.driver.find_element(By.ID, "f_valor")
+            doc.click()
+            doc.send_keys(debt["value"])
+            doc.send_keys(Keys.RETURN)
 
-            # Inserts document expenditure (Tipo de Despesa)
-            pyautogui.write(debt["expenditure"])
-            sleep(3)
-            enter(2)
+            # Inserts document expenditure (Tipo de Despesa)            
+            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen8_search"]')
+            doc.click()
+            doc.send_keys(debt["expenditure"])
+            doc.send_keys(Keys.RETURN)
 
             # Inserts document cost center
-            pyautogui.write(debt["cost-center"])
-            sleep(1)
-            enter()
+            doc  = self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-9"]')
+            doc.click()
+
+            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen9_search"]')
+            doc.click()
+            doc.send_keys(debt["cost-center"])
+            doc.send_keys(Keys.RETURN)
 
             # Inserts document emitter
-            try:
-                self.driver.find_element(By.XPATH, select_doc_emitter_opt1).click()
-            except NoSuchElementException:
-                self.driver.find_element(By.XPATH, select_doc_emitter_opt2).click()
-            
+            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-14"]').click()
+            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen14_search"]')
+            doc.click()
+            doc.send_keys(debt["emitter"])
+            doc.send_keys(Keys.RETURN)
             sleep(2)
-            pyautogui.write(debt["emitter"])
-            enter(3, 1)
+            doc.send_keys(Keys.RETURN)
 
-            # Inserts document historic 1 
-            pyautogui.write(debt["hist-1"])
-            enter(3)
+            # Inserts document historic 1
+            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-10"]').click()
+            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen10_search"]')
+            doc.click()
+            doc.send_keys(debt["hist-1"])
+            doc.send_keys(Keys.RETURN)
 
-            # Inserts document payment date
-            sleep(1)
-            for i in range(3): 
-                pyautogui.write(debt["date"][i])
-                sleep(0.5)
-            enter()
+            # Inserts payment date
+            doc = self.driver.find_element_by_id("f_datapagamento")
+            doc.send_keys(debt["date"])
+
+            # Inserts payment form
+            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-11"]').click()
+            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen11_search"]')
+            doc.click()
+            doc.send_keys(debt["payment-form"])
+            doc.send_keys(Keys.RETURN)
 
             # Inserts payment form
             if debt["payment-form"] == "CHEQUE"\
                 and debt["check-num"] is not None:
-                # Inserts payment form
-                pyautogui.write(debt["payment-form"])
-                sleep(2)
-                enter(3)
-
-                # Inserts check number
-                sleep(1)
-                pyautogui.write(debt["check-num"])
-                enter(4)
-                
-                # Inserts document cost account
-                pyautogui.write(debt["cost-account"])
-                enter()
-
-                # Inserts payment historic
-                pyautogui.write(debt["hist-2"])
-                enter()
+                self.driver.find_element_by_id("f_numerocheque").click()
+                self.driver.find_element_by_id("f_numerocheque").send_keys(debt["check-num"])
 
             elif debt["payment-form"] == "DEBITO AUTOMATICO":
-                pass
-                # Inserts payment form
-                pyautogui.write(debt["payment-form"])
-                sleep(2)
-                enter(2)
+                self.driver.find_element_by_id("f_documento2").click()
+                self.driver.find_element_by_id("f_documento2").send_keys(debt["doc-num"])
 
-                # Inserts document number
-                pyautogui.write(debt["doc-num"])
-                sleep(0.5)
-                enter()
-                
-                # Inserts document cost account
-                pyautogui.write(debt["cost-account"])
-                enter(2)
+            # Inserts payment cost account
+            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-12"]').click()
+            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen12_search"]')
+            doc.click()
+            doc.send_keys(debt["cost-account"])
+            doc.send_keys(Keys.RETURN)
 
-                # Inserts document historic 2
-                pyautogui.write(debt["hist-2"])
-                enter()
-
-            else:
-                sleep(1)
-                pyautogui.write(debt["payment-form"])
-                sleep(1)
-                enter(2)
-
-                # Inserts document cost account
-                pyautogui.write(debt["cost-account"])
-                enter(2)
-            
-                # Inserts payment historic
-                pyautogui.write(debt["hist-2"])
-                sleep(0.5)
-                enter()
+            # Inserts document historic 2
+            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-13"]').click()
+            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen13_search"]')
+            doc.click()
+            doc.send_keys(debt["hist-2"])
+            doc.send_keys(Keys.RETURN)
             
             return True
 
         except Exception as err:
+            print(err)
             insert_execlog(f"{red}Debt Insertion Error: {yellow}\n\t{err}{bg}\n")
             return False
         
     def file_upload(self, file_path) -> bool:
         try:
-            self.driver.find_element(By.XPATH, file_upload_place).click()
+            # self.driver.find_element(By.XPATH, file_upload_place).click()
+            documento  = self.driver.find_element(By.ID, 'f_anexos')
+            documento.send_keys(file_path)
+
             sleep(3)
 
-            if not WIN:
-                pyautogui.write(file_path)
-                sleep(2)
-                enter()
+            # if not WIN:
+            #     pyautogui.write(file_path)
+            #     sleep(2)
+            #     enter()
 
-            else:
-                # Windows implementation
-                msg = "UPLOAD para Windows não foi implementado"
-                insert_execlog(f"{red}File Upload Error: {yellow}\n\t{msg}{bg}\n")
+            # else:
+            #     # Windows implementation
+            #     msg = "UPLOAD para Windows não foi implementado"
+            #     insert_execlog(f"{red}File Upload Error: {yellow}\n\t{msg}{bg}\n")
 
             return True
 

@@ -11,6 +11,7 @@ from utils.filemanager import create_dir, get_files_path, move_file_to
 
 
 def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
+    # ccb_siga = "file:///home/tesouraria/Downloads/CCBSiga.html"
     selenium = Selenium(ccb_siga)
     selenium.start()
     siga = Siga(selenium.get_driver())
@@ -25,7 +26,8 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
     if siga.login(user, passw):
         sleep(10)
         siga.change_work_month_date(work_month)
-        sleep(5)
+        sleep(599)
+        return
         siga.open_tesouraria()
         sleep(4)
 
@@ -44,7 +46,8 @@ def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
                             files_sent_successfull.append(file_path)
                         else:
                             files_not_sent.append(file_path)
-
+                        sleep(3000)
+                        return
                         sleep(3)
                         if len(data) > 1:
                             print("\n\n\nSalvando e iniciando novo lançamento..\n\n\n")
