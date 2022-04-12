@@ -52,9 +52,9 @@ def cli_main():
         
         
         logs: list = get_execlogs()
-        for log in logs:
-            sleep(1)
-            print(log[1])
+        for log in logs: print(log[1])
+    
+        clear_logs()
 
     else:
         banner()
@@ -62,11 +62,9 @@ def cli_main():
         print(restart)
         sleep(2)
 
-    clear_logs()
 
     
 if __name__ == "__main__":
-    # while True: main()
     cli_main()
 
 
