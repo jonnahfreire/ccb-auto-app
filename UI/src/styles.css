@@ -1,7 +1,14 @@
-#container-form-user-config {
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {width: 100%; height: 100%;}
+
+#container-form-user-credentials {
     width: 400px;
     height: max-content;
-    margin: 10% auto;
+    margin: 5% auto;
     padding: 20px;
 
     background-color: rgba(10, 10, 10, .1);
@@ -11,19 +18,11 @@
     box-shadow: 2px 2px 2px 2px rgba(10, 10, 10, .3);
 }
 
-#user-config-form {
-    display: flex;
-    flex-direction: column;
-}
-
-#user-config-form-title {
+#form-user-credentials {
     text-align: center;
 }
-.user-config-input {
-    font-size: 12pt;
-}
 
-#user-config-save {
+#btn-save-credentials {
     margin-top: 30px;
 }
 
@@ -32,15 +31,193 @@
     width: 400px;
 }
 
-.loading-alert {
+.container-content {
+    width: 100%;
+    height: 100%; 
+}
+
+.backdrop-alert {
     display: flex;
     align-items: center;
     justify-content: center;
-
-    margin: 20px auto 0 auto;
-    width: 400px;
+    width: 360px;
+    margin: 20% auto;
 }
-
-.loading-icon {
+    
+.loading-alert strong {
+    margin-top: 3px;
     margin-right: 10px;
 }
+
+.container-content-header {
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: flex-start;
+
+    width: inherit;
+    height: 50px;
+
+    background-color: #296ABC;
+    border-bottom: 1px solid black;
+
+    margin: 0;
+}
+
+.header-system-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    margin-left: 10px;
+    color: #FFF;
+    font-weight: 800;
+}
+
+.header-system-title span {
+    margin-left: 5px;
+}
+
+.separator {
+    flex: 2;
+}
+
+.work-month-select-container {
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: center;
+
+    align-self: flex-end;
+
+    color: #FFF;
+    width: fit-content;
+    height: inherit;
+
+    font-weight: 400;
+    font-size: normal;
+
+    cursor: pointer;
+
+    margin-right: 10px;
+    border-left: .6px solid rgb(182, 171, 171);
+}
+
+.work-month-select-container label {
+    margin-left: 10px;
+    margin-right: 5px;
+
+    cursor: pointer;
+}
+
+.work-month-select-container select {
+    cursor: pointer;
+    width: 80px;
+}
+
+.perfil {
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: center;
+
+    width: fit-content;
+    height: inherit;
+
+    color: #FFF;
+    border-left: .6px solid rgb(182, 171, 171);
+    padding-left: 5px;
+    
+    cursor: pointer;
+}
+
+.perfil #username, .username-link {
+    text-decoration: none;
+    color: #FFF;
+}
+
+.perfil #username:hover {
+    text-decoration: underline;
+}
+
+.perfil-modal-info {
+    display: flex;
+    flex-direction: column;
+
+    position: absolute;
+    top: 60px;
+    right: 20px;
+
+    width: 160px;
+
+    background-color: rgba(10, 10, 10, .1);
+
+    color: rgba(10, 10, 10, .7);
+    border: 1px solid rgba(10, 10, 10, .3);
+
+    box-shadow: 2px 2px 2px rgba(10, 10, 10, .3);;
+    border-radius: 5px;
+
+    font-size: small;
+    transition: .2s all;
+}
+
+.perfil h6 {
+    padding-top: 10px;
+    text-align: center;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.perfil .sep {
+    border-bottom: 1px solid rgba(10, 10, 10, .3);
+    margin-bottom: 0;
+}
+
+.perfil-modal-items {
+    display: flex;
+    flex-direction: column;
+}
+
+.perfil-modal-item {
+    display: flex;
+    flex-direction: row;
+
+    width: inherit;
+
+    align-items: center;
+    justify-content: space-evenly;
+
+    font-size: medium;
+    height: 30px;
+}
+
+.perfil-modal-item:hover {
+    background-color: rgba(158, 158, 158, 0.9);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.item-title {
+    flex: 2;
+    margin-left: 5px;
+}
+
+.item-title a {
+    width: 70%;
+    height: inherit;
+    color: rgba(10, 10, 10, .8);
+    text-decoration: none;
+}
+
+.item-title a:hover {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+}
+
+.item-icon {
+    margin-right: 5px;
+}
+

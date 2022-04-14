@@ -15,6 +15,7 @@ def create_config_path() -> bool:
         if not os.path.exists(config_dir):
             os.mkdir(config_dir)
             return True
+            
     except Exception:
         return False
 

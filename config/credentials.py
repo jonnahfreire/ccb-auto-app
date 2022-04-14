@@ -26,7 +26,7 @@ class Credential:
         db.cursor.execute("DELETE FROM user")
         db.commit()
 
-    def set_user_credential(self, username: str, userpass: str):
+    def set_user_credential(self, username: str, userpass: str) -> bool:
         self.username = username
         self.userpass = userpass
 
@@ -38,11 +38,14 @@ class Credential:
             and not user or not username in user and not userpass in user:
             if db.cursor.execute("INSERT INTO user (username, userpass) VALUES (?,?) ",(self.username, self.userpass)): 
                 print('Usuário inserido com sucesso!')
-                sleep(4)
+                db.commit()
+                return True
             else:
                 print('Não foi possível inserir usuário!')
-                sleep(4)
+                db.commit()
+                return False
         else:
             db.cursor.execute("UPDATE user SET username=?, userpass=?", (self.username, self.userpass))
-        db.commit()
+            db.commit()
+            return True
 
