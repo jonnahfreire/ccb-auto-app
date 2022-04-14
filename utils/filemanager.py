@@ -20,6 +20,13 @@ def create_config_path() -> bool:
         return False
 
 
+def get_month_directories() -> list:
+    if os.path.exists(sist_path):
+        return [month for month in sorted(os.listdir(sist_path)) if not month.startswith(".")]
+
+    return []
+
+
 def set_initial_struct_dirs(work_month_path: str) -> bool:
     try:
         if not os.path.exists(sist_path):

@@ -1,7 +1,15 @@
 import os
 import eel
 
-from utils.filemanager import list_files, get_files_by_account, create_config_path, set_initial_struct_dirs
+from tkinter import Tk, messagebox
+
+from utils.filemanager import list_files
+from utils.filemanager import get_files_by_account
+from utils.filemanager import create_config_path
+from utils.filemanager import set_initial_struct_dirs
+from utils.filemanager import get_month_directories
+from utils.filemanager import select_dir
+
 from data.main import get_modelized_debts
 from config.globals import sist_path, screen_size
 
@@ -18,6 +26,11 @@ def is_user_set() -> bool:
     if len(user_data) == 0:
         return False
     return True
+
+
+@eel.expose
+def get_month_directory_list() -> list:
+    return get_month_directories()
 
 
 @eel.expose
@@ -43,19 +56,33 @@ def set_user_credential(username: str, passwd: str) -> bool:
 
 
 @eel.expose
+def get_folder_path():
+    return select_dir()
+
+
+@eel.expose
 def get_screen_size():
     return screen_size
 
 
 @eel.expose
 def create_work_directory(work_month: str) -> bool:
-    work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))
-    print("Month received:", work_month_path)                    
+    work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))                   
     return set_initial_struct_dirs(work_month_path)
 
 
+@ eel.expose
+def alert(title: str, msg:str) -> None:
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    root.iconbitmap()
+    messagebox.showinfo(title, msg)
+    root.destroy()
+
+
 @eel.expose
-def get_data(work_month):
+def get_data(work_month, all=False):
 
     if work_month is None: pass
     work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))
@@ -68,11 +95,13 @@ def get_data(work_month):
         modelized_debts_1000: list[dict] = get_modelized_debts(debts_1000)
         modelized_debts_1010: list[dict] = get_modelized_debts(debts_1010)
 
-        # all_debts: list[dict] = modelized_debts_1000 + modelized_debts_1010
+        if all:
+            all_debts: list[dict] = modelized_debts_1000 + modelized_debts_1010
+            return all_debts
 
         return {"1000": modelized_debts_1000, "1010": modelized_debts_1010}
 
-    return {"data": []}
+    return {"1000": [], "1010": []}
 
 
 @eel.expose

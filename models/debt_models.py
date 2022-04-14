@@ -36,6 +36,13 @@ class BaseModel:
             "doc-num": self.doc_num
         }
 
+# ----------------------------------
+class Model1120(BaseModel):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.expenditure: str = "1120"
+
 
 # ----------------------------------
 class Model3006(BaseModel):
