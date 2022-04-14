@@ -1,4 +1,3 @@
-const containerContent = document.querySelector(".container-content");
 const containerUserRequest = document.querySelector(".container-request-user-credentials");
 const userCredentialInputs = document.querySelectorAll(".user-credential-input");
 // form elements
@@ -14,6 +13,10 @@ const userIconSuccess = document.querySelector(".user-icon-success");
 const passIconSuccess = document.querySelector(".pass-icon-success");
 const pass2IconSuccess = document.querySelector(".pass2-icon-success");
 const passFeedBack = document.querySelector(".pass-feedback");
+const alertBackdrop = document.querySelector(".backdrop-alert");
+
+const containerContent = document.querySelector(".container-content");
+const containerContentHeader = document.querySelector(".container-content-header");
 
 
 async function isUserSet() {
@@ -34,6 +37,10 @@ async function getUserName() {
 
 async function getData(month) {
     return await eel.get_data(month)()
+};
+
+async function createWorkDirectory(month) {
+    return await eel.create_work_directory(month)()
 };
 
 
@@ -114,7 +121,7 @@ document.querySelector(".perfil").addEventListener("click", () => {
 
 const setSelectMonths = () => {
     const {months, actualMonth} = getMonths();
-    
+
     months.map(month => {
         const option = document.querySelector("#work-month-select option").cloneNode(true);
         const select = document.querySelector("#work-month-select");
@@ -129,25 +136,11 @@ const setSelectMonths = () => {
 
         select.append(option);
     })
+
+    return actualMonth;
 }
 
-
-const init = () => {
-    document.querySelector(".backdrop-alert").classList.remove("d-none");
-
-    setSelectMonths();
-
-    getUserName().then(response => {
-        username = response; 
-        document.querySelector(".perfil .user-content #username").innerHTML = username;
-    })
-
-    setTimeout(() => {
-        document.querySelector(".backdrop-alert").classList.add("d-none");
-    }, 3000);
-
-    const {_, actualMonth} = getMonths();
-
+const setData = () => {
     getData(actualMonth.replace("/", "-"))
         .then(response => {
 
@@ -159,14 +152,14 @@ const init = () => {
             const debts1000 = response["1000"]
             const debts1010 = response["1010"]
             console.log(debts1000, debts1010)
-    
+
             console.log(debts1000[0]["hist-1"])
-    
+
             const debts1000Length = debts1000.length
             const debts1010Length = debts1010.length
             const model1000Title = document.querySelector(".content-model .model-account-1000")
             const contentModel1000 =  document.querySelector(".content-model .d-1000")
-    
+
             const model1010Title = document.querySelector(".content-model .model-account-1010")
             const contentModel1010 =  document.querySelector(".content-model .d-1010")
             
@@ -174,12 +167,38 @@ const init = () => {
             contentModel1000.textContent =  debts1000Length > 1 
                 ? "Encontrados " + debts1000Length + " despesas."
                 : "Encontrados " + debts1000Length +" despesa."
-    
+
             model1010Title.textContent = "1010:"
             contentModel1010.textContent =  debts1010Length > 1 
                 ? "Encontrados " + debts1010Length + " despesas."
                 : "Encontrados " + debts1010Length +" despesa."
     })
+}
+
+
+const init = () => {
+    const actualWorkMonth = setSelectMonths();
+    
+    getUserName().then(response => {
+        username = response; 
+        document.querySelector(".perfil .user-content #username").innerHTML = username;
+    })
+
+    createWorkDirectory(actualWorkMonth.replace("/", "-"))
+        .then(response => {
+            if (response === null) {
+                alertBackdrop.querySelector("strong").textContent = "Verificando diretório de trabalho, aguarde...";
+            }else {
+                alertBackdrop.querySelector("strong").textContent = "Criando diretório de trabalho, aguarde..."
+            }
+            
+            setTimeout(() => {
+                alertBackdrop.classList.add("d-none")
+                containerContentHeader.classList.remove("d-none")
+            }, 2000);
+            
+            alertBackdrop.querySelector("strong").textContent = "Verificando diretório de trabalho, aguarde...";
+        })
 }
 
 
@@ -200,11 +219,13 @@ const getMonths = () => {
 
 
 window.onload = () => {
-
     isUserSet().then(response => {
+        alertBackdrop.querySelector("strong").textContent = "Inicializando.."
+
         if(response) {
             containerContent.classList.remove("d-none");
-            init();
+            alertBackdrop.classList.remove("d-none");
+            setTimeout(() => init(), 1000);
         }
 
         toggleInputPass(togglePassword, password);

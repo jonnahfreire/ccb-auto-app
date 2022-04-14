@@ -1,7 +1,7 @@
 import os
 import eel
 
-from utils.filemanager import list_files, get_files_by_account, create_config_path
+from utils.filemanager import list_files, get_files_by_account, create_config_path, set_initial_struct_dirs
 from data.main import get_modelized_debts
 from config.globals import sist_path, screen_size
 
@@ -45,6 +45,13 @@ def set_user_credential(username: str, passwd: str) -> bool:
 @eel.expose
 def get_screen_size():
     return screen_size
+
+
+@eel.expose
+def create_work_directory(work_month: str) -> bool:
+    work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))
+    print("Month received:", work_month_path)                    
+    return set_initial_struct_dirs(work_month_path)
 
 
 @eel.expose

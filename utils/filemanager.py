@@ -35,7 +35,9 @@ def set_initial_struct_dirs(work_month_path: str) -> bool:
         
             for struct in struct_dirs:
                 create_struct_dir(work_month_path, struct[1:], struct[0])
-        return True
+            
+            return True
+            
     except Exception:
         return False
 

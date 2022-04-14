@@ -63,6 +63,7 @@ body {width: 100%; height: 100%;}
     border-bottom: 1px solid black;
 
     margin: 0;
+    transition: .2s linear;
 }
 
 .header-system-title {
@@ -168,7 +169,7 @@ body {width: 100%; height: 100%;}
 .perfil h6 {
     padding-top: 10px;
     text-align: center;
-    font-weight: 700;
+    font-weight: 600;
     letter-spacing: 1px;
 }
 
@@ -186,12 +187,10 @@ body {width: 100%; height: 100%;}
     display: flex;
     flex-direction: row;
 
-    width: inherit;
-
     align-items: center;
     justify-content: space-evenly;
 
-    font-size: medium;
+    width: inherit;
     height: 30px;
 }
 
@@ -201,6 +200,7 @@ body {width: 100%; height: 100%;}
 }
 
 .item-title {
+    font-size: medium;
     flex: 2;
     margin-left: 5px;
 }
@@ -208,16 +208,47 @@ body {width: 100%; height: 100%;}
 .item-title a {
     width: 70%;
     height: inherit;
+
     color: rgba(10, 10, 10, .8);
     text-decoration: none;
+
+    font-size: small;
+    margin: 0;
+    padding: 5px;
 }
 
 .item-title a:hover {
     color: rgba(255, 255, 255, 0.8);
-    text-decoration: none;
 }
 
 .item-icon {
     margin-right: 5px;
 }
 
+.footer-info {
+    width: 100%;
+    height: 25px;
+
+    background-color: rgb(238, 238, 238);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    font-size: small;
+}
+
+.footer-info svg {
+    margin-bottom: 2px;
+}
+
+.footer-info a {
+    margin-left: 4px;
+    color: rgba(24, 23, 23, 0.919);
+    text-decoration: none;
+}
