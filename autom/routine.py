@@ -10,13 +10,13 @@ from utils.filemanager import create_dir, get_files_path, move_file_to
 
 
 
-def insert_debt(work_month: str, work_month_path:str, data: list) -> dict:
+def insert_debt(work_month: str, work_month_path:str, data: list, window: bool = False) -> dict:
    
     if len(data) == 0: 
         print("Insert debt error: No debts found")
         return
 
-    selenium = Selenium(ccb_siga)
+    selenium = Selenium(ccb_siga, window)
     selenium.start()
     siga = Siga(selenium.get_driver())
     

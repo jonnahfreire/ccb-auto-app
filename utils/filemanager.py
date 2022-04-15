@@ -134,14 +134,28 @@ def move_file_to(path: str, filename: str) -> bool:
     return False
 
 
+def remove_directory(dirname: str) -> bool:   
+    dirpath: str = os.path.join(sist_path, dirname)
+
+    if os.path.exists(dirpath):
+        if not WIN: 
+            os.system(f"rm -rf '{dirpath}'")
+        else: # Windows Implementation
+            os.system(f"DEL /S '{dirpath}/*'")
+
+        return True 
+    return False
+
+
 def copy_file_to(path: str, filename: str) -> bool:
     if os.path.exists(path):
         if not WIN: 
             os.system(f"cp '{filename}' '{path}'")
-            return True
+            
         else: # Windows Implementation
             os.system(f"copy '{filename}' '{path}'")
-            return True
+        
+        return True
     return False
 
 

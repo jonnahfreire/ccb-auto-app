@@ -18,11 +18,12 @@ const alertBackdrop = document.querySelector(".backdrop-alert");
 const containerContent = document.querySelector(".container-content");
 const containerContentHeader = document.querySelector(".container-content-header");
 const content = document.querySelector(".container-content .content");
+const folderContextMenu = document.querySelector(".folder-context-menu");
+const contextMenuCurrentFolder = {"element": "", "title": ""};
+const timeout = 100;
 
-const timeout = 2000;
-
-async function getFolderPath() {
-    return await eel.get_folder_path()()
+async function getFilesFromFolder() {
+    return await eel.get_files_from_folder()()
 }
 
 async function isUserSet() {
@@ -41,6 +42,14 @@ async function getUserName() {
     return await eel.get_username()()
 }
 
+async function getSysPath() {
+    return await eel.get_sys_path()()
+}
+
+async function openDirectory(path) {
+    return await eel.open_directory(path)()
+}
+
 async function getData(month) {
     return await eel.get_data(month)()
 };
@@ -49,12 +58,24 @@ async function createWorkDirectory(month) {
     return await eel.create_work_directory(month)()
 };
 
+async function insertDebt(month, workMonthPath, debtList, window=false) {
+    return await eel.insert_new_debt(month,workMonthPath, debtList, window)()
+};
+
+async function getWorkMonthPath(month) {
+    return await eel.get_work_month_path(month)()
+};
+
 async function eelAlert(title, message) {
     return await eel.alert(title, message)()
 };
 
 async function getMonthDirectoryList() {
     return await eel.get_month_directory_list()()
+};
+
+async function removeMonthDirectory(dirname) {
+    return await eel.remove_month_directory(dirname)()
 };
 
 
@@ -143,44 +164,70 @@ const getMappedObject = obj => {
     };
 }
 
-
 document.querySelector(".perfil").addEventListener("click", () => {
     document.querySelector(".perfil-modal-info").classList.toggle("d-none");
 })
 
-document.querySelector(".btn-create").addEventListener("click", () => {
+document.querySelector(".content").addEventListener("click", () => {
+    document.querySelector(".perfil-modal-info").classList.add("d-none");
+})
 
-    const modalSelectBackdrop = document.querySelector(".select-month-modal-backdrop")
+document.querySelector(".btn-create").addEventListener("click", () => {
+    const modalSelectBackdrop = document.querySelector(".select-month-modal-backdrop");
+    const modalSelectCloseBtn = document.querySelector(".modal-select-month svg");
     modalSelectBackdrop.classList.remove("d-none");
 
     let selectedMonth = null;
+    modalSelectCloseBtn.addEventListener("click", () => {
+        modalSelectBackdrop.classList.add("d-none");
+    })
 
     document.querySelector("#work-month-select").addEventListener('change', (e) => {
         selectedMonth = e.target.value;
     })
 
-    
-    document.querySelector(".select-month-modal-backdrop .btn-ok").addEventListener("click", () => {
+    modalSelectBackdrop.querySelector(".btn-ok")
+        .addEventListener("click", () => {
         modalSelectBackdrop.classList.add("d-none")   
         
-        console.log(selectedMonth)
-        createWorkDirectory(selectedMonth)
+        selectedMonth && createWorkDirectory(selectedMonth)
             .then(response => response && init())
     })
 })
 
 document.querySelector(".btn-add").addEventListener("click", () => {
-
-    getFolderPath().then(response => {
-
-        if (response) {
-            console.log(response)
-        }
-        // document.querySelector(".perfil-modal-info").classList.toggle("d-none");
-
-    })
+    getFilesFromFolder().then(response => response && init())
 })
 
+document.querySelector(".btn-start").addEventListener("click", async() => {
+    const monthDirectories = document
+        .querySelectorAll(".month-directories .work-month-directory");
+        
+    const selectedMonthDir = [...monthDirectories].filter(month => {
+            if (month.classList.contains("work-month-directory-selected")){
+                return month
+            }
+        })[0];
+
+    const selectedMonth = selectedMonthDir.querySelector(".folder-title").textContent;
+    
+    const workMonthPath = await getWorkMonthPath(selectedMonth);
+    
+    getData(selectedMonth.replace("/", "-"))
+        .then(response => {
+            const debts1000 = response["1000"].map(debt => getMappedObject(debt));
+            const debts1010 = response["1010"].map(debt => getMappedObject(debt));
+
+            console.log(debts1010)
+
+            if (debts1000 || debts1010){
+                insertDebt(selectedMonth, workMonthPath, debts1010)
+                    .then(response => {
+                        console.log(response);
+                    });
+            }
+    })
+})
 
 const getMonths = () => {
     const today = new Date();
@@ -194,12 +241,16 @@ const getMonths = () => {
         months.push( index < 10 ? `0${index}/${year}`: `${index}/${year}` );
     }
 
+    actualMonth = actualMonth.toString()
     return {months, actualMonth};
 }
 
 
 const setSelectMonths = () => {
     const {months, actualMonth} = getMonths();
+
+    const options = document.querySelectorAll("#work-month-select option");
+    if (options.length == 14) return actualMonth;
 
     months.map(month => {
         const option = document.querySelector("#work-month-select option").cloneNode(true);
@@ -219,36 +270,63 @@ const setSelectMonths = () => {
     return actualMonth;
 }
 
+function getPosition(el) {
+    let xPos = 0;
+    let yPos = 0;
+   
+    while (el) {
+        if (el.tagName == "BODY") {
+            let xScroll = el.scrollLeft || document.documentElement.scrollLeft;
+            let yScroll = el.scrollTop || document.documentElement.scrollTop;
+   
+            xPos += (el.offsetLeft - xScroll + el.clientLeft);
+            yPos += (el.offsetTop - yScroll + el.clientTop);
+
+        } else {
+            xPos += (el.offsetLeft - el.scrollLeft + el.clientLeft);
+            yPos += (el.offsetTop - el.scrollTop + el.clientTop);
+        }
+   
+        el = el.offsetParent;
+    }
+
+    return {
+        x: xPos,
+        y: yPos
+    };
+}
+
 const fillContent = (debtList, account) => {
     const contentMessage1000 = document.querySelector(".account1000-content .message");
     const contentMessage1010 = document.querySelector(".account1010-content .message");
     const content1000Info =  document.querySelector(".account1000-content");
     const content1010Info =  document.querySelector(".account1010-content");
 
-    console.log(debtList, account)
-
-    if(debtList.length > 0) {
-        // clear content
-        account === "1000" && document.querySelectorAll(".account1000-content .model-item")
-            .forEach(item => item.remove());
+    // clear content
+    account == "1000" && content1000Info.querySelectorAll(".model-item")
+        .forEach(item => item.remove());
+    
+    account == "1010" && content1010Info.querySelectorAll(".model-item")
+        .forEach(item => item.remove());
         
-        account === "1010" && document.querySelectorAll(".account1010-content .model-item")
-            .forEach(item => item.remove());
-
+    if(debtList.length > 0) {
         debtList.forEach(debt => {
             const model = document.querySelector(".content-model .debt-info").cloneNode(true);
-
+            
             model.querySelector(".filetype").textContent = debt.type.replace("NOTA FISCAL", "NF");
             model.querySelector(".filenumber").textContent =  debt.num;
             model.querySelector(".filedate").textContent =  `${debt.date[0]}/${debt.date[1]}/${debt.date[2]}`;
             model.querySelector(".filevalue").textContent = "R$ " + debt.value;
-
+                
             account === "1000" && contentMessage1000.classList.add("d-none");
             account === "1010" && contentMessage1010.classList.add("d-none");
             
             account === "1000" && content1000Info.append(model);
             account === "1010" && content1010Info.append(model);
         })
+    } else {
+        account === "1000" && contentMessage1000.classList.remove("d-none");
+        account === "1010" && contentMessage1010.classList.remove("d-none");
     }
 }
 
@@ -256,23 +334,65 @@ const fillContent = (debtList, account) => {
 const setData = (month) => {
     getData(month)
         .then(response => {
-            console.log(response)
-
-            if (response["1000"].length == 0 && response["1010"].length == 0) return;
-
             const debts1000 = response["1000"].map(debt => getMappedObject(debt));
             const debts1010 = response["1010"].map(debt => getMappedObject(debt));
-
 
             fillContent(debts1000, "1000");
             fillContent(debts1010, "1010");
     })
 }
 
+folderContextMenu.querySelector(".remove").addEventListener("click", () => {
+    const modalRemoveMonthBackDrop = document.querySelector(".remove-month-modal-backdrop");
+    modalRemoveMonthBackDrop.classList.remove("d-none");
+
+    const modalRemoveMonthBtnOk = document.querySelector(".modal-remove-footer .btn-ok");
+    const modalRemoveMonthClose = document.querySelector(".modal-remove-header svg");
+    const modalRemoveMonthBtnCancel = document.querySelector(".modal-remove-footer .btn-cancel");
+
+    modalRemoveMonthClose.addEventListener("click", () => {
+        modalRemoveMonthBackDrop.classList.add("d-none");
+    })
+
+    modalRemoveMonthBtnCancel.addEventListener("click", () => {
+        modalRemoveMonthBackDrop.classList.add("d-none");
+    })
+
+    modalRemoveMonthBtnOk.addEventListener("click", () => {
+        modalRemoveMonthBackDrop.classList.add("d-none");
+        removeMonthDirectory(contextMenuCurrentFolder.title)
+            .then(response => {
+                response && init();
+            })
+    })
+})
+
+folderContextMenu.querySelector(".open-folder-local").addEventListener("click", () => {
+    getSysPath().then(path => {
+        const folderPath = path+"/"+contextMenuCurrentFolder.title
+        path && openDirectory(folderPath).then();
+    })
+})
+
+document.querySelector("body").addEventListener("click", () => {
+    folderContextMenu.classList.add("d-none");
+})
+
+const showFolderContextMenu = (element) => {
+    const folderOffSetWidth = element.offsetWidth;
+    position = getPosition(element)
+    
+    folderContextMenu.classList.remove("d-none");
+    folderContextMenu.style.left = position.x + folderOffSetWidth + 10 + "px";
+    folderContextMenu.style.top = position.y + "px";
+    return false
+}
 
 const init = () => {
     const actualWorkMonth = setSelectMonths().replace("/", "-");
-    document.querySelector(".container-content .actual-month span").textContent = actualWorkMonth.replace("-", "/");
+
+    document.querySelector(".container-content .actual-month span")
+        .textContent = actualWorkMonth.replace("-", "/");
     
     getUserName().then(response => {
         username = response; 
@@ -300,11 +420,10 @@ const init = () => {
         if (response.length > 0) {
             const directoryContainer = document.querySelector(".month-directories");
 
-            document.querySelectorAll(".month-directories .work-month-directory")
+            directoryContainer.querySelectorAll(".work-month-directory")
                 .forEach(item => item.remove());
             
             response.forEach(month => {
-
                 const directoryModel = document.querySelector(".content-model .work-month-directory").cloneNode(true);
 
                 directoryModel.querySelector(".folder-title").textContent = month.replace("-", "/");
@@ -325,10 +444,6 @@ const init = () => {
                             dir.querySelector(".bi-folder").classList.remove("d-none");
                             dir.querySelector(".bi-folder2-open").classList.add("d-none");
                         });
-
-                    if (directoryModel.classList.contains("work-month-directory-selected")){
-                        return false;
-                    }
                     
                     if (!directoryModel.classList.contains("work-month-directory-selected")){
                         directoryModel.classList.add("work-month-directory-selected");
@@ -339,9 +454,24 @@ const init = () => {
                     setData(month);
                 })
             })
+            
+            const folders = document.querySelectorAll(".month-directories .work-month-directory");
+            if (folders.length > 0) {
+                folders.forEach(folder => {
+                    folder.addEventListener("contextmenu", e => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        
+                        contextMenuCurrentFolder.element = folder;
+                        contextMenuCurrentFolder.title = folder.querySelector(".folder-title")
+                            .textContent.replace("/", "-");
+                            
+                        showFolderContextMenu(folder);                 
+                    })
+                })
+            }
         }
     })
-    
     setData(actualWorkMonth);
 }
 
@@ -352,6 +482,7 @@ window.onload = () => {
         if(response) {
             containerContent.classList.remove("d-none");
             alertBackdrop.classList.remove("d-none");
+            setSelectMonths();
             setTimeout(() => init(), timeout); //1000
         }
 
@@ -369,9 +500,9 @@ window.onload = () => {
 // 	}
 // })
 
-// window.addEventListener('keyup', e => {
-// 	if (e.key === 93){
-// 		e.preventDefault();
-// 		return false;
-// 	}
-// })
+window.addEventListener('keyup', e => {
+	if (e.key === 93){
+		e.preventDefault();
+		return false;
+	}
+})

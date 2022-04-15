@@ -6,7 +6,7 @@ from models.debt_models import *
 from config.globals import sist_path, extensions, accepted_accounts
 
 from utils.main import get_debt_models_list
-from utils.filemanager import copy_file_to
+from utils.filemanager import copy_file_to, set_initial_struct_dirs
 
 
 def get_data_from_filename(model, file: str) -> dict:
@@ -113,9 +113,7 @@ def get_unclassified_files_from_path(path: str) -> list:
 
 
 def get_classified_files(path:str) -> list[dict]:
-
-    if os.path.exists(path):
-
+    if isinstance(path, str) and os.path.exists(path):
         files: list[str] = get_unclassified_files_from_path(path)
 
         file_data_list: list[dict] = [
@@ -141,7 +139,15 @@ def move_classified_files_to_sist_path(
         debt_account: str = file["expenditure"]
         work_month: str = "-".join(file["date"])[3:]
 
+        work_month_path: str = os.path.join(sist_path, work_month)
+        if not os.path.exists(work_month_path):
+            set_initial_struct_dirs(work_month_path)
+
         base_account_path = os.path.join(sist_path, work_month, base_account)
+
+        if not os.path.exists(base_account_path):
+            print(base_account_path)
+            return False
 
         debt_account_path = [
             p for p in os.listdir(base_account_path)
@@ -149,8 +155,6 @@ def move_classified_files_to_sist_path(
         ][0]
         base_account_path = os.path.join(base_account_path, debt_account_path)
 
-        if not os.path.exists(base_account_path):
-            return False
 
         filename = [
             _ for _ in files
