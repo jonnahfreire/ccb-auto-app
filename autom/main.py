@@ -3,12 +3,12 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 
 
-from config.globals import chrome_driver_path, chrome_window_size
+from config.globals import chrome_driver_path, selenium_brw_size
 
 
 class Selenium:
     chrome_options = Options()
-    chrome_options.add_argument("--window-size=%s" % chrome_window_size)
+    chrome_options.add_argument("--window-size=%s" % selenium_brw_size)
     
 
     def __init__(self, target: str, no_window: bool = False) -> None:

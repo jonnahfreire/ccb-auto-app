@@ -158,6 +158,15 @@ body {width: 100%; height: 100%; user-select: none;}
 
     font-size: small;
     transition: .2s all;
+    opacity: 0;
+}
+
+.p-m-opacity {
+    opacity: 1;
+}
+
+.f-c-opacity {
+    opacity: 1;
 }
 
 .perfil h6 {
@@ -403,6 +412,43 @@ body {width: 100%; height: 100%; user-select: none;}
     padding: 10px;
 }
 
+.footer-btn .status-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    
+    justify-self: left;
+    flex: 3;
+
+    width: fit-content;
+    height: 32px;
+    
+    margin-left: 1.5%;
+    margin-bottom: 10px;
+    border-radius: 2px;
+}
+
+.footer-btn .status-container .status {
+    font-weight: 700;
+    font-size: small;
+    color: #FFF;
+    padding: 5px;
+    margin-left: 5px;
+    border-radius: 5px;
+}
+
+.footer-btn .status-container .started {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+}
+
+.footer-btn .status-container .loading {
+    border-radius: 100%;
+}
+
 .footer-btn .btn-start {
     margin-right: 1%;
 }
@@ -412,17 +458,21 @@ body {width: 100%; height: 100%; user-select: none;}
     margin-bottom: 10px;
 }
 
-.select-month-modal-backdrop, .remove-month-modal-backdrop {
+.select-month-modal-backdrop,
+.remove-month-modal-backdrop,
+.remove-user-modal-backdrop {
     width: 100%;
     height: 100%;
 
     background-color: rgba(0, 0, 0, 0.1);
     position: absolute;
 
-    transition: 2s linear;
+    transition: .2s linear;
 }
 
-.modal-select-month, .modal-remove-month {
+.modal-select-month,
+.modal-remove-month,
+.modal-remove-user {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -447,6 +497,11 @@ body {width: 100%; height: 100%; user-select: none;}
 
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
     z-index: 999;
+}
+
+.modal-remove-user {
+    width: 260px;
+    height: 150px;
 }
 
 .modal-remove-month {
@@ -488,7 +543,9 @@ body {width: 100%; height: 100%; user-select: none;}
     border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
 
-.modal-month-body, .modal-remove-body {
+.modal-month-body, 
+.modal-remove-body,
+.modal-remove-user-body {
     width: inherit;
     height: 90px;
     display: flex;
@@ -498,7 +555,8 @@ body {width: 100%; height: 100%; user-select: none;}
     justify-content: space-around;
 }
 
-.modal-remove-body {
+.modal-remove-body,
+.modal-remove-user-body  {
     height: 50px;
     padding: 10px;
     align-items: center;
@@ -525,7 +583,8 @@ body {width: 100%; height: 100%; user-select: none;}
     text-align: justify;
 }
 
-.modal-remove-footer {
+.modal-remove-footer,
+.modal-remove-user-footer {
     width: inherit;
     height: 40px;
 
@@ -535,7 +594,9 @@ body {width: 100%; height: 100%; user-select: none;}
 }
 
 .modal-remove-footer .btn-ok,
-.modal-remove-footer .btn-cancel {
+.modal-remove-user-footer .btn-ok,
+.modal-remove-footer .btn-cancel,
+.modal-remove-user-footer .btn-cancel {
     margin-right: 10px;
 }
 
@@ -550,8 +611,12 @@ body {width: 100%; height: 100%; user-select: none;}
     border-radius: 5px;
 
     background-color: rgb(255, 248, 248);
+    opacity: 0;
+    transition: .3s all;
+}
 
-    transition: .2s all;
+.folder-context-menu .context-item-separator {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .context-items {
@@ -578,4 +643,96 @@ body {width: 100%; height: 100%; user-select: none;}
 
 .context-items svg {
     margin-right: 5px;
+}
+
+.model-item {
+    display: flex;
+    flex-direction: row;
+
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.debt-item {
+    display: flex;
+    width: 120px;
+    height: 30px;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+
+    background-color: rgba(0, 0, 0, 0.02);
+    border-right: .6px solid rgba(0, 0, 0, 0.05);
+
+    box-shadow: 1px 0px 1px rgb(168, 164, 164);
+    margin-bottom: 5px;
+
+    border-radius: 4px;
+    margin-right: 5px;
+}
+
+.debt-info .filetype {
+    width: 25px;
+}
+
+.debt-info .status {
+    font-size: small;
+    font-weight: 600;
+    color: #FFF;
+    width: 100px;
+}
+
+.debt-item.status.bg-success {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    padding-left: 8px;
+    padding-right: 8px;
+    width: 100px;
+}
+
+.bg-warning-2 {
+    background-color: rgb(255, 157, 65);
+}
+
+.container-settings {
+    width: 100%;
+    height: 100%;
+}
+
+.container-settings .settings-header {
+    background-color: rgba(0, 0, 0, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    height: 50px;
+}
+
+.container-settings 
+.settings-header 
+.btn-go-back {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 45px;
+    height: 45px;
+
+    cursor: pointer;
+    border-radius: 50%;
+    
+    margin: 5px;
+}
+.btn-go-back:hover {
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.09);
+
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+.btn-go-back svg {
+    color: #FFF;
 }

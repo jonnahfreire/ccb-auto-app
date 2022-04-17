@@ -17,6 +17,7 @@ class BaseModel:
         self.file_name: str = None
         self.check_num: str = None
         self.doc_num: str = None
+        self.file_type: str = None
 
     def get_mapped_data(self) -> dict:
         return {
@@ -33,7 +34,8 @@ class BaseModel:
             "payment-form": self.payment_form, 
             "file-name": self.file_name,
             "check-num": self.check_num,
-            "doc-num": self.doc_num
+            "doc-num": self.doc_num,
+            "file-type": self.file_type
         }
 
 # ----------------------------------

@@ -1,8 +1,10 @@
 import os
+from threading import Thread
 import eel
 
 from tkinter import Tk, messagebox
 
+from utils.main import reset_db
 from utils.filemanager import list_files, open_dir
 from utils.filemanager import get_files_by_account
 from utils.filemanager import create_config_path
@@ -15,11 +17,13 @@ from data.main import get_classified_files
 from data.main import move_classified_files_to_sist_path
 from data.main import get_modelized_debts
 
-from autom.routine import insert_debt
+from autom.routine import insert_debt, status
 
 from config.globals import sist_path, screen_size
 from config.credentials import Credential
 from config.user import User
+
+from execlogs.logs import *
 
 
 @eel.expose
@@ -31,6 +35,11 @@ def is_user_set() -> bool:
     if len(user_data) == 0:
         return False
     return True
+
+
+@eel.expose
+def remove_current_user() -> bool:
+    return reset_db()
 
 
 @eel.expose
@@ -100,9 +109,19 @@ def get_work_month_path(month: str) -> str:
 def insert_new_debt(month:str, 
         work_month_path: str, 
         debt_list: list[dict], 
-        window: bool = False) -> dict:
+        window: bool = False) -> None:
         
-    return insert_debt(month.replace("-", "/"), work_month_path, debt_list, window)
+    Thread(target=insert_debt,
+        args=(
+            month.replace("-", "/"),
+            work_month_path,
+            debt_list,
+            window
+        )
+    ).start()
+
+    logs: list = get_execlogs()
+    for log in logs: print(log[1])
 
 
 @ eel.expose
@@ -127,6 +146,11 @@ def get_files_from_folder() -> bool:
             success = move_classified_files_to_sist_path(path, i)
         
     return success
+
+
+@eel.expose
+def get_current_status() -> dict:
+    return status
 
 
 @eel.expose

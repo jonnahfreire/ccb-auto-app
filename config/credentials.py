@@ -19,12 +19,16 @@ class Credential:
         db.commit()
         return user_data or []
     
-    def reset_all(self):
+    def reset_all(self) -> bool:
         db = LocalDB()
         db.connect()
 
-        db.cursor.execute("DELETE FROM user")
+        if db.cursor.execute("DELETE FROM user"):
+            db.commit()
+            return True
+
         db.commit()
+        return False
 
     def set_user_credential(self, username: str, userpass: str) -> bool:
         self.username = username

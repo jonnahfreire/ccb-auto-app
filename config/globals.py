@@ -4,7 +4,8 @@ from os import environ, path, sys
 sist_name = "ccb-autom"
 
 chrome_driver_path = "/usr/local/bin/chromedriver" if not sys.platform == "win32" else ""
-chrome_window_size = "900,600" #"1920,1080"
+chrome_window_size = "900,600" 
+selenium_brw_size = "1920,1080"
 screen_size = chrome_window_size.split(',')
 
 user_docs_path = path.join("/home", environ["USER"], "Documentos" or "Documents")\

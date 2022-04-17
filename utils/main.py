@@ -21,8 +21,8 @@ WIN = sys.platform == "win32"
 #     merger.close()
 
 
-def reset_db():
-    Credential().reset_all()
+def reset_db() -> bool:
+    return Credential().reset_all()
 
 
 def clear() -> None:

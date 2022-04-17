@@ -8,14 +8,15 @@ from config.credentials import Credential
 
 from utils.filemanager import create_dir, get_files_path, move_file_to
 
-
+status =  {"current": {}, "started": False, "finished": False, "finished_all": False}
 
 def insert_debt(work_month: str, work_month_path:str, data: list, window: bool = False) -> dict:
-   
+    global status
+
     if len(data) == 0: 
         print("Insert debt error: No debts found")
         return
-
+    
     selenium = Selenium(ccb_siga, window)
     selenium.start()
     siga = Siga(selenium.get_driver())
@@ -35,6 +36,9 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool =
 
         if siga.new_debt():
             for debt in data:
+                status["current"] = debt
+                status["started"] = True
+
                 if siga.debt(debt):
                     file_name = debt["file-name"]
                     file_path = None
@@ -54,6 +58,8 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool =
                             print("\n\n\nSalvando e iniciando novo lançamento..\n\n\n")
                             if siga.save_and_new_debt(debt):
                                 print(f"{debt['file-name']}: salvo com sucesso.")
+                                status["finished"] = True
+
                             else:
                                 try:
                                     files_sent_successfull.remove(file_path)
@@ -64,6 +70,7 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool =
                             print("\n\n\nSalvando lançamento..\n\n\n")
                             if siga.save_debt(debt):
                                 print(f"{debt['file-name']}: salvo com sucesso.")
+                                status["finished"] = True
                             else:
                                 files_not_sent.append(file_path)
                                 print("\n\nNão foi possível salvar o lançamento devido à uma exceção.")
@@ -76,6 +83,9 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool =
             basedir = file[:file.rfind("/")]
             create_dir(basedir, "Lancados")
             move_file_to(f"{basedir}/Lancados/", file)
+            
+    status["finished_all"] = True
+    status = {"current": {}, "started": False, "finished": False, "finished_all": False}
 
     selenium.close()
     return {"success": files_sent_successfull, "error": files_not_sent}

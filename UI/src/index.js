@@ -21,6 +21,7 @@ const content = document.querySelector(".container-content .content");
 const folderContextMenu = document.querySelector(".folder-context-menu");
 const contextMenuCurrentFolder = {"element": "", "title": ""};
 const timeout = 100;
+const system = {"running": false};
 
 async function getFilesFromFolder() {
     return await eel.get_files_from_folder()()
@@ -40,6 +41,10 @@ async function setUserCredentials(username, password) {
 
 async function getUserName() {
     return await eel.get_username()()
+}
+
+async function getStatus() {
+    return await eel.get_current_status()()
 }
 
 async function getSysPath() {
@@ -78,6 +83,10 @@ async function removeMonthDirectory(dirname) {
     return await eel.remove_month_directory(dirname)()
 };
 
+async function removeCurrentUser() {
+    return await eel.remove_current_user()()
+};
+
 
 const toggleInputPass = (el, inputElement) => {
     el.addEventListener('click', () => {
@@ -92,7 +101,7 @@ const toggleInputPass = (el, inputElement) => {
     });
 }
 
-
+// Set user
 form.addEventListener("submit", (e) => {
     e.preventDefault();
     
@@ -118,15 +127,18 @@ form.addEventListener("submit", (e) => {
                     .forEach(input => input.value = "");
 
                 document.querySelector("#user-success-inserted-alert")
-                .classList.remove("d-none");
+                    .classList.remove("d-none");
                 
-
                 setTimeout(() => {
-                        containerUserRequest.classList.add("d-none");
-                        containerContent.classList.remove("d-none");
+                    containerUserRequest.classList.add("d-none");
+                    splashScreen.show();
                 }, timeout);
-                
-                init();    
+                        
+                setTimeout(() => { 
+                    containerContent.classList.remove("d-none");
+                    splashScreen.dismiss();
+                    init();
+                }, timeout);
                 
             } else {
                 document.querySelector("#user-failed-insert-alert")
@@ -160,16 +172,70 @@ const getMappedObject = obj => {
         "costAccount":obj["cost-account"],
         "paymentForm":obj["payment-form"],
         "hist1":obj["hist-1"],
-        "hist2":obj["hist-2"]
+        "hist2":obj["hist-2"],
+        "fileType":obj["file-type"],
     };
 }
 
+// perfil
 document.querySelector(".perfil").addEventListener("click", () => {
     document.querySelector(".perfil-modal-info").classList.toggle("d-none");
+    document.querySelector(".perfil-modal-info").classList.add("p-m-opacity");
+})
+
+// Remove user
+document.querySelector(".perfil-modal-info .remove-user").addEventListener("click", () => {
+    const removeUserBackdrop = document.querySelector(".remove-user-modal-backdrop");
+    removeUserBackdrop.classList.remove("d-none");
+    
+    const removeUserModal = document.querySelector(".modal-remove-user");
+    
+    const btnClose = removeUserModal.querySelector("svg");
+    const btnOk = removeUserModal.querySelector(".modal-remove-user-footer .btn-ok");
+    const btnCancel = removeUserModal.querySelector(".btn-cancel");
+    
+
+    btnClose.addEventListener("click",
+        () => removeUserBackdrop.classList.add("d-none"));
+    
+    btnCancel.addEventListener("click",
+        () => removeUserBackdrop.classList.add("d-none"));
+    
+    btnOk.addEventListener("click", () => {
+        removeCurrentUser().then(response => {
+            response && window.location.reload();
+        })
+    });
+})
+
+// Settings
+document.querySelector(".perfil-modal-info .settings").addEventListener("click", () => {
+    const content = document.querySelector(".content")
+    const settingsContainer = document.querySelector(".container-settings")
+    content.classList.add("d-none");
+    settingsContainer.classList.remove("d-none");
+
+    document.querySelector(".container-settings .btn-go-back")
+        .addEventListener("click", () => {
+            settingsContainer.classList.add("d-none");
+            content.classList.remove("d-none");
+        })
+})
+
+// Perfil modal
+document.querySelector(".container-settings").addEventListener("click", () => {
+    document.querySelector(".perfil-modal-info").classList.add("d-none");
+    document.querySelector(".perfil-modal-info").classList.remove("p-m-opacity");
 })
 
 document.querySelector(".content").addEventListener("click", () => {
     document.querySelector(".perfil-modal-info").classList.add("d-none");
+    document.querySelector(".perfil-modal-info").classList.remove("p-m-opacity");
+})
+
+document.querySelector("body").addEventListener("click", () => {
+    folderContextMenu.classList.add("d-none");
+    folderContextMenu.classList.remove("f-c-opacity");
 })
 
 document.querySelector(".btn-create").addEventListener("click", () => {
@@ -199,6 +265,7 @@ document.querySelector(".btn-add").addEventListener("click", () => {
     getFilesFromFolder().then(response => response && init())
 })
 
+// Automation Start
 document.querySelector(".btn-start").addEventListener("click", async() => {
     const monthDirectories = document
         .querySelectorAll(".month-directories .work-month-directory");
@@ -215,19 +282,74 @@ document.querySelector(".btn-start").addEventListener("click", async() => {
     
     getData(selectedMonth.replace("/", "-"))
         .then(response => {
-            const debts1000 = response["1000"].map(debt => getMappedObject(debt));
-            const debts1010 = response["1010"].map(debt => getMappedObject(debt));
+            const debts1000 = response["1000"]
+            const debts1010 = response["1010"]
 
-            console.log(debts1010)
+            const allDebts = [...debts1000, ...debts1010];
+            
+            const items = [...document.querySelectorAll(".debt-info")];
+            const files = {"success": [], "error": []};
 
             if (debts1000 || debts1010){
-                insertDebt(selectedMonth, workMonthPath, debts1010)
+                insertDebt(selectedMonth, workMonthPath, allDebts)
                     .then(response => {
-                        console.log(response);
+                        files.success = response.success;
+                        files.error = response.error;
                     });
+
+                system.running = true;
+
+                const statusCheck = setInterval(() => {
+                    getStatus().then(response => {
+
+                        const current = items.filter(item => 
+                            (item.querySelector(".filename")
+                                .textContent.trim() === response.current["file-name"]))[0]
+
+                        if (response.started && !response.finished_all){
+                            if (!document.querySelector(".status-container .not-started").classList.contains("d-none")) {
+                                document.querySelector(".status-container .not-started").classList.add("d-none");
+                                document.querySelector(".status-container .started").classList.remove("d-none");   
+                            }
+                            
+                            if (!current.querySelector(".not-started").classList.contains("d-none")) {
+                                current.querySelector(".not-started").classList.add("d-none");
+                                current.querySelector(".started").classList.remove("d-none");    
+                            }
+
+                            if (current.querySelector(".started").classList.contains("d-none")) {
+                                current.querySelector(".started").classList.remove("d-none"); 
+                            }
+                        }
+                        
+                        if (response.started && response.finished) {
+                            items[items.indexOf(current) - 1]
+                                .querySelector(".started").classList.add("d-none");
+
+                            items[items.indexOf(current) - 1]
+                                .querySelector(".finished").classList.remove("d-none");
+                            
+                            if (current.querySelector(".started").classList.contains("d-none")) {
+                                current.querySelector(".started").classList.add("d-none"); 
+                                current.querySelector(".finished").classList.remove("d-none");
+                            }
+                        }
+
+                        if (response.finished_all) {
+                            current.querySelector(".started").classList.add("d-none"); 
+                            current.querySelector(".finished").classList.remove("d-none");
+
+                            document.querySelector(".status-container .started").classList.add("d-none");
+                            document.querySelector(".status-container .finished").classList.remove("d-none");
+                            clearInterval(statusCheck);
+                        }                        
+                    })
+                }, 500);
             }
     })
 })
+// End Automation
+
 
 const getMonths = () => {
     const today = new Date();
@@ -311,12 +433,34 @@ const fillContent = (debtList, account) => {
         
     if(debtList.length > 0) {
         debtList.forEach(debt => {
+            const debtValue = new Intl.NumberFormat(`pt-BR`, {
+                currency: `BRL`,
+                style: 'currency',
+            }).format(debt.value.replace(",","."));
+
             const model = document.querySelector(".content-model .debt-info").cloneNode(true);
             
-            model.querySelector(".filetype").textContent = debt.type.replace("NOTA FISCAL", "NF");
-            model.querySelector(".filenumber").textContent =  debt.num;
+            if (debt.fileType === "pdf") {
+                model.querySelector(".filetype svg.pdf").classList.remove("d-none");
+
+            } else if (debt.fileType === "jpg" || debt.fileType === "jpeg") {
+                model.querySelector(".filetype svg.jpg").classList.remove("d-none");
+
+            }else if (debt.fileType === "png") {
+                model.querySelector(".filetype svg.png").classList.remove("d-none");
+            }
+
+            if (debt.fileName.includes("DB AT")) {
+                let fileName = debt.fileName.replace("DB AT", "");
+                fileName = fileName.length > 12 ? `${fileName.slice(0, 12)}...`: fileName;
+                model.querySelector(".filename").textContent = fileName;
+
+            } else {
+                model.querySelector(".filename").textContent = debt.fileName;
+            }
             model.querySelector(".filedate").textContent =  `${debt.date[0]}/${debt.date[1]}/${debt.date[2]}`;
-            model.querySelector(".filevalue").textContent = "R$ " + debt.value;
+            model.querySelector(".filevalue").textContent = debtValue;
+            model.querySelector(".filedebttype").textContent = "DP " + debt.expenditure;
                 
             account === "1000" && contentMessage1000.classList.add("d-none");
             account === "1010" && contentMessage1010.classList.add("d-none");
@@ -337,12 +481,18 @@ const setData = (month) => {
             const debts1000 = response["1000"].map(debt => getMappedObject(debt));
             const debts1010 = response["1010"].map(debt => getMappedObject(debt));
 
+            if (debts1000.length > 0 || debts1010.length > 0) {
+                document.querySelector(".status-container").classList.remove("d-none");
+            } else {
+                document.querySelector(".status-container").classList.add("d-none");
+            }
+
             fillContent(debts1000, "1000");
             fillContent(debts1010, "1010");
     })
 }
 
-folderContextMenu.querySelector(".remove").addEventListener("click", () => {
+folderContextMenu.querySelector(".remove-folder").addEventListener("click", () => {
     const modalRemoveMonthBackDrop = document.querySelector(".remove-month-modal-backdrop");
     modalRemoveMonthBackDrop.classList.remove("d-none");
 
@@ -367,25 +517,36 @@ folderContextMenu.querySelector(".remove").addEventListener("click", () => {
     })
 })
 
-folderContextMenu.querySelector(".open-folder-local").addEventListener("click", () => {
+folderContextMenu.querySelector(".open-folder").addEventListener("click", () => {
     getSysPath().then(path => {
         const folderPath = path+"/"+contextMenuCurrentFolder.title
         path && openDirectory(folderPath).then();
     })
 })
 
-document.querySelector("body").addEventListener("click", () => {
-    folderContextMenu.classList.add("d-none");
-})
-
 const showFolderContextMenu = (element) => {
-    const folderOffSetWidth = element.offsetWidth;
-    position = getPosition(element)
+    const windowRightCorner = window.innerWidth;
+    const position = getPosition(element)
     
+    const elementRight = element.getBoundingClientRect().right;
+    const elementLeft = element.getBoundingClientRect().left;
+   
     folderContextMenu.classList.remove("d-none");
-    folderContextMenu.style.left = position.x + folderOffSetWidth + 10 + "px";
-    folderContextMenu.style.top = position.y + "px";
-    return false
+    folderContextMenu.style.opacity = 1;
+
+    if (elementRight >= windowRightCorner){
+        folderContextMenu.style.left = 
+            windowRightCorner - folderContextMenu
+                                .getBoundingClientRect()
+                                .width - 20 + "px";
+
+    } else if (elementLeft <= 0){
+        folderContextMenu.style.left = 20 + "px";
+
+    } else {
+        folderContextMenu.style.left = elementLeft + "px";
+    }
+    folderContextMenu.style.top = position.y + 60 + "px";
 }
 
 const init = () => {
@@ -436,6 +597,15 @@ const init = () => {
                 }
 
                 directoryModel.addEventListener("click", () => {
+                    if (!system.running) {
+                        const finished = document.querySelector(".status-container .finished")
+                        const started = document.querySelector(".status-container .started")
+                        const notStarted = document.querySelector(".status-container .not-started")
+                        !started.classList.contains("d-none") && finished.classList.add("d-none")
+                        !finished.classList.contains("d-none") && finished.classList.add("d-none")
+                        !notStarted.classList.contains("d-none") && notStarted.classList.remove("d-none")
+                    }
+
                     directoryContainer.querySelectorAll(".work-month-directory-selected")
                         .forEach(dir => {
                             dir.classList.contains("work-month-directory-selected")
@@ -458,7 +628,7 @@ const init = () => {
             const folders = document.querySelectorAll(".month-directories .work-month-directory");
             if (folders.length > 0) {
                 folders.forEach(folder => {
-                    folder.addEventListener("contextmenu", e => {
+                    folder.addEventListener("contextmenu", (e) => {
                         e.preventDefault();
                         e.stopPropagation();
                         
@@ -475,13 +645,19 @@ const init = () => {
     setData(actualWorkMonth);
 }
 
+
+const splashScreen = {
+    "show": () => alertBackdrop.querySelector("strong").textContent = "Inicializando..",
+    "dismiss": () => alertBackdrop.classList.remove("d-none")
+}
+
+
 window.onload = () => {
     isUserSet().then(response => {
-        alertBackdrop.querySelector("strong").textContent = "Inicializando.."
-
+        splashScreen.show();
         if(response) {
             containerContent.classList.remove("d-none");
-            alertBackdrop.classList.remove("d-none");
+            splashScreen.dismiss();
             setSelectMonths();
             setTimeout(() => init(), timeout); //1000
         }

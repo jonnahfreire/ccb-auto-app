@@ -11,6 +11,7 @@ from utils.filemanager import copy_file_to, set_initial_struct_dirs
 
 def get_data_from_filename(model, file: str) -> dict:
     model.file_name = file.split("-")[0].strip()
+    model.file_type = os.path.splitext(file)[1][1:]
     file_data = [os.path.splitext(f.strip())[0] for f in file.split("-")]
 
     for data in file_data:
