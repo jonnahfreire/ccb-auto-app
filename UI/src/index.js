@@ -99,15 +99,23 @@ const toggleInputPass = (el, inputElement) => {
 $("#form-user-credentials").on("submit", (e) => {
     e.preventDefault();
     
+    const passSuccessIcons = [
+        $(".user-icon-success"),
+        $(".pass-icon-success"),
+        $(".pass2-icon-success")
+    ]
+    const passEyeIcons = [
+        $('#togglePassword'),
+        $('#toggleConfirmPassword')
+    ]
+
     if(user.value.length > 0 && password.value.length > 0 
         && confirmPassword.value.length > 0 
         && password.value === confirmPassword.value) {
         
-        $(".user-icon-success").removeClass('d-none');
-        $(".pass-icon-success").removeClass('d-none');
-        $(".pass2-icon-success").removeClass('d-none');
-        $('#togglePassword').addClass('d-none');
-        $('#toggleConfirmPassword').addClass('d-none');
+        passSuccessIcons.forEach(icon => icon.removeClass("d-none"));
+        passEyeIcons.forEach(icon => icon.addClass("d-none"));
+
         $(".pass-feedback").addClass('d-none');
 
         const username = user.value;
@@ -139,34 +147,43 @@ $("#form-user-credentials").on("submit", (e) => {
         })
         
     } else {
-        $(".pass-icon-success").addClass('d-none');
-        $(".pass2-icon-success").addClass('d-none');
-        $('#togglePassword').removeClass('d-none');
-        $('#toggleConfirmPassword').removeClass('d-none');
+        passSuccessIcons.slice(1).forEach(icon => icon.addClass("d-none"));
+        passEyeIcons.forEach(icon => icon.removeClass("d-none"));
         $(".pass-feedback").removeClass('d-none');
     }
 })
 
 
 const getMappedObject = obj => {
+    const map = {
+        "keys": [], 
+        "values": Object.values(obj)
+    }
+     
+    Object.keys(obj).map(key => {
+        
+        if (key.includes("-")) {
+            key = key.split("-")
+            const isNumber = Number.parseInt(key[1]) ? true: false;
 
-    return {
-        "type":obj["type"],
-        "num":obj["num"],
-        "date":obj["date"],
-        "value":obj["value"],
-        "emitter":obj["emitter"],
-        "expenditure":obj["expenditure"],
-        "checkNum":obj["check-num"],
-        "docNum":obj["doc-num"],
-        "fileName":obj["file-name"],
-        "costCenter":obj["cost-center"],
-        "costAccount":obj["cost-account"],
-        "paymentForm":obj["payment-form"],
-        "hist1":obj["hist-1"],
-        "hist2":obj["hist-2"],
-        "fileType":obj["file-type"],
-    };
+            key = !isNumber
+            ? key[0].concat(key[1].replace(key[1][0], key[1][0].toUpperCase()))
+            : key[0]+key[1];
+        }
+        map.keys.push(key);
+    });
+
+    const mapped = {"data": {}}
+
+    for (let index = 0; index < map.keys.length; index++) {
+        const key = map.keys[index];
+        const value = map.values[index]
+        
+        const item = mapped.data[`${key}`] = value;
+        if (!item in mapped) mapped.data = {...mapped.data, item}
+    }
+
+    return mapped.data;
 }
 
 // perfil
