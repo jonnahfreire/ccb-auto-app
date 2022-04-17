@@ -1,5 +1,6 @@
 import os
 from threading import Thread
+from time import sleep
 import eel
 
 from tkinter import Tk, messagebox
@@ -125,6 +126,29 @@ def alert(title: str, msg:str) -> None:
     messagebox.showinfo(title, msg)
     root.destroy()
 
+
+@eel.expose
+def month_has_inserted_debts(month: str) -> dict[str]:
+    sleep(0.3)
+    work_month_path: str = os.path.join(sist_path, month)
+
+    dirs: list = os.listdir(work_month_path)
+    debt_dirs: list = [os.listdir(os.path.join(work_month_path, _dir)) for _dir in dirs]
+    
+    files: list = []
+    for debt_dir in debt_dirs:
+        for _dir in debt_dir:
+            path_1000: str = os.path.join(sist_path, month, "1000", _dir, "Lancados")
+            path_1010: str = os.path.join(sist_path, month, "1010", _dir, "Lancados")
+            
+            if os.path.exists(path_1000):
+                files.append(os.listdir(os.path.join(path_1000)))
+            
+            if os.path.exists(path_1010):
+                files.append(os.listdir(os.path.join(path_1010)))
+        
+    return len(files) > 0
+    
 
 @eel.expose 
 def get_files_from_folder() -> bool:

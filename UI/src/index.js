@@ -81,6 +81,9 @@ async function removeCurrentUser() {
     return await eel.remove_current_user()()
 };
 
+async function MonthHasInsertedDebts(month) {
+    return await eel.month_has_inserted_debts(month)()
+}
 
 const toggleInputPass = (el, inputElement) => {
     el.addEventListener('click', () => {
@@ -559,6 +562,35 @@ const showFolderContextMenu = (element) => {
     folderContextMenu.style.top = position.y + 60 + "px";
 }
 
+const showMonthPopover = (element) => {
+    const windowRightCorner = window.innerWidth;
+    const position = getPosition(element)
+    
+    const elementRight = element.getBoundingClientRect().right;
+    const elementLeft = element.getBoundingClientRect().left;
+    
+    const monthPopover = _$(".popover-finished-debts");
+    $(".popover-finished-debts").removeClass("d-none");
+
+    $$(".month-directories .work-month-directory").on("mouseout", () => {
+        $(".popover-finished-debts").addClass("d-none")
+    })
+
+    if (elementRight >= windowRightCorner){
+        monthPopover.style.left = 
+            windowRightCorner - monthPopover
+            .getBoundingClientRect()
+            .width - 20 + "px";
+
+    } else if (elementLeft <= 0){
+        monthPopover.style.left = 20 + "px";
+
+    } else {
+        monthPopover.style.left = elementLeft + "px";
+    }
+    monthPopover.style.top = position.y + 60 + "px";
+}
+
 const init = () => {
     const actualWorkMonth = setSelectMonths().replace("/", "-");
 
@@ -638,11 +670,22 @@ const init = () => {
                     setData(month);
                 })
             })
-            
+
+            handleMonthPopover();
             handleFolderContextClick();
         }
     })
     setData(actualWorkMonth);
+}
+
+const handleMonthPopover = () => {
+    $$(".month-directories .work-month-directory").on("mouseenter", (e) => {
+        const month = e.target.textContent.trim().replace("/", "-");
+        
+        MonthHasInsertedDebts(month).then(response => {
+            response && showMonthPopover(e.target);
+        })
+    })
 }
 
 const handleFolderContextClick = () => {
@@ -687,12 +730,12 @@ window.onload = () => {
 }
 
 
-$(window).on('contextmenu', e => {
-    if (e.button == 2){
-        e.preventDefault();
-        return false;
-    }
-})
+// $(window).on('contextmenu', e => {
+//     if (e.button == 2){
+//         e.preventDefault();
+//         return false;
+//     }
+// })
 
 $(window).on('keyup', e => {
     if (e.key === 93){
