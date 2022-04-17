@@ -1,18 +1,10 @@
 const containerUserRequest = _$(".container-request-user-credentials");
 const userCredentialInputs = _$$(".user-credential-input");
-// form elements
-const togglePassword        = _$('#togglePassword');
-const toggleConfirmPassword = _$('#toggleConfirmPassword');
 
 const user            = _$("#user");
 const password        = _$('#pass');
 const confirmPassword = _$('#pass-confirm');
 
-const form              = _$("#form-user-credentials");
-const userIconSuccess   = _$(".user-icon-success");
-const passIconSuccess   = _$(".pass-icon-success");
-const pass2IconSuccess  = _$(".pass2-icon-success");
-const passFeedBack      = _$(".pass-feedback");
 const alertBackdrop     = _$(".backdrop-alert");
 
 const containerContent         = _$(".container-content");
@@ -95,7 +87,7 @@ const toggleInputPass = (el, inputElement) => {
         const type = inputElement.getAttribute('type') === 'password' 
         ? 'text' : 'password';
         
-        if (password.value && confirmPassword.value) {
+        if (password.value || confirmPassword.value) {
             inputElement.setAttribute('type', type);
             el.classList.toggle('fa-eye-slash');
             el.classList.add('fa-eye');
@@ -104,19 +96,19 @@ const toggleInputPass = (el, inputElement) => {
 }
 
 // Set user
-form.addEventListener("submit", (e) => {
+$("#form-user-credentials").on("submit", (e) => {
     e.preventDefault();
     
     if(user.value.length > 0 && password.value.length > 0 
         && confirmPassword.value.length > 0 
         && password.value === confirmPassword.value) {
         
-        userIconSuccess.classList.remove('d-none');
-        passIconSuccess.classList.remove('d-none');
-        pass2IconSuccess.classList.remove('d-none');
-        togglePassword.classList.add('d-none');
-        toggleConfirmPassword.classList.add('d-none');
-        passFeedBack.classList.add('d-none');
+        $(".user-icon-success").removeClass('d-none');
+        $(".pass-icon-success").removeClass('d-none');
+        $(".pass2-icon-success").removeClass('d-none');
+        $('#togglePassword').addClass('d-none');
+        $('#toggleConfirmPassword').addClass('d-none');
+        $(".pass-feedback").addClass('d-none');
 
         const username = user.value;
         const pass = password.value;
@@ -147,11 +139,11 @@ form.addEventListener("submit", (e) => {
         })
         
     } else {
-        passIconSuccess.classList.add('d-none');
-        pass2IconSuccess.classList.add('d-none');
-        togglePassword.classList.remove('d-none');
-        toggleConfirmPassword.classList.remove('d-none');
-        passFeedBack.classList.remove('d-none');
+        $(".pass-icon-success").addClass('d-none');
+        $(".pass2-icon-success").addClass('d-none');
+        $('#togglePassword').removeClass('d-none');
+        $('#toggleConfirmPassword').removeClass('d-none');
+        $(".pass-feedback").removeClass('d-none');
     }
 })
 
