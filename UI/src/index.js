@@ -311,12 +311,12 @@ $(".btn-start").on("click", async() => {
                                 .textContent.trim() === response.current["file-name"]))[0]
 
                         if (response.started && !response.finished_all){
-                            if (!document.querySelector(".status-container .not-started").classList.contains("d-none")) {
-                                document.querySelector(".status-container .not-started").classList.add("d-none");
-                                document.querySelector(".status-container .started").classList.remove("d-none");   
+                            if (!$(".status-container .not-started").containClass("d-none")) {
+                                $(".status-container .not-started").addClass("d-none");
+                                $(".status-container .started").removeClass("d-none");   
                             }
                             
-                            if (!current.querySelector(".not-started").classList.contains("d-none")) {
+                            if (!$(".not-started").containClass("d-none")) {
                                 current.querySelector(".not-started").classList.add("d-none");
                                 current.querySelector(".started").classList.remove("d-none");    
                             }
@@ -343,8 +343,8 @@ $(".btn-start").on("click", async() => {
                             current.querySelector(".started").classList.add("d-none"); 
                             current.querySelector(".finished").classList.remove("d-none");
 
-                            document.querySelector(".status-container .started").classList.add("d-none");
-                            document.querySelector(".status-container .finished").classList.remove("d-none");
+                            $(".status-container .started").addClass("d-none");
+                            $(".status-container .finished").removeClass("d-none");
                             clearInterval(statusCheck);
                         }                        
                     })
@@ -379,8 +379,8 @@ const setSelectMonths = () => {
     if (options.length == 14) return actualMonth;
 
     months.map(month => {
-        const option = document.querySelector("#work-month-select option").cloneNode(true);
-        const select = document.querySelector("#work-month-select");
+        const option = _$("#work-month-select option").cloneNode(true);
+        const select = _$("#work-month-select");
         
         if (month === actualMonth) {
             option.setAttribute("selected", month);
