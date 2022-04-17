@@ -252,6 +252,7 @@ $(".content").on("click", () => {
 })
 
 $("body").on("click", () => {
+    $(".popover-finished-debts").addClass("d-none");
     $(".folder-context-menu").addClass("d-none");
     $(".folder-context-menu").removeClass("f-c-opacity");
 })
@@ -696,6 +697,8 @@ const handleFolderContextClick = () => {
             folder.addEventListener("contextmenu", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
+
+                $(".popover-finished-debts").addClass("d-none");
                 
                 contextMenuCurrentFolder.element = folder;
                 contextMenuCurrentFolder.title = folder.querySelector(".folder-title")
@@ -730,12 +733,12 @@ window.onload = () => {
 }
 
 
-// $(window).on('contextmenu', e => {
-//     if (e.button == 2){
-//         e.preventDefault();
-//         return false;
-//     }
-// })
+$(window).on('contextmenu', e => {
+    if (e.button == 2){
+        e.preventDefault();
+        return false;
+    }
+})
 
 $(window).on('keyup', e => {
     if (e.key === 93){
