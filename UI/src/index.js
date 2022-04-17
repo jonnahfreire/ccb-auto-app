@@ -688,15 +688,15 @@ window.onload = () => {
 
 
 $(window).on('contextmenu', e => {
-	if (e.button == 2){
-		e.preventDefault();
-		return false;
-	}
+    if (e.button == 2){
+        e.preventDefault();
+        return false;
+    }
 })
 
 $(window).on('keyup', e => {
-	if (e.key === 93){
-		e.preventDefault();
-		return false;
-	}
+    if (e.key === 93){
+        e.preventDefault();
+        return false;
+    }
 })
