@@ -610,7 +610,7 @@ const init = () => {
                     $(directoryModel).get(".bi-folder2-open", el => el.removeClass("d-none"));
                 }
 
-                directoryModel.addEventListener("click", () => {
+                $(directoryModel).on("click", () => {
                     if (!system.running) {
                         const finished = _$(".status-container .finished")
                         const started = _$(".status-container .started")
@@ -647,7 +647,7 @@ const init = () => {
 
 const handleFolderContextClick = () => {
     const folders = _$$(".month-directories .work-month-directory");
-    
+
     if (folders.length > 0) {
         folders.forEach(folder => {
             folder.addEventListener("contextmenu", (e) => {
@@ -687,14 +687,14 @@ window.onload = () => {
 }
 
 
-// window.addEventListener('contextmenu', e => {
-// 	if (e.button == 2){
-// 		e.preventDefault();
-// 		return false;
-// 	}
-// })
+$(window).on('contextmenu', e => {
+	if (e.button == 2){
+		e.preventDefault();
+		return false;
+	}
+})
 
-window.addEventListener('keyup', e => {
+$(window).on('keyup', e => {
 	if (e.key === 93){
 		e.preventDefault();
 		return false;
