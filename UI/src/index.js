@@ -18,7 +18,7 @@ const alertBackdrop = document.querySelector(".backdrop-alert");
 const containerContent = document.querySelector(".container-content");
 const containerContentHeader = document.querySelector(".container-content-header");
 const content = document.querySelector(".container-content .content");
-const folderContextMenu = document.querySelector(".folder-context-menu");
+const folderContextMenu = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
 const timeout = 100;
 const system = {"running": false};
@@ -208,67 +208,72 @@ document.querySelector(".perfil-modal-info .remove-user").addEventListener("clic
     });
 })
 
-// Settings
-document.querySelector(".perfil-modal-info .settings").addEventListener("click", () => {
-    const content = document.querySelector(".content")
-    const settingsContainer = document.querySelector(".container-settings")
-    content.classList.add("d-none");
-    settingsContainer.classList.remove("d-none");
 
-    document.querySelector(".container-settings .btn-go-back")
-        .addEventListener("click", () => {
-            settingsContainer.classList.add("d-none");
-            content.classList.remove("d-none");
-        })
+// Settings
+$(".perfil-modal-info .settings").on("click", () => {
+    const content = $(".content")
+    const settingsContainer = $(".container-settings")
+
+    content.addClass("d-none");
+    settingsContainer.removeClass("d-none");
+
+    $(".container-settings .btn-go-back").on("click", () => {
+            settingsContainer.addClass("d-none");
+            content.removeClass("d-none");
+    })
+    
+    document.onkeyup = function(e) {
+        if (e.altKey && e.key === "ArrowLeft") {
+            settingsContainer.addClass("d-none");
+            content.removeClass("d-none");
+        }
+    };
 })
 
 // Perfil modal
-document.querySelector(".container-settings").addEventListener("click", () => {
-    document.querySelector(".perfil-modal-info").classList.add("d-none");
-    document.querySelector(".perfil-modal-info").classList.remove("p-m-opacity");
+$(".container-settings").on("click", () => {
+    $(".perfil-modal-info").addClass("d-none");
+    $(".perfil-modal-info").removeClass("p-m-opacity");
 })
 
-document.querySelector(".content").addEventListener("click", () => {
-    document.querySelector(".perfil-modal-info").classList.add("d-none");
-    document.querySelector(".perfil-modal-info").classList.remove("p-m-opacity");
+$(".content").on("click", () => {
+    $(".perfil-modal-info").addClass("d-none");
+    $(".perfil-modal-info").removeClass("p-m-opacity");
 })
 
-document.querySelector("body").addEventListener("click", () => {
-    folderContextMenu.classList.add("d-none");
-    folderContextMenu.classList.remove("f-c-opacity");
+$("body").on("click", () => {
+    $(".folder-context-menu").addClass("d-none");
+    $(".folder-context-menu").removeClass("f-c-opacity");
 })
 
-document.querySelector(".btn-create").addEventListener("click", () => {
-    const modalSelectBackdrop = document.querySelector(".select-month-modal-backdrop");
-    const modalSelectCloseBtn = document.querySelector(".modal-select-month svg");
-    modalSelectBackdrop.classList.remove("d-none");
+$(".btn-create").on("click", () => {
+    const modalSelectBackdrop = $(".select-month-modal-backdrop");
+    modalSelectBackdrop.removeClass("d-none");
 
     let selectedMonth = null;
-    modalSelectCloseBtn.addEventListener("click", () => {
-        modalSelectBackdrop.classList.add("d-none");
+    $(".modal-select-month svg").on("click", () => {
+        modalSelectBackdrop.addClass("d-none");
     })
 
-    document.querySelector("#work-month-select").addEventListener('change', (e) => {
+    $("#work-month-select").on('change', (e) => {
         selectedMonth = e.target.value;
     })
 
-    modalSelectBackdrop.querySelector(".btn-ok")
-        .addEventListener("click", () => {
-        modalSelectBackdrop.classList.add("d-none")   
+    $(".select-month-modal-backdrop .btn-ok").on("click", () => {
+        modalSelectBackdrop.addClass("d-none")   
         
         selectedMonth && createWorkDirectory(selectedMonth)
             .then(response => response && init())
     })
 })
 
-document.querySelector(".btn-add").addEventListener("click", () => {
+$(".btn-add").on("click", () => {
     getFilesFromFolder().then(response => response && init())
 })
 
 // Automation Start
-document.querySelector(".btn-start").addEventListener("click", async() => {
-    const monthDirectories = document
-        .querySelectorAll(".month-directories .work-month-directory");
+$(".btn-start").on("click", async() => {
+    const monthDirectories = $$(".month-directories .work-month-directory").this;
         
     const selectedMonthDir = [...monthDirectories].filter(month => {
             if (month.classList.contains("work-month-directory-selected")){
@@ -287,7 +292,7 @@ document.querySelector(".btn-start").addEventListener("click", async() => {
 
             const allDebts = [...debts1000, ...debts1010];
             
-            const items = [...document.querySelectorAll(".debt-info")];
+            const items = [...$$(".debt-info").this];
             const files = {"success": [], "error": []};
 
             if (debts1000 || debts1010){
@@ -371,7 +376,7 @@ const getMonths = () => {
 const setSelectMonths = () => {
     const {months, actualMonth} = getMonths();
 
-    const options = document.querySelectorAll("#work-month-select option");
+    const options = $$("#work-month-select option").this;
     if (options.length == 14) return actualMonth;
 
     months.map(month => {
@@ -418,17 +423,14 @@ function getPosition(el) {
     };
 }
 
+
 const fillContent = (debtList, account) => {
-    const contentMessage1000 = document.querySelector(".account1000-content .message");
-    const contentMessage1010 = document.querySelector(".account1010-content .message");
-    const content1000Info =  document.querySelector(".account1000-content");
-    const content1010Info =  document.querySelector(".account1010-content");
 
     // clear content
-    account == "1000" && content1000Info.querySelectorAll(".model-item")
+    account == "1000" && _$$(".account1000-content .model-item")
         .forEach(item => item.remove());
     
-    account == "1010" && content1010Info.querySelectorAll(".model-item")
+    account == "1010" && _$$(".account1010-content .model-item")
         .forEach(item => item.remove());
         
     if(debtList.length > 0) {
@@ -438,39 +440,45 @@ const fillContent = (debtList, account) => {
                 style: 'currency',
             }).format(debt.value.replace(",","."));
 
-            const model = document.querySelector(".content-model .debt-info").cloneNode(true);
+            const model = _$(".content-model .debt-info").cloneNode(true);
             
             if (debt.fileType === "pdf") {
-                model.querySelector(".filetype svg.pdf").classList.remove("d-none");
+                $(model).get(".filetype svg.pdf",
+                    e => e.removeClass("d-none"));
 
             } else if (debt.fileType === "jpg" || debt.fileType === "jpeg") {
-                model.querySelector(".filetype svg.jpg").classList.remove("d-none");
+                $(model).get(".filetype svg.jpg", 
+                    e => e.removeClass("d-none"));
 
             }else if (debt.fileType === "png") {
-                model.querySelector(".filetype svg.png").classList.remove("d-none");
+                $(model).get(".filetype svg.png", 
+                    e => e.removeClass("d-none"));
             }
 
             if (debt.fileName.includes("DB AT")) {
                 let fileName = debt.fileName.replace("DB AT", "");
                 fileName = fileName.length > 12 ? `${fileName.slice(0, 12)}...`: fileName;
-                model.querySelector(".filename").textContent = fileName;
+                $(model).get(".filename", el => el.setText(fileName));
 
             } else {
-                model.querySelector(".filename").textContent = debt.fileName;
+                $(model).get(".filename", el=> el.setText(debt.fileName));
             }
-            model.querySelector(".filedate").textContent =  `${debt.date[0]}/${debt.date[1]}/${debt.date[2]}`;
-            model.querySelector(".filevalue").textContent = debtValue;
-            model.querySelector(".filedebttype").textContent = "DP " + debt.expenditure;
-                
-            account === "1000" && contentMessage1000.classList.add("d-none");
-            account === "1010" && contentMessage1010.classList.add("d-none");
+
+            const date = `${debt.date[0]}/${debt.date[1]}/${debt.date[2]}`;
+
+            $(model).get(".filedate", el => el.setText(date));
+            $(model).get(".filevalue", el => el.setText(debtValue));
+            $(model).get(".filedebttype", el => el.setText("DP " + debt.expenditure));
+               
+            account === "1000" && $(".account1000-content .message").addClass("d-none");
+            account === "1010" && $(".account1010-content .message").addClass("d-none");
             
-            account === "1000" && content1000Info.append(model);
-            account === "1010" && content1010Info.append(model);
+            account === "1000" && _$(".account1000-content").append(model);
+            account === "1010" && _$(".account1010-content").append(model);
         })
     } else {
-        account === "1000" && contentMessage1000.classList.remove("d-none");
-        account === "1010" && contentMessage1010.classList.remove("d-none");
+        account === "1000" && $(".account1000-content .message").removeClass("d-none");
+        account === "1010" && $(".account1010-content .message").removeClass("d-none");
     }
 }
 
@@ -482,9 +490,9 @@ const setData = (month) => {
             const debts1010 = response["1010"].map(debt => getMappedObject(debt));
 
             if (debts1000.length > 0 || debts1010.length > 0) {
-                document.querySelector(".status-container").classList.remove("d-none");
+                $(".status-container").removeClass("d-none");
             } else {
-                document.querySelector(".status-container").classList.add("d-none");
+                $(".status-container").addClass("d-none");
             }
 
             fillContent(debts1000, "1000");
@@ -493,23 +501,21 @@ const setData = (month) => {
 }
 
 folderContextMenu.querySelector(".remove-folder").addEventListener("click", () => {
-    const modalRemoveMonthBackDrop = document.querySelector(".remove-month-modal-backdrop");
-    modalRemoveMonthBackDrop.classList.remove("d-none");
+    $(".remove-month-modal-backdrop").removeClass("d-none");
 
-    const modalRemoveMonthBtnOk = document.querySelector(".modal-remove-footer .btn-ok");
-    const modalRemoveMonthClose = document.querySelector(".modal-remove-header svg");
-    const modalRemoveMonthBtnCancel = document.querySelector(".modal-remove-footer .btn-cancel");
-
-    modalRemoveMonthClose.addEventListener("click", () => {
-        modalRemoveMonthBackDrop.classList.add("d-none");
+    // btn close (x)
+    $(".modal-remove-header svg").on("click", () => {
+        $(".remove-month-modal-backdrop").addClass("d-none");
     })
 
-    modalRemoveMonthBtnCancel.addEventListener("click", () => {
-        modalRemoveMonthBackDrop.classList.add("d-none");
+    //btn cancel
+    $(".modal-remove-footer .btn-cancel").on("click", () => {
+        $(".remove-month-modal-backdrop").addClass("d-none");
     })
 
-    modalRemoveMonthBtnOk.addEventListener("click", () => {
-        modalRemoveMonthBackDrop.classList.add("d-none");
+    $(".modal-remove-footer .btn-ok").on("click", () => {
+        $(".remove-month-modal-backdrop").addClass("d-none");
+
         removeMonthDirectory(contextMenuCurrentFolder.title)
             .then(response => {
                 response && init();
@@ -517,12 +523,14 @@ folderContextMenu.querySelector(".remove-folder").addEventListener("click", () =
     })
 })
 
-folderContextMenu.querySelector(".open-folder").addEventListener("click", () => {
-    getSysPath().then(path => {
-        const folderPath = path+"/"+contextMenuCurrentFolder.title
-        path && openDirectory(folderPath).then();
-    })
-})
+$(folderContextMenu).get(".open-folder", folder => 
+    folder.on("click", () => {
+        getSysPath().then(path => {
+            const folderPath = path+"/"+contextMenuCurrentFolder.title
+            path && openDirectory(folderPath).then();
+        })
+    }
+))
 
 const showFolderContextMenu = (element) => {
     const windowRightCorner = window.innerWidth;
@@ -552,55 +560,59 @@ const showFolderContextMenu = (element) => {
 const init = () => {
     const actualWorkMonth = setSelectMonths().replace("/", "-");
 
-    document.querySelector(".container-content .actual-month span")
-        .textContent = actualWorkMonth.replace("-", "/");
+    $(".container-content .actual-month span")
+        .setText(actualWorkMonth.replace("-", "/"));
     
     getUserName().then(response => {
         username = response; 
-        document.querySelector(".perfil .user-content #username").innerHTML = username;
+        $(".perfil .user-content #username").setText(username)
     })
 
     createWorkDirectory(actualWorkMonth)
         .then(response => {
             if (response === null) {
-                alertBackdrop.querySelector("strong").textContent = "Verificando diretório de trabalho, aguarde...";
+                const text = "Verificando diretório de trabalho, aguarde...";
+                $(alertBackdrop).get("strong", el => el.setText(text));
+
             }else {
-                alertBackdrop.querySelector("strong").textContent = "Criando diretório de trabalho, aguarde..."
+                const text = "Criando diretório de trabalho, aguarde...";
+                $(alertBackdrop).get("strong", el => el.setText(text));
             }
             
             setTimeout(() => {
-                alertBackdrop.classList.add("d-none")
-                containerContentHeader.classList.remove("d-none")
-                content.classList.remove("d-none")
+                $(alertBackdrop).addClass("d-none")
+                $(containerContentHeader).removeClass("d-none")
+                $(content).removeClass("d-none")
             }, timeout); // 2000
             
-            alertBackdrop.querySelector("strong").textContent = "Verificando diretório de trabalho, aguarde...";
+            const text = "Verificando diretório de trabalho, aguarde...";
+            $(alertBackdrop).get("strong", el => el.setText(text));
         })
     
     getMonthDirectoryList().then(response => {
         if (response.length > 0) {
-            const directoryContainer = document.querySelector(".month-directories");
+            const directoryContainer = _$(".month-directories");
 
             directoryContainer.querySelectorAll(".work-month-directory")
                 .forEach(item => item.remove());
             
             response.forEach(month => {
-                const directoryModel = document.querySelector(".content-model .work-month-directory").cloneNode(true);
+                const directoryModel = _$(".content-model .work-month-directory").cloneNode(true);
 
-                directoryModel.querySelector(".folder-title").textContent = month.replace("-", "/");
+                $(directoryModel).get(".folder-title", el => el.setText(month.replace("-", "/")));
                 directoryContainer.append(directoryModel);
 
                 if (month === actualWorkMonth) {
-                    directoryModel.classList.add("work-month-directory-selected");
-                    directoryModel.querySelector(".bi-folder").classList.add("d-none");
-                    directoryModel.querySelector(".bi-folder2-open").classList.remove("d-none");
+                    $(directoryModel).addClass("work-month-directory-selected");
+                    $(directoryModel).get(".bi-folder", el => el.addClass("d-none"));
+                    $(directoryModel).get(".bi-folder2-open", el => el.removeClass("d-none"));
                 }
 
                 directoryModel.addEventListener("click", () => {
                     if (!system.running) {
-                        const finished = document.querySelector(".status-container .finished")
-                        const started = document.querySelector(".status-container .started")
-                        const notStarted = document.querySelector(".status-container .not-started")
+                        const finished = _$(".status-container .finished")
+                        const started = _$(".status-container .started")
+                        const notStarted = _$(".status-container .not-started")
                         !started.classList.contains("d-none") && finished.classList.add("d-none")
                         !finished.classList.contains("d-none") && finished.classList.add("d-none")
                         !notStarted.classList.contains("d-none") && notStarted.classList.remove("d-none")
@@ -617,8 +629,8 @@ const init = () => {
                     
                     if (!directoryModel.classList.contains("work-month-directory-selected")){
                         directoryModel.classList.add("work-month-directory-selected");
-                        directoryModel.querySelector(".bi-folder").classList.toggle("d-none");
-                        directoryModel.querySelector(".bi-folder2-open").classList.toggle("d-none");
+                        $(directoryModel).get(".bi-folder", el => el.toggleClass("d-none"));
+                        $(directoryModel).get(".bi-folder2-open", el => el.toggleClass("d-none"));
                     }
 
                     setData(month);
