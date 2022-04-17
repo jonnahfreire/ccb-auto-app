@@ -81,7 +81,7 @@ async function removeCurrentUser() {
     return await eel.remove_current_user()()
 };
 
-async function MonthHasInsertedDebts(month) {
+async function monthHasInsertedDebts(month) {
     return await eel.month_has_inserted_debts(month)()
 }
 
@@ -683,7 +683,7 @@ const handleMonthPopover = () => {
     $$(".month-directories .work-month-directory").on("mouseenter", (e) => {
         const month = e.target.textContent.trim().replace("/", "-");
         
-        MonthHasInsertedDebts(month).then(response => {
+        monthHasInsertedDebts(month).then(response => {
             response && showMonthPopover(e.target);
         })
     })
