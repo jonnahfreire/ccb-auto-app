@@ -1,24 +1,24 @@
 const containerUserRequest = _$(".container-request-user-credentials");
 const userCredentialInputs = _$$(".user-credential-input");
 // form elements
-const togglePassword = _$('#togglePassword');
+const togglePassword        = _$('#togglePassword');
 const toggleConfirmPassword = _$('#toggleConfirmPassword');
 
-const user = _$("#user");
-const password = _$('#pass');
+const user            = _$("#user");
+const password        = _$('#pass');
 const confirmPassword = _$('#pass-confirm');
 
-const form = _$("#form-user-credentials");
-const userIconSuccess = _$(".user-icon-success");
-const passIconSuccess = _$(".pass-icon-success");
-const pass2IconSuccess = _$(".pass2-icon-success");
-const passFeedBack = _$(".pass-feedback");
-const alertBackdrop = _$(".backdrop-alert");
+const form              = _$("#form-user-credentials");
+const userIconSuccess   = _$(".user-icon-success");
+const passIconSuccess   = _$(".pass-icon-success");
+const pass2IconSuccess  = _$(".pass2-icon-success");
+const passFeedBack      = _$(".pass-feedback");
+const alertBackdrop     = _$(".backdrop-alert");
 
-const containerContent = _$(".container-content");
-const containerContentHeader = _$(".container-content-header");
-const content = _$(".container-content .content");
-const folderContextMenu = $(".folder-context-menu").this;
+const containerContent         = _$(".container-content");
+const containerContentHeader   = _$(".container-content-header");
+const content                  = _$(".container-content .content");
+const folderContextMenu        = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
 const timeout = 100;
 const statusCheckInterval = 500;
