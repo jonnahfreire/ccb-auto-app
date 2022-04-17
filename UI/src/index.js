@@ -639,26 +639,30 @@ const init = () => {
                 })
             })
             
-            const folders = document.querySelectorAll(".month-directories .work-month-directory");
-            if (folders.length > 0) {
-                folders.forEach(folder => {
-                    folder.addEventListener("contextmenu", (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        contextMenuCurrentFolder.element = folder;
-                        contextMenuCurrentFolder.title = folder.querySelector(".folder-title")
-                            .textContent.replace("/", "-");
-                            
-                        showFolderContextMenu(folder);                 
-                    })
-                })
-            }
+            handleFolderContextClick();
         }
     })
     setData(actualWorkMonth);
 }
 
+const handleFolderContextClick = () => {
+    const folders = _$$(".month-directories .work-month-directory");
+    
+    if (folders.length > 0) {
+        folders.forEach(folder => {
+            folder.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                contextMenuCurrentFolder.element = folder;
+                contextMenuCurrentFolder.title = folder.querySelector(".folder-title")
+                    .textContent.replace("/", "-");
+                    
+                showFolderContextMenu(folder);                 
+            })
+        })
+    }
+}
 
 const splashScreen = {
     "show": () => alertBackdrop.querySelector("strong").textContent = "Inicializando..",
