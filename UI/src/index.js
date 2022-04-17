@@ -1,27 +1,28 @@
-const containerUserRequest = document.querySelector(".container-request-user-credentials");
-const userCredentialInputs = document.querySelectorAll(".user-credential-input");
+const containerUserRequest = _$(".container-request-user-credentials");
+const userCredentialInputs = _$$(".user-credential-input");
 // form elements
-const togglePassword = document.querySelector('#togglePassword');
-const toggleConfirmPassword = document.querySelector('#toggleConfirmPassword');
+const togglePassword = _$('#togglePassword');
+const toggleConfirmPassword = _$('#toggleConfirmPassword');
 
-const user = document.querySelector("#user");
-const password = document.querySelector('#pass');
-const confirmPassword = document.querySelector('#pass-confirm');
+const user = _$("#user");
+const password = _$('#pass');
+const confirmPassword = _$('#pass-confirm');
 
-const form = document.querySelector("#form-user-credentials");
-const userIconSuccess = document.querySelector(".user-icon-success");
-const passIconSuccess = document.querySelector(".pass-icon-success");
-const pass2IconSuccess = document.querySelector(".pass2-icon-success");
-const passFeedBack = document.querySelector(".pass-feedback");
-const alertBackdrop = document.querySelector(".backdrop-alert");
+const form = _$("#form-user-credentials");
+const userIconSuccess = _$(".user-icon-success");
+const passIconSuccess = _$(".pass-icon-success");
+const pass2IconSuccess = _$(".pass2-icon-success");
+const passFeedBack = _$(".pass-feedback");
+const alertBackdrop = _$(".backdrop-alert");
 
-const containerContent = document.querySelector(".container-content");
-const containerContentHeader = document.querySelector(".container-content-header");
-const content = document.querySelector(".container-content .content");
+const containerContent = _$(".container-content");
+const containerContentHeader = _$(".container-content-header");
+const content = _$(".container-content .content");
 const folderContextMenu = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
 const timeout = 100;
 const system = {"running": false};
+
 
 async function getFilesFromFolder() {
     return await eel.get_files_from_folder()()
@@ -126,8 +127,7 @@ form.addEventListener("submit", (e) => {
                 Array.prototype.slice.call(userCredentialInputs)
                     .forEach(input => input.value = "");
 
-                document.querySelector("#user-success-inserted-alert")
-                    .classList.remove("d-none");
+                $("#user-success-inserted-alert").removeClass("d-none");
                 
                 setTimeout(() => {
                     containerUserRequest.classList.add("d-none");
@@ -141,8 +141,7 @@ form.addEventListener("submit", (e) => {
                 }, timeout);
                 
             } else {
-                document.querySelector("#user-failed-insert-alert")
-                    .classList.remove("d-none")
+                $("#user-failed-insert-alert").removeClass("d-none")
             }
         })
         
@@ -178,13 +177,13 @@ const getMappedObject = obj => {
 }
 
 // perfil
-document.querySelector(".perfil").addEventListener("click", () => {
-    document.querySelector(".perfil-modal-info").classList.toggle("d-none");
-    document.querySelector(".perfil-modal-info").classList.add("p-m-opacity");
+$(".perfil").on("click", () => {
+    $(".perfil-modal-info").toggleClass("d-none");
+    $(".perfil-modal-info").addClass("p-m-opacity");
 })
 
 // Remove user
-document.querySelector(".perfil-modal-info .remove-user").addEventListener("click", () => {
+$(".perfil-modal-info .remove-user").on("click", () => {
     const removeUserBackdrop = document.querySelector(".remove-user-modal-backdrop");
     removeUserBackdrop.classList.remove("d-none");
     
