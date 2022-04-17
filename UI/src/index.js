@@ -21,6 +21,7 @@ const content = _$(".container-content .content");
 const folderContextMenu = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
 const timeout = 100;
+const statusCheckInterval = 500;
 const system = {"running": false};
 
 
@@ -272,84 +273,83 @@ $(".btn-add").on("click", () => {
 
 // Automation Start
 $(".btn-start").on("click", async() => {
-    const monthDirectories = $$(".month-directories .work-month-directory").this;
+    const monthDirectories = _$$(".month-directories .work-month-directory");
         
     const selectedMonthDir = [...monthDirectories].filter(month => {
-            if (month.classList.contains("work-month-directory-selected")){
+            if ($(month).containClass("work-month-directory-selected")){
                 return month
             }
         })[0];
 
-    const selectedMonth = selectedMonthDir.querySelector(".folder-title").textContent;
+    const selectedMonth = $(selectedMonthDir).get(".folder-title", el => el.text());
     
     const workMonthPath = await getWorkMonthPath(selectedMonth);
     
-    getData(selectedMonth.replace("/", "-"))
-        .then(response => {
-            const debts1000 = response["1000"]
-            const debts1010 = response["1010"]
+    getData(selectedMonth.replace("/", "-")).then(response => {
+        const debts1000 = response["1000"]
+        const debts1010 = response["1010"]
 
-            const allDebts = [...debts1000, ...debts1010];
-            
-            const items = [...$$(".debt-info").this];
-            const files = {"success": [], "error": []};
+        const allDebts = [...debts1000, ...debts1010];
+        
+        const items = [..._$$(".debt-info")];
+        const files = {"success": [], "error": []};
 
-            if (debts1000 || debts1010){
-                insertDebt(selectedMonth, workMonthPath, allDebts)
-                    .then(response => {
-                        files.success = response.success;
-                        files.error = response.error;
-                    });
+        if (debts1000 || debts1010) {
+            insertDebt(selectedMonth, workMonthPath, allDebts)
+                .then(response => {
+                    files.success = response.success;
+                    files.error = response.error;
+            });
 
-                system.running = true;
+            system.running = true;
 
-                const statusCheck = setInterval(() => {
-                    getStatus().then(response => {
+            const statusCheck = setInterval(() => {
+                getStatus().then(response => {
 
-                        const current = items.filter(item => 
-                            (item.querySelector(".filename")
-                                .textContent.trim() === response.current["file-name"]))[0]
+                    const current = items.filter(item => 
+                        (item.querySelector(".filename")
+                            .textContent.trim() === response.current["file-name"]))[0]
 
-                        if (response.started && !response.finished_all){
-                            if (!$(".status-container .not-started").containClass("d-none")) {
-                                $(".status-container .not-started").addClass("d-none");
-                                $(".status-container .started").removeClass("d-none");   
-                            }
-                            
-                            if (!$(".not-started").containClass("d-none")) {
-                                current.querySelector(".not-started").classList.add("d-none");
-                                current.querySelector(".started").classList.remove("d-none");    
-                            }
-
-                            if (current.querySelector(".started").classList.contains("d-none")) {
-                                current.querySelector(".started").classList.remove("d-none"); 
-                            }
+                    if (response.started && !response.finished_all){
+                        if (!$(".status-container .not-started").containClass("d-none")) {
+                            $(".status-container .not-started").addClass("d-none");
+                            $(".status-container .started").removeClass("d-none");   
                         }
                         
-                        if (response.started && response.finished) {
-                            items[items.indexOf(current) - 1]
-                                .querySelector(".started").classList.add("d-none");
-
-                            items[items.indexOf(current) - 1]
-                                .querySelector(".finished").classList.remove("d-none");
-                            
-                            if (current.querySelector(".started").classList.contains("d-none")) {
-                                current.querySelector(".started").classList.add("d-none"); 
-                                current.querySelector(".finished").classList.remove("d-none");
-                            }
+                        if (!$(".not-started").containClass("d-none")) {
+                            current.querySelector(".not-started").classList.add("d-none");
+                            current.querySelector(".started").classList.remove("d-none");    
                         }
 
-                        if (response.finished_all) {
+                        if (current.querySelector(".started").classList.contains("d-none")) {
+                            current.querySelector(".started").classList.remove("d-none"); 
+                        }
+                    }
+                    
+                    if (response.started && response.finished) {
+                        items[items.indexOf(current) - 1]
+                            .querySelector(".started").classList.add("d-none");
+
+                        items[items.indexOf(current) - 1]
+                            .querySelector(".finished").classList.remove("d-none");
+                        
+                        if (current.querySelector(".started").classList.contains("d-none")) {
                             current.querySelector(".started").classList.add("d-none"); 
                             current.querySelector(".finished").classList.remove("d-none");
+                        }
+                    }
 
-                            $(".status-container .started").addClass("d-none");
-                            $(".status-container .finished").removeClass("d-none");
-                            clearInterval(statusCheck);
-                        }                        
-                    })
-                }, 500);
-            }
+                    if (response.finished_all) {
+                        current.querySelector(".started").classList.add("d-none"); 
+                        current.querySelector(".finished").classList.remove("d-none");
+
+                        $(".status-container .started").addClass("d-none");
+                        $(".status-container .finished").removeClass("d-none");
+                        clearInterval(statusCheck);
+                    }                        
+                })
+            }, statusCheckInterval);
+        }
     })
 })
 // End Automation
@@ -358,8 +358,8 @@ $(".btn-start").on("click", async() => {
 const getMonths = () => {
     const today = new Date();
     const year = today.getFullYear();
-    let actualMonth = today.getMonth();
-    actualMonth = actualMonth < 9 ? `0${actualMonth+1}/${year}`: `${actualMonth+1}/${year}`;
+    const month = today.getMonth();
+    const actualMonth = month < 9 ? `0${month+1}/${year}`: `${month+1}/${year}`;
 
     const months = []
 
@@ -367,7 +367,6 @@ const getMonths = () => {
         months.push( index < 10 ? `0${index}/${year}`: `${index}/${year}` );
     }
 
-    actualMonth = actualMonth.toString()
     return {months, actualMonth};
 }
 
@@ -442,16 +441,13 @@ const fillContent = (debtList, account) => {
             const model = _$(".content-model .debt-info").cloneNode(true);
             
             if (debt.fileType === "pdf") {
-                $(model).get(".filetype svg.pdf",
-                    e => e.removeClass("d-none"));
+                $(model).get(".filetype svg.pdf", el => el.removeClass("d-none"));
 
             } else if (debt.fileType === "jpg" || debt.fileType === "jpeg") {
-                $(model).get(".filetype svg.jpg", 
-                    e => e.removeClass("d-none"));
+                $(model).get(".filetype svg.jpg", el => el.removeClass("d-none"));
 
             }else if (debt.fileType === "png") {
-                $(model).get(".filetype svg.png", 
-                    e => e.removeClass("d-none"));
+                $(model).get(".filetype svg.png", el => el.removeClass("d-none"));
             }
 
             if (debt.fileName.includes("DB AT")) {

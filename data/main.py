@@ -147,7 +147,6 @@ def move_classified_files_to_sist_path(
         base_account_path = os.path.join(sist_path, work_month, base_account)
 
         if not os.path.exists(base_account_path):
-            print(base_account_path)
             return False
 
         debt_account_path = [

@@ -32,9 +32,7 @@ def is_user_set() -> bool:
     user_credential = Credential()
     user_data = user_credential.get_user_credentials()
 
-    if len(user_data) == 0:
-        return False
-    return True
+    return not len(user_data) == 0
 
 
 @eel.expose
@@ -66,10 +64,7 @@ def get_username() -> str:
     user_credential = Credential()
     user_data = user_credential.get_user_credentials()
 
-    if len(user_data) > 0:
-        return user_data[0]
-    
-    return ""
+    return user_data[0] if len(user_data) > 0 else ""
 
 
 @eel.expose
@@ -77,10 +72,7 @@ def set_user_credential(username: str, passwd: str) -> bool:
     user = User(username, passwd)
     user_credential = Credential()
 
-    if user_credential.set_user_credential(user.get_user(), user.get_pass()):
-        return True
-    
-    return False
+    return user_credential.set_user_credential(user.get_user(), user.get_pass())
 
 
 @eel.expose
@@ -154,7 +146,7 @@ def get_current_status() -> dict:
 
 
 @eel.expose
-def get_data(work_month, all=False):
+def get_data(work_month: str, all: bool = False):
 
     if work_month is None: pass
     work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))
@@ -169,7 +161,7 @@ def get_data(work_month, all=False):
 
         if all:
             all_debts: list[dict] = modelized_debts_1000 + modelized_debts_1010
-            return all_debts
+            return {"all": all_debts}
 
         return {"1000": modelized_debts_1000, "1010": modelized_debts_1010}
 
