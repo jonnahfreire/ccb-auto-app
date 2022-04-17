@@ -194,23 +194,21 @@ $(".perfil").on("click", () => {
 
 // Remove user
 $(".perfil-modal-info .remove-user").on("click", () => {
-    const removeUserBackdrop = document.querySelector(".remove-user-modal-backdrop");
-    removeUserBackdrop.classList.remove("d-none");
+    const removeUserBackdrop = _$(".remove-user-modal-backdrop");
+    $(removeUserBackdrop).removeClass("d-none");
     
-    const removeUserModal = document.querySelector(".modal-remove-user");
+    const removeUserModal = $(".modal-remove-user");
     
-    const btnClose = removeUserModal.querySelector("svg");
-    const btnOk = removeUserModal.querySelector(".modal-remove-user-footer .btn-ok");
-    const btnCancel = removeUserModal.querySelector(".btn-cancel");
-    
+    const btnCancel = [
+        _$(removeUserModal).get("svg"),
+        _$(removeUserModal).get(".btn-cancel")
+    ]
 
-    btnClose.addEventListener("click",
-        () => removeUserBackdrop.classList.add("d-none"));
-    
-    btnCancel.addEventListener("click",
-        () => removeUserBackdrop.classList.add("d-none"));
-    
-    btnOk.addEventListener("click", () => {
+    btnCancel.forEach(btn => 
+        $(btn).on("click", () => $(removeUserBackdrop).addClass("d-none")))
+        
+    const btnOk = _$(removeUserModal).get(".modal-remove-user-footer .btn-ok");
+    $(btnOk).on("click", () => {
         removeCurrentUser().then(response => {
             response && window.location.reload();
         })
