@@ -148,6 +148,14 @@ def remove_directory(dirname: str) -> bool:
 
 
 def copy_file_to(path: str, filename: str) -> bool:
+    """Copy file to the path specified
+
+    @params:
+        path (str): path to copy file to
+        filename (str): name of file including it's local path
+        
+    returns:
+        bool: True if success, else False"""
     if os.path.exists(path):
         if not WIN: 
             os.system(f"cp '{filename}' '{path}'")
@@ -172,7 +180,6 @@ def rename_file_to(filename: str, newname: str) -> bool:
 
 def select_dir() -> str:
     root = Tk()
-    # root.iconbitmap('static/src/images/downloader.ico')
     root.withdraw()
     dirpath = filedialog.askdirectory(title="Selecione o diretório das despesas")
     root.destroy()

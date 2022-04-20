@@ -13,7 +13,7 @@ const content                  = _$(".container-content .content");
 const folderContextMenu        = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
 const timeout = 100;
-const statusCheckInterval = 500;
+const statusCheckInterval = 2000;
 const system = {"running": false};
 
 
@@ -644,13 +644,13 @@ const init = () => {
                 }
 
                 $(directoryModel).on("click", () => {
-                    if (!system.running) {
-                        const finished = _$(".status-container .finished")
-                        const started = _$(".status-container .started")
-                        const notStarted = _$(".status-container .not-started")
-                        !started.classList.contains("d-none") && finished.classList.add("d-none")
-                        !finished.classList.contains("d-none") && finished.classList.add("d-none")
-                        !notStarted.classList.contains("d-none") && notStarted.classList.remove("d-none")
+                    if (!system.running) {  
+                        const finished = _$(".status-container .finished");
+                        const started = _$(".status-container .started");
+                        const notStarted = _$(".status-container .not-started");
+                        !started.classList.contains("d-none") && finished.classList.add("d-none");
+                        !finished.classList.contains("d-none") && finished.classList.add("d-none");
+                        !notStarted.classList.contains("d-none") && notStarted.classList.remove("d-none");
                     }
 
                     directoryContainer.querySelectorAll(".work-month-directory-selected")

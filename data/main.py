@@ -105,7 +105,7 @@ def get_modelized_debts(debt_list: list[dict]) -> list[dict]:
     return debts_data
 
 
-def get_unclassified_files_from_path(path: str) -> list:
+def get_unclassified_files_from(path: str) -> list:
     files: list[str] = [
         file for file in os.listdir(path)
         if os.path.splitext(file)[1] in extensions
@@ -115,7 +115,7 @@ def get_unclassified_files_from_path(path: str) -> list:
 
 def get_classified_files(path:str) -> list[dict]:
     if isinstance(path, str) and os.path.exists(path):
-        files: list[str] = get_unclassified_files_from_path(path)
+        files: list[str] = get_unclassified_files_from(path)
 
         file_data_list: list[dict] = [
             _ for _ in [
@@ -133,7 +133,7 @@ def get_classified_files(path:str) -> list[dict]:
 def move_classified_files_to_sist_path(
     path: str, file: list[dict]) -> bool:
     
-    files: list[str] = get_unclassified_files_from_path(path)
+    files: list[str] = get_unclassified_files_from(path)
 
     if file["expenditure"] is not None:
         base_account: str = file["cost-account"]
@@ -144,19 +144,19 @@ def move_classified_files_to_sist_path(
         if not os.path.exists(work_month_path):
             set_initial_struct_dirs(work_month_path)
 
-        base_account_path = os.path.join(sist_path, work_month, base_account)
+        base_account_path: str = os.path.join(sist_path, work_month, base_account)
 
         if not os.path.exists(base_account_path):
             return False
 
-        debt_account_path = [
+        debt_account_path: list = [
             p for p in os.listdir(base_account_path)
             if debt_account in p    
         ][0]
         base_account_path = os.path.join(base_account_path, debt_account_path)
 
 
-        filename = [
+        filename: str = [
             _ for _ in files
             if file["file-name"] in _
             and ":".join(file["date"]) in _
