@@ -18,7 +18,7 @@ from data.main import get_classified_files
 from data.main import move_classified_files_to_sist_path
 from data.main import get_modelized_debts
 
-from autom.routine import insert_debt, status
+from autom.routine import insert_debt, status, errors
 
 from config.globals import sist_path, screen_size
 from config.credentials import Credential
@@ -102,7 +102,7 @@ def get_work_month_path(month: str) -> str:
 def insert_new_debt(month:str, 
         work_month_path: str, 
         debt_list: list[dict], 
-        window: bool = False) -> None:
+        window) -> None:
         
     Thread(target=insert_debt,
         args=(
@@ -112,9 +112,6 @@ def insert_new_debt(month:str,
             window
         )
     ).start()
-
-    logs: list = get_execlogs()
-    for log in logs: print(log[1])
 
 
 @ eel.expose
@@ -166,7 +163,14 @@ def get_files_from_folder() -> bool:
 
 @eel.expose
 def get_current_status() -> dict:
-    return status
+    return {"status": status, "errors": errors}
+
+
+@eel.expose
+def clear_status() -> None:
+    global status, errors
+    status = {}
+    errors = {}
 
 
 @eel.expose
@@ -198,5 +202,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    logs: list = get_execlogs()
+    for log in logs: print(log[1])
     main()
+    clear_logs()
     
