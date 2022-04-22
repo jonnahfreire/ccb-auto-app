@@ -8,88 +8,112 @@ from config.credentials import Credential
 
 from utils.filemanager import create_dir, get_files_path, move_file_to
 
-status =  {"current": {}, "started": False, "finished": False, "finished_all": False}
 
-def insert_debt(work_month: str, work_month_path:str, data: list, window: bool = False) -> dict:
+class InsertionStatus:
+
+    def __init__(self) -> None:
+        self.current: dict = {}
+        self.started: bool = False
+        self.finished: bool = False
+        self.finished_all: bool = False
+    
+    def set_current(self, current: dict):
+        self.current = current
+    
+    def set_started(self):
+        self.started = True
+
+    def set_finished(self, finished: bool):
+        self.finished = finished
+        
+    def set_finished_all(self):
+        self.finished_all = True
+
+
+
+status: dict =  {}
+
+def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) -> None:
     global status
 
-    if len(data) == 0: 
-        print("Insert debt error: No debts found")
+    if len(data) == 0:
         return
-    
-    selenium = Selenium(ccb_siga, window)
-    selenium.start()
-    siga = Siga(selenium.get_driver())
     
     files_sent_successfull = []
     files_not_sent = []
     user, passw = Credential().get_user_credentials()
     files_path = get_files_path(work_month_path)
-    sleep(2)
     
-    if siga.login(user, passw):
-        sleep(10)
-        siga.change_work_month_date(work_month)
-        sleep(4)
-        siga.open_tesouraria()
-        sleep(2)
+    status_obj = InsertionStatus()
+    selenium = Selenium(ccb_siga, window)
 
-        if siga.new_debt():
-            for debt in data:
-                status["current"] = debt
-                status["started"] = True
+    def execute(data_list: list[dict]):
 
-                if siga.debt(debt):
-                    file_name = debt["file-name"]
-                    file_path = None
-
-                    for fp in files_path:
-                        if file_name in fp:
-                            file_path = files_path[files_path.index(fp)]
-
-                    if file_path is not None:
-                        if siga.file_upload(file_path):
-                            files_sent_successfull.append(file_path)
-                        else:
-                            files_not_sent.append(file_path)
-
-                        sleep(3)
-                        if len(data) > 1:
-                            print("\n\n\nSalvando e iniciando novo lançamento..\n\n\n")
-                            if siga.save_and_new_debt(debt):
-                                print(f"{debt['file-name']}: salvo com sucesso.")
-                                status["finished"] = True
-
-                            else:
-                                try:
-                                    files_sent_successfull.remove(file_path)
-                                except ValueError: pass
-                                files_not_sent.append(file_path)
-                                siga.new_debt()
-                        else:
-                            print("\n\n\nSalvando lançamento..\n\n\n")
-                            if siga.save_debt(debt):
-                                print(f"{debt['file-name']}: salvo com sucesso.")
-                                status["finished"] = True
-                            else:
-                                files_not_sent.append(file_path)
-                                print("\n\nNão foi possível salvar o lançamento devido à uma exceção.")
-                                print("Finalizando automação..")
+        for debt in data_list:
+            selenium.start()
+            siga = Siga(selenium.get_driver())
+            
+            if siga.login(user, passw):
                 sleep(10)
+                siga.change_work_month_date(work_month)
+                sleep(4)
+                siga.open_tesouraria()
+                sleep(2)
 
-    for file in files_path:
-        if file in files_sent_successfull\
-            and not file in files_not_sent:
-            basedir = file[:file.rfind("/")]
+                if siga.new_debt():
+                    status_obj.set_current(debt)
+                    status_obj.set_finished(False)
+
+                    status["current"] = status_obj.current
+                    status["finished"] = status_obj.finished
+                    
+                    status_obj.set_started()
+                    status["started"] = status_obj.started
+                    
+                    if siga.debt(debt):
+                        file_name = debt["file-name"]
+                        file_path = None
+
+                        for fp in files_path:
+                            if file_name in fp:
+                                file_path = files_path[files_path.index(fp)]
+
+                        if file_path is not None:
+                            if siga.file_upload(file_path):
+                                files_sent_successfull.append(file_path)
+                            else:
+                                files_not_sent.append(file_path)
+
+                            sleep(3)
+                            if siga.save_debt(debt):
+                                status_obj.set_finished(True)
+                                status["finished"] = status_obj.finished
+
+                            else:
+                                files_not_sent.append(file_path)
+                    else:
+                        selenium.close()
+                        sleep(5)
+                        execute([debt])
+
+                sleep(5)
+            selenium.close()
+        sleep(2)
+    
+        move_files(files_path, files_sent_successfull, files_not_sent)
+        status_obj.set_finished_all()
+        status["finished_all"] = status_obj.finished_all
+
+    execute(data)
+
+
+def move_files(path: str, success: list, errors: list) -> None:
+    for file in path:
+        if file in success:
+            basedir: str = file[:file.rfind("/")]
             create_dir(basedir, "Lancados")
             move_file_to(f"{basedir}/Lancados/", file)
+
             
-    status["finished_all"] = True
-    status = {"current": {}, "started": False, "finished": False, "finished_all": False}
-
-    selenium.close()
-    return {"success": files_sent_successfull, "error": files_not_sent}
-
-
 if __name__ == "__main__":
     pass
