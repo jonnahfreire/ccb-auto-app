@@ -174,11 +174,17 @@
 
             <div class="footer-btn" role="group">
                 <div class="status-container d-none">
-                    <span>Status: </span>
+                    <span>Status:</span>
                     <span class="status not-started bg-warning-2" aria-label="Status">Não iniciado</span>
+                    
+                    <span class="status starting bg-primary d-none" aria-label="Status">
+                        <span class="status-msg">Iniciando, aguarde..</span>
+                        <span class="status loading spinner-border ms-auto" role="status" aria-hidden="true" style="width: 18px; height: 18px;padding-left: 5px;"></span>
+                    </span>
+                    
                     <span class="status started bg-success d-none">
-                        Iniciado
-                        <span class="status loading spinner-border ms-auto" role="status" aria-hidden="true" style="width: 18px; height: 18px;"></span>
+                        <span class="status-msg">Em andamento..</span>
+                        <span class="status loading spinner-border ms-auto" role="status" aria-hidden="true" style="width: 18px; height: 18px;padding-left: 5px;"></span>
                     </span>
                     <span class="status finished bg-primary d-none">Finalizado</span>
                 </div>
@@ -321,6 +327,17 @@
                     <span class="loading spinner-border ms-auto" role="status" aria-hidden="true" style="width: 18px; height: 18px;"></span>
                 </span>
                 <span class="debt-item status finished bg-primary d-none">Finalizado</span>
+                <span class="debt-item status failed bg-danger d-none">
+                    <span class="status-error">Falhou</span>
+                    <span class="status-error-msg d-none">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        Erro ao salvar lançamento. Documento já existe!
+                    </span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>
+                        <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>
+                    </svg>
+                </span>
             </div>
         </div>
 

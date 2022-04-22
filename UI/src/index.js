@@ -314,10 +314,17 @@ $(".btn-start").on("click", async() => {
 
             system.running = true;
 
+            $(".status-container .not-started").addClass("d-none");
+            $(".status-container .starting").removeClass("d-none");        
+
             const statusCheck = setInterval(() => {
                 getStatus().then(response => {
+                    const status = response.status;
+                    const errors = response.errors;
+
+                    // console.log(status, errors)
                     
-                    const currentFileName = response.current["file-name"]
+                    const currentFileName = status.current["file-name"]
                     const current = items.filter(item => 
                         currentFileName.includes(
                             item.querySelector(".filename")
@@ -325,10 +332,11 @@ $(".btn-start").on("click", async() => {
                         )
                     )[0]
 
-                    if (response.started && !response.finished_all){
 
-                        if (!$(".status-container .not-started").containClass("d-none")) {
-                            $(".status-container .not-started").addClass("d-none");
+                    if (status.started && !status.finished_all){
+
+                        if (!$(".status-container .starting").containClass("d-none")) {
+                            $(".status-container .starting").addClass("d-none");
                             $(".status-container .started").removeClass("d-none");
                         }
                         
@@ -341,15 +349,34 @@ $(".btn-start").on("click", async() => {
                             current.querySelector(".started").classList.remove("d-none"); 
                         }
 
-                        if (response.finished) {                           
+                        if (status.finished) {                           
                             current.querySelector(".started").classList.add("d-none"); 
                             current.querySelector(".finished").classList.remove("d-none");
                         }
+
+                        if (status.failed) {
+                            current.querySelector(".not-started").classList.add("d-none");
+                            current.querySelector(".started").classList.add("d-none"); 
+                            current.querySelector(".failed").classList.remove("d-none");
+                            
+                            current.querySelector(".failed").addEventListener("mouseover", () => {
+                                current.querySelector(".status-error-msg").classList.remove("d-none")
+                            })
+
+                            current.querySelector(".failed").addEventListener("mouseout", () => {
+                                current.querySelector(".status-error-msg").classList.add("d-none")
+                            })
+                        }
                     }
                     
-                    if (response.finished_all) {
-                        current.querySelector(".started").classList.add("d-none"); 
-                        current.querySelector(".finished").classList.remove("d-none");
+                    if (status.finished_all) {
+                        if (!status.failed) {
+                            current.querySelector(".started").classList.add("d-none"); 
+                            current.querySelector(".finished").classList.remove("d-none");
+                        } else {
+                            current.querySelector(".started").classList.add("d-none"); 
+                            current.querySelector(".failed").classList.remove("d-none");
+                        }
                         $(".status-container .started").addClass("d-none");
                         $(".status-container .finished").removeClass("d-none");
                         clearInterval(statusCheck);
