@@ -31,6 +31,9 @@ class Selenium:
     
     def get_driver(self) -> webdriver:
         return self.driver
+    
+    def refresh(self):
+        self.driver.refresh()
         
 
 
