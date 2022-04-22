@@ -13,7 +13,7 @@ const content                  = _$(".container-content .content");
 const folderContextMenu        = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
 const timeout = 100;
-const statusCheckInterval = 2000;
+const statusCheckInterval = 200;
 const system = {"running": false};
 
 
@@ -39,6 +39,10 @@ async function getUserName() {
 
 async function getStatus() {
     return await eel.get_current_status()()
+}
+
+async function clearStatus() {
+    return await eel.clear_status()()
 }
 
 async function getSysPath() {
@@ -302,65 +306,59 @@ $(".btn-start").on("click", async() => {
 
         const allDebts = [...debts1000, ...debts1010];
         
-        const items = [..._$$(".debt-info")];
+        const items = $$(".debt-info");
         const files = {"success": [], "error": []};
 
         if (debts1000 || debts1010) {
-            insertDebt(selectedMonth, workMonthPath, allDebts)
-                .then(response => {
-                    files.success = response.success;
-                    files.error = response.error;
-            });
+            insertDebt(selectedMonth, workMonthPath, allDebts, true);
 
             system.running = true;
 
             const statusCheck = setInterval(() => {
                 getStatus().then(response => {
-
+                    
+                    const currentFileName = response.current["file-name"]
                     const current = items.filter(item => 
-                        (item.querySelector(".filename")
-                            .textContent.trim() === response.current["file-name"]))[0]
+                        currentFileName.includes(
+                            item.querySelector(".filename")
+                                .textContent.trim()
+                        )
+                    )[0]
 
                     if (response.started && !response.finished_all){
+
                         if (!$(".status-container .not-started").containClass("d-none")) {
                             $(".status-container .not-started").addClass("d-none");
-                            $(".status-container .started").removeClass("d-none");   
+                            $(".status-container .started").removeClass("d-none");
                         }
                         
-                        if (!$(".not-started").containClass("d-none")) {
+                        if (!current.querySelector(".not-started").classList.contains("d-none")) {
                             current.querySelector(".not-started").classList.add("d-none");
                             current.querySelector(".started").classList.remove("d-none");    
                         }
-
+                        
                         if (current.querySelector(".started").classList.contains("d-none")) {
                             current.querySelector(".started").classList.remove("d-none"); 
                         }
-                    }
-                    
-                    if (response.started && response.finished) {
-                        items[items.indexOf(current) - 1]
-                            .querySelector(".started").classList.add("d-none");
 
-                        items[items.indexOf(current) - 1]
-                            .querySelector(".finished").classList.remove("d-none");
-                        
-                        if (current.querySelector(".started").classList.contains("d-none")) {
+                        if (response.finished) {                           
                             current.querySelector(".started").classList.add("d-none"); 
                             current.querySelector(".finished").classList.remove("d-none");
                         }
                     }
-
+                    
                     if (response.finished_all) {
                         current.querySelector(".started").classList.add("d-none"); 
                         current.querySelector(".finished").classList.remove("d-none");
-
                         $(".status-container .started").addClass("d-none");
                         $(".status-container .finished").removeClass("d-none");
                         clearInterval(statusCheck);
+                        clearStatus();
                     }                        
                 })
             }, statusCheckInterval);
         }
+
     })
 })
 // End Automation
@@ -648,9 +646,9 @@ const init = () => {
                         const finished = _$(".status-container .finished");
                         const started = _$(".status-container .started");
                         const notStarted = _$(".status-container .not-started");
-                        !started.classList.contains("d-none") && finished.classList.add("d-none");
-                        !finished.classList.contains("d-none") && finished.classList.add("d-none");
-                        !notStarted.classList.contains("d-none") && notStarted.classList.remove("d-none");
+                        !$(started).containClass("d-none") && $(finished).addClass("d-none");
+                        !$(finished).containClass("d-none") && $(finished).addClass("d-none");
+                        !$(notStarted).containClass("d-none") && $(notStarted).removeClass("d-none");
                     }
 
                     directoryContainer.querySelectorAll(".work-month-directory-selected")
@@ -733,12 +731,12 @@ window.onload = () => {
 }
 
 
-$(window).on('contextmenu', e => {
-    if (e.button == 2){
-        e.preventDefault();
-        return false;
-    }
-})
+// $(window).on('contextmenu', e => {
+//     if (e.button == 2){
+//         e.preventDefault();
+//         return false;
+//     }
+// })
 
 $(window).on('keyup', e => {
     if (e.key === 93){
