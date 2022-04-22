@@ -20,7 +20,7 @@ def cli_main():
     
     set_initial_user_config() 
     
-    work_month: str = set_work_month()
+    work_month: str = "04/2022"#set_work_month()
     if work_month is None: cli_main()
     work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))
 
@@ -40,21 +40,15 @@ def cli_main():
 
         if option.strip() == "1000":
             if len(modelized_debts_1000) > 0:
-                insert_debt(work_month, work_month_path, modelized_debts_1000)
+                insert_debt(work_month, work_month_path, modelized_debts_1000, True)
 
         elif option == "1010":
             if len(modelized_debts_1010) > 0:
-                insert_debt(work_month, work_month_path, modelized_debts_1010)
+                insert_debt(work_month, work_month_path, modelized_debts_1010, True)
         
         elif option.strip() == "1":
             if len(all_debts) > 0:
-                insert_debt(work_month, work_month_path, all_debts)
-        
-        
-        logs: list = get_execlogs()
-        for log in logs: print(log[1])
-    
-        clear_logs()
+                insert_debt(work_month, work_month_path, all_debts, True)
 
     else:
         banner()
@@ -62,6 +56,10 @@ def cli_main():
         print(restart)
         sleep(2)
 
+    logs: list = get_execlogs()
+    for log in logs: print(log[1])
+
+    clear_logs()
 
     
 if __name__ == "__main__":

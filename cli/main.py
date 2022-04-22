@@ -64,16 +64,29 @@ def set_initial_user_config() -> None:
 
 
 def select_initial_routine(debts_1000: list[dict], debts_1010: list[dict]) -> str:
+    def show_items(debt_list: list[dict]) -> None:
+        len(debt_list) > 0 and [
+            print(f"\t{yellow}{item['file-name']} - {item['value']}{cyan}")
+            for item in debt_list
+        ]
+
+
     try:
         clear()
         banner()
-        msg = "{}\tEncontrados {} despesas para lançar.\n{}"
+        msg = "{}\tEncontrados {} despesas para lançar:{}"
         print(f"\n{cyan}*** Selecione os lançamentos que deseja efetuar ***\n")
+
         print("1000 - Caixa 1000")
         print(msg.format(yellow, len(debts_1000), cyan))
-        print("1010 - Banco")
+        show_items(debts_1000)
+
+        print("\n1010 - Banco")
         print(msg.format(yellow, len(debts_1010), cyan))
-        print("1 - Todos\n")
+        show_items(debts_1010)
+
+        print("\n1 - Todos")
+        show_items(debts_1000+debts_1010)
         print("***************************************")
 
         option = input(f"{cyan}Digite o código dos lançamentos: {bg}")
