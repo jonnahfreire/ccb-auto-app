@@ -14,14 +14,19 @@ class InsertionStatus:
     def __init__(self) -> None:
         self.current: dict = {}
         self.started: bool = False
+        self.failed: bool = False
         self.finished: bool = False
         self.finished_all: bool = False
+        self.failed_all: bool = False
     
     def set_current(self, current: dict):
         self.current = current
     
     def set_started(self):
         self.started = True
+    
+    def set_failed(self):
+        self.failed = True
 
     def set_finished(self, finished: bool):
         self.finished = finished
@@ -29,9 +34,13 @@ class InsertionStatus:
     def set_finished_all(self):
         self.finished_all = True
 
+    def set_failed_all(self):
+        self.failed_all = True
+
 
 
 status: dict =  {}
+errors = {}
 
 def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) -> None:
     global status
@@ -66,6 +75,7 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) 
 
                     status["current"] = status_obj.current
                     status["finished"] = status_obj.finished
+                    status["failed"] = status_obj.failed
                     
                     status_obj.set_started()
                     status["started"] = status_obj.started
@@ -94,20 +104,35 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) 
                     else:
                         selenium.close()
                         sleep(5)
-                        execute([debt])
+                        data_list = [
+                            debt for debt in data_list 
+                            if not debt["file-name"] 
+                            in files_sent_successfull
+                        ]
+                        execute(data_list)
+
+                else:
+                    errors["start_insertion_error"] = "Erro ao abrir novo lançamento. Tente novamente!"
+                    selenium.close()
+                    return False
 
                 sleep(5)
+
+            else:
+                errors["access_error"] = "Erro de acesso. Verifique seu usuário!"
+                selenium.close()
+                return False
+
             selenium.close()
-        sleep(2)
     
-        move_files(files_path, files_sent_successfull, files_not_sent)
+        move_files(files_path, files_sent_successfull)
         status_obj.set_finished_all()
         status["finished_all"] = status_obj.finished_all
 
     execute(data)
 
 
-def move_files(path: str, success: list, errors: list) -> None:
+def move_files(path: str, success: list) -> None:
     for file in path:
         if file in success:
             basedir: str = file[:file.rfind("/")]
