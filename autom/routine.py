@@ -13,6 +13,7 @@ class InsertionStatus:
 
     def __init__(self) -> None:
         self.current: dict = {}
+        self.starting: bool = False
         self.started: bool = False
         self.failed: bool = False
         self.finished: bool = False
@@ -22,11 +23,14 @@ class InsertionStatus:
     def set_current(self, current: dict):
         self.current = current
     
+    def set_starting(self):
+        self.starting = True
+
     def set_started(self):
         self.started = True
     
-    def set_failed(self):
-        self.failed = True
+    def set_failed(self, failed: bool):
+        self.failed = failed
 
     def set_finished(self, finished: bool):
         self.finished = finished
@@ -50,6 +54,7 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) 
     
     files_sent_successfull = []
     files_not_sent = []
+    debt_already_exists = []
     user, passw = Credential().get_user_credentials()
     files_path = get_files_path(work_month_path)
     
@@ -57,6 +62,8 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) 
     selenium = Selenium(ccb_siga, window)
 
     def execute(data_list: list[dict]):
+        status_obj.set_starting()
+        status["starting"] = status_obj.starting
 
         for debt in data_list:
             selenium.start()
@@ -72,12 +79,12 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) 
                 if siga.new_debt():
                     status_obj.set_current(debt)
                     status_obj.set_finished(False)
+                    status_obj.set_failed(False)
+                    status_obj.set_started()
 
                     status["current"] = status_obj.current
                     status["finished"] = status_obj.finished
                     status["failed"] = status_obj.failed
-                    
-                    status_obj.set_started()
                     status["started"] = status_obj.started
                     
                     if siga.debt(debt):
@@ -100,7 +107,11 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) 
                                 status["finished"] = status_obj.finished
 
                             else:
+                                status["fail_cause"] = "Erro ao salvar lançamento. Documento já existe!"
+                                status_obj.set_failed(True)
+                                status["failed"] = status_obj.failed
                                 files_not_sent.append(file_path)
+                                debt_already_exists.append(file_path)
                     else:
                         selenium.close()
                         sleep(5)
@@ -125,7 +136,7 @@ def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) 
 
             selenium.close()
     
-        move_files(files_path, files_sent_successfull)
+        move_files(files_path, files_sent_successfull+debt_already_exists)
         status_obj.set_finished_all()
         status["finished_all"] = status_obj.finished_all
 

@@ -68,6 +68,7 @@ class Siga:
             self.driver.find_element(By.XPATH, menu_tesouraria).click()
             sleep(2)
             self.driver.find_element(By.XPATH, caixa_bancos).click()
+
             return True
         except Exception as ex:
             insert_execlog(f"{red}Open Tesouraria Exception: {yellow}\n\t{ex}{bg}\n")
@@ -76,115 +77,172 @@ class Siga:
     def debt(self, debt: dict) -> bool:
         try:
             WebDriverWait(self.driver, 7)\
-                        .until(expected_conditions\
-                            .presence_of_element_located((By.ID, "f_data")))
+                .until(expected_conditions\
+                    .presence_of_element_located((By.ID, "f_data")))
 
             # Inserts document date
-            sleep(1)
             self.driver.find_element_by_id("f_data").send_keys(debt["date"])
+            sleep(1)
             
             # Inserts document type
-            sleep(1)
-            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-7"]').click()
-            doc = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen7_search"]')
-            doc.click()
-            doc.send_keys(debt["type"])
-            doc.send_keys(Keys.RETURN)
+            try:
+                self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-7"]').click()
+                sleep(1)
+                doc = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen7_search"]')
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["type"])
+                doc.send_keys(Keys.RETURN)
+            except Exception as ex:
+                print("EXCEPTION INSERTING DOC TYPE: ", ex)
+
+            try:
+                # Inserts document number
+                sleep(1)
+                doc  = self.driver.find_element(By.ID, "f_documento")
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["num"])
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC NUM: ", ex)
             
-            # Inserts document number
-            sleep(1)
-            doc  = self.driver.find_element(By.ID, "f_documento")
-            doc.click()
-            doc.send_keys(debt["num"])
+            try:
+                # Inserts document value
+                sleep(1)
+                doc  = self.driver.find_element(By.ID, "f_valor")
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["value"])
+                doc.send_keys(Keys.RETURN)
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC VALUE: ", ex)
 
-            # Inserts document value
-            sleep(1)
-            doc  = self.driver.find_element(By.ID, "f_valor")
-            doc.click()
-            doc.send_keys(debt["value"])
-            doc.send_keys(Keys.RETURN)
+            try:
+                # Inserts document expenditure (Tipo de Despesa)  
+                sleep(1)          
+                doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen8_search"]')
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["expenditure"])
+                doc.send_keys(Keys.RETURN)
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC EXPENDITURE: ", ex)
 
-            # Inserts document expenditure (Tipo de Despesa)  
-            sleep(1)          
-            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen8_search"]')
-            doc.click()
-            doc.send_keys(debt["expenditure"])
-            doc.send_keys(Keys.RETURN)
+            try:
+                # Inserts document cost center
+                sleep(1)
+                self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-9"]').click()
+                sleep(0.5)
+                doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen9_search"]')
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["cost-center"])
+                doc.send_keys(Keys.RETURN)
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC COST CENTER: ", ex)
 
-            # Inserts document cost center
-            sleep(1)
-            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-9"]').click()
-            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen9_search"]')
-            doc.click()
-            doc.send_keys(debt["cost-center"])
-            doc.send_keys(Keys.RETURN)
+            try:
+                # Inserts document emitter
+                sleep(1)
+                self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-14"]').click()
+                sleep(0.5)
+                doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen14_search"]')
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["emitter"])
+                doc.send_keys(Keys.RETURN)
+                sleep(2)
+                doc.send_keys(Keys.RETURN)
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC EMITTER: ", ex)
 
-            # Inserts document emitter
-            sleep(1)
-            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-14"]').click()
-            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen14_search"]')
-            doc.click()
-            doc.send_keys(debt["emitter"])
-            doc.send_keys(Keys.RETURN)
-            sleep(2)
-            doc.send_keys(Keys.RETURN)
+            try:
+                # Inserts document historic 1
+                sleep(1)
+                self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-10"]').click()
+                sleep(0.5)
+                doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen10_search"]')
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["hist-1"])
+                doc.send_keys(Keys.RETURN)
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC HIST1: ", ex)
 
-            # Inserts document historic 1
-            sleep(1)
-            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-10"]').click()
-            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen10_search"]')
-            doc.click()
-            doc.send_keys(debt["hist-1"])
-            doc.send_keys(Keys.RETURN)
+            try:
+                # Inserts payment date
+                sleep(1)
+                doc = self.driver.find_element_by_id("f_datapagamento")
+                doc.send_keys(debt["date"])
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC PAYMENT DATE: ", ex)
 
-            # Inserts payment date
-            sleep(1)
-            doc = self.driver.find_element_by_id("f_datapagamento")
-            doc.send_keys(debt["date"])
+            try:
+                # Inserts payment form
+                sleep(1)
+                self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-11"]').click()
+                sleep(0.5)
+                doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen11_search"]')
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["payment-form"])
+                doc.send_keys(Keys.RETURN)
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC PAYMENT FORM: ", ex)
 
-            # Inserts payment form
-            sleep(1)
-            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-11"]').click()
-            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen11_search"]')
-            doc.click()
-            doc.send_keys(debt["payment-form"])
-            doc.send_keys(Keys.RETURN)
 
             # Inserts payment form
             sleep(1)
             if debt["payment-form"] == "CHEQUE"\
                 and debt["check-num"] is not None:
-                self.driver.find_element_by_id("f_numerocheque").click()
-                self.driver.find_element_by_id("f_numerocheque").send_keys(debt["check-num"])
+                try:
+                    self.driver.find_element_by_id("f_numerocheque").click()
+                    sleep(0.5)
+                    self.driver.find_element_by_id("f_numerocheque").send_keys(debt["check-num"])
+                except NoSuchElementException as ex:
+                    print("EXCEPTION INSERTING DOC PAYMENT CHEQUE: ", ex)
 
             elif debt["payment-form"] == "DEBITO AUTOMATICO":
-                self.driver.find_element_by_id("f_documento2").click()
-                self.driver.find_element_by_id("f_documento2").send_keys(debt["doc-num"])
+                try:
+                    self.driver.find_element_by_id("f_documento2").click()
+                    sleep(0.5)
+                    self.driver.find_element_by_id("f_documento2").send_keys(debt["doc-num"])
+                except NoSuchElementException as ex:
+                    print("EXCEPTION INSERTING DOC PAYMENT DEB AT: ", ex)
 
-            # Inserts payment cost account
-            sleep(1)
-            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-12"]').click()
-            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen12_search"]')
-            doc.click()
-            doc.send_keys(debt["cost-account"])
-            doc.send_keys(Keys.RETURN)
+            try:
+                # Inserts payment cost account
+                sleep(1)
+                self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-12"]').click()
+                sleep(0.5)
+                doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen12_search"]')
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["cost-account"])
+                doc.send_keys(Keys.RETURN)
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC COST ACCOUNT: ", ex)
 
-            # Inserts document historic 2
-            sleep(1)
-            self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-13"]').click()
-            doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen13_search"]')
-            doc.click()
-            doc.send_keys(debt["hist-2"])
-            doc.send_keys(Keys.RETURN)
-            sleep(1)
+            try:
+                # Inserts document historic 2
+                sleep(1)
+                self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-13"]').click()
+                sleep(0.5)
+                doc  = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen13_search"]')
+                doc.click()
+                sleep(0.5)
+                doc.send_keys(debt["hist-2"])
+                doc.send_keys(Keys.RETURN)
+                sleep(1)
+            except NoSuchElementException as ex:
+                print("EXCEPTION INSERTING DOC HIST2: ", ex)
             
             return True
 
         except Exception as ex:
-            insert_execlog(f"{red}Debt Insertion Exception: {yellow}\n\t{ex}{bg}\n")
-            return False
+            insert_execlog(f"{red}Debt Insertion Exception: {yellow}\n\t{ex}{bg}\n[Trying again..]\n")
         
-    def file_upload(self, file_path) -> bool:
+    def file_upload(self, file_path: str) -> bool:
         try:
             documento  = self.driver.find_element(By.ID, 'f_anexos')
             documento.send_keys(file_path)
@@ -209,15 +267,16 @@ class Siga:
             modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
 
             try:
-                WebDriverWait(self.driver, 3)\
-                        .until(expected_conditions\
-                            .presence_of_element_located((By.XPATH, modal_header)))
+                # WebDriverWait(self.driver, 3)\
+                #         .until(expected_conditions\
+                #             .presence_of_element_located((By.XPATH, modal_header)))
 
                 modal_header_title = self.driver.find_element(By.XPATH, modal_header)
                 if modal_header_title.size != 0 or modal_header_title.is_diplayed():
                     document_already_exists = True
                     self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
-            
+
+                return False
             except NoSuchElementException as ex:
                 message = "Falha ao fechar modal de 'Documento já existe'"
                 if document_already_exists:
@@ -239,6 +298,7 @@ class Siga:
                         if document_already_exists:
                             message += f"\n\t'Documento com o mesmo número já existe'"
                         insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
+                        return False
                         
                 except NoSuchElementException as ex:
                     insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
@@ -261,9 +321,13 @@ class Siga:
 
             except NoSuchElementException as ex:
                 insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
-                return False
+
+            return True
 
         except NoSuchElementException as ex:
+            insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{ex.msg}{bg}\n")
+            return False
+        except Exception as ex:
             insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{ex.msg}{bg}\n")
             return False
 
