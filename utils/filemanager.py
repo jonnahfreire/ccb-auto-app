@@ -110,17 +110,17 @@ def list_files(base_path: str) -> list[dict]:
 
 
 def get_files_by_account(files: list) -> tuple[list]:
-    debts_1000, debts_1010 = [], []
+    items_1000, items_1010 = [], []
 
-    for debts in files:
-        for key in debts.keys():
+    for items in files:
+        for key in items.keys():
             if key == "1000":
-                debts_1000.append(debts[key])
+                items_1000.append(items[key])
 
             elif key == "1010":
-                debts_1010.append(debts[key])
+                items_1010.append(items[key])
         
-    return debts_1000, debts_1010
+    return items_1000, items_1010
 
 
 def move_file_to(path: str, filename: str) -> bool:

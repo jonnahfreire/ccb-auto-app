@@ -61,8 +61,8 @@ async function createWorkDirectory(month) {
     return await eel.create_work_directory(month)()
 };
 
-async function insertDebt(month, workMonthPath, debtList, window=false) {
-    return await eel.insert_new_debt(month,workMonthPath, debtList, window)()
+async function insertItem(month, workMonthPath, itemsList, window=false) {
+    return await eel.insert_new_item(month,workMonthPath, itemsList, window)()
 };
 
 async function getWorkMonthPath(month) {
@@ -301,16 +301,16 @@ $(".btn-start").on("click", async() => {
     const workMonthPath = await getWorkMonthPath(selectedMonth);
     
     getData(selectedMonth.replace("/", "-")).then(response => {
-        const debts1000 = response["1000"]
-        const debts1010 = response["1010"]
+        const items1000 = response["1000"]
+        const items1010 = response["1010"]
 
-        const allDebts = [...debts1000, ...debts1010];
+        const allItems = [...items1000, ...items1010];
         
         const items = $$(".debt-info");
         const files = {"success": [], "error": []};
 
-        if (debts1000 || debts1010) {
-            insertDebt(selectedMonth, workMonthPath, allDebts, true);
+        if (allItems) {
+            insertItem(selectedMonth, workMonthPath, allItems, true);
 
             system.running = true;
 
@@ -322,7 +322,7 @@ $(".btn-start").on("click", async() => {
                     const status = response.status;
                     const errors = response.errors;
 
-                    // console.log(status, errors)
+                    if (Object.keys(status.current).length === 0) return false;
                     
                     const currentFileName = status.current["file-name"]
                     const current = items.filter(item => 
@@ -458,7 +458,7 @@ function getPosition(el) {
 }
 
 
-const fillContent = (debtList, account) => {
+const fillContent = (itemList, account) => {
 
     // clear content
     account == "1000" && _$$(".account1000-content .model-item")
@@ -467,39 +467,45 @@ const fillContent = (debtList, account) => {
     account == "1010" && _$$(".account1010-content .model-item")
         .forEach(item => item.remove());
         
-    if(debtList.length > 0) {
-        debtList.forEach(debt => {
-            const debtValue = new Intl.NumberFormat(`pt-BR`, {
+    if(itemList.length > 0) {
+        itemList.forEach(item => {
+            const itemValue = new Intl.NumberFormat(`pt-BR`, {
                 currency: `BRL`,
                 style: 'currency',
-            }).format(debt.value.replace(",","."));
+            }).format(item.value.replace(",","."));
 
             const model = _$(".content-model .debt-info").cloneNode(true);
             
-            if (debt.fileType === "pdf") {
+            if (item.fileType === "pdf") {
                 $(model).get(".filetype svg.pdf", el => el.removeClass("d-none"));
 
-            } else if (debt.fileType === "jpg" || debt.fileType === "jpeg") {
+            } else if (item.fileType === "jpg" || item.fileType === "jpeg") {
                 $(model).get(".filetype svg.jpg", el => el.removeClass("d-none"));
 
-            }else if (debt.fileType === "png") {
+            }else if (item.fileType === "png") {
                 $(model).get(".filetype svg.png", el => el.removeClass("d-none"));
             }
 
-            if (debt.fileName.includes("DB AT")) {
-                let fileName = debt.fileName.replace("DB AT", "");
+            if (item.fileName.includes("DB AT")) {
+                let fileName = item.fileName.replace("DB AT", "");
                 fileName = fileName.length > 12 ? `${fileName.slice(0, 12)}...`: fileName;
                 $(model).get(".filename", el => el.setText(fileName));
 
             } else {
-                $(model).get(".filename", el=> el.setText(debt.fileName));
+                $(model).get(".filename", el=> el.setText(item.fileName));
             }
 
-            const date = `${debt.date[0]}/${debt.date[1]}/${debt.date[2]}`;
+            const date = `${item.date[0]}/${item.date[1]}/${item.date[2]}`;
 
             $(model).get(".filedate", el => el.setText(date));
-            $(model).get(".filevalue", el => el.setText(debtValue));
-            $(model).get(".filedebttype", el => el.setText("DP " + debt.expenditure));
+            $(model).get(".filevalue", el => el.setText(itemValue));
+
+            if (item.insertType === "MOVINT") {
+                $(model).get(".fileinserttype", el => el.setText(`${item.type} ${item.destAccount}`));
+
+            } else {
+                $(model).get(".fileinserttype", el => el.setText("DP " + item.expenditure));
+            }
                
             account === "1000" && $(".account1000-content .message").addClass("d-none");
             account === "1010" && $(".account1010-content .message").addClass("d-none");
@@ -517,17 +523,17 @@ const fillContent = (debtList, account) => {
 const setData = (month) => {
     getData(month)
         .then(response => {
-            const debts1000 = response["1000"].map(debt => getMappedObject(debt));
-            const debts1010 = response["1010"].map(debt => getMappedObject(debt));
+            const items1000 = response["1000"].map(item => getMappedObject(item));
+            const items1010 = response["1010"].map(item => getMappedObject(item));
 
-            if (debts1000.length > 0 || debts1010.length > 0) {
+            if (items1000.length > 0 || items1010.length > 0) {
                 $(".status-container").removeClass("d-none");
             } else {
                 $(".status-container").addClass("d-none");
             }
 
-            fillContent(debts1000, "1000");
-            fillContent(debts1010, "1010");
+            fillContent(items1000, "1000");
+            fillContent(items1010, "1010");
     })
 }
 

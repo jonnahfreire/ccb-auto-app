@@ -3,144 +3,142 @@ from time import sleep
 from autom.main import Selenium
 from autom.strings import ccb_siga
 from autom.siga import Siga
+from autom.msgs import *
 
 from config.credentials import Credential
 
-from utils.filemanager import create_dir, get_files_path, move_file_to
+from utils.main import InsertionStatus
+from utils.filemanager import create_dir
+from utils.filemanager import get_files_path, move_file_to
 
 
-class InsertionStatus:
+SUCCESSFUL_SENT: list = []
+FAIL_SENDING   : list = []
+EXISTING_FILES : list = []
 
-    def __init__(self) -> None:
-        self.current: dict = {}
-        self.starting: bool = False
-        self.started: bool = False
-        self.failed: bool = False
-        self.finished: bool = False
-        self.finished_all: bool = False
-        self.failed_all: bool = False
+
+def set_initial_status(current: dict, status: InsertionStatus) -> None:
+    status.set_current(current)
+    status.set_finished(False)
+    status.set_failed(False)
+    status.set_started()
+
+
+def get_file_path(files_path: str, filename: str) -> str:
+    return [
+        files_path[files_path.index(fp)]
+        for fp in files_path
+        if filename in fp
+    ][0]
+
+
+def insert_item(work_month: str, work_month_path:str, 
+    data: list, window: bool, status: InsertionStatus) -> None:
+
+    if len(data) == 0: return
+
+    user, passwd = Credential().get_user_credentials()
+    files_path:list[str] = get_files_path(work_month_path)
+    user:dict = {"name": user, "passwd": passwd}
+    start(files_path, work_month, user, data, window, status)
+
+
+def upload_item_from(routine: Siga, file_path: str) -> None:
+    if routine.file_upload(file_path):
+        SUCCESSFUL_SENT.append(file_path)
+    else:
+        FAIL_SENDING.append(file_path)
+
+
+def save_item(routine: Siga, file_path: str, item: dict, status: InsertionStatus) -> None:
+    if routine.save(item):
+        status.set_finished(True)
+        print(f"{item['file-name']} salvo com sucesso")
+
+    else:
+        print(f"falha em salvar: {item['file-name']}")
+        status.set_fail_cause(save_error_msg)
+        status.set_failed(True)
+        FAIL_SENDING.append(file_path)
+        EXISTING_FILES.append(file_path)
+
+
+def start(files_path: str, work_month: str, 
+    user: dict, items_list: list[dict], 
+    window: bool, status: InsertionStatus) -> None:
     
-    def set_current(self, current: dict):
-        self.current = current
-    
-    def set_starting(self):
-        self.starting = True
+    username: str = user["name"]
+    passwd: str = user["passwd"]
 
-    def set_started(self):
-        self.started = True
-    
-    def set_failed(self, failed: bool):
-        self.failed = failed
+    selenium: Selenium = Selenium(ccb_siga, window)
+    status.set_starting()
 
-    def set_finished(self, finished: bool):
-        self.finished = finished
+    for item in items_list:
+        selenium.start()
+        siga: Siga = Siga(selenium.get_driver())
         
-    def set_finished_all(self):
-        self.finished_all = True
+        if siga.login(username, passwd):
+            sleep(10)
+            siga.change_work_month_date(work_month)
+            sleep(4)
+            siga.open_tesouraria()
+            sleep(2)
 
-    def set_failed_all(self):
-        self.failed_all = True
+            if item["insert-type"] == "MOVINT":
+                set_initial_status(item, status)
+                movint_insertion(siga, item, status)
 
+            if item["insert-type"] == "DEBT":
+                debt_insertion(siga, selenium, files_path, items_list, item, status)
 
-
-status: dict =  {}
-errors = {}
-
-def insert_debt(work_month: str, work_month_path:str, data: list, window: bool) -> None:
-    global status
-
-    if len(data) == 0:
-        return
-    
-    files_sent_successfull = []
-    files_not_sent = []
-    debt_already_exists = []
-    user, passw = Credential().get_user_credentials()
-    files_path = get_files_path(work_month_path)
-    
-    status_obj = InsertionStatus()
-    selenium = Selenium(ccb_siga, window)
-
-    def execute(data_list: list[dict]):
-        status_obj.set_starting()
-        status["starting"] = status_obj.starting
-
-        for debt in data_list:
-            selenium.start()
-            siga = Siga(selenium.get_driver())
-            
-            if siga.login(user, passw):
-                sleep(10)
-                siga.change_work_month_date(work_month)
-                sleep(4)
-                siga.open_tesouraria()
-                sleep(2)
-
-                if siga.new_debt():
-                    status_obj.set_current(debt)
-                    status_obj.set_finished(False)
-                    status_obj.set_failed(False)
-                    status_obj.set_started()
-
-                    status["current"] = status_obj.current
-                    status["finished"] = status_obj.finished
-                    status["failed"] = status_obj.failed
-                    status["started"] = status_obj.started
-                    
-                    if siga.debt(debt):
-                        file_name = debt["file-name"]
-                        file_path = None
-
-                        for fp in files_path:
-                            if file_name in fp:
-                                file_path = files_path[files_path.index(fp)]
-
-                        if file_path is not None:
-                            if siga.file_upload(file_path):
-                                files_sent_successfull.append(file_path)
-                            else:
-                                files_not_sent.append(file_path)
-
-                            sleep(3)
-                            if siga.save_debt(debt):
-                                status_obj.set_finished(True)
-                                status["finished"] = status_obj.finished
-
-                            else:
-                                status["fail_cause"] = "Erro ao salvar lançamento. Documento já existe!"
-                                status_obj.set_failed(True)
-                                status["failed"] = status_obj.failed
-                                files_not_sent.append(file_path)
-                                debt_already_exists.append(file_path)
-                    else:
-                        selenium.close()
-                        sleep(5)
-                        data_list = [
-                            debt for debt in data_list 
-                            if not debt["file-name"] 
-                            in files_sent_successfull
-                        ]
-                        execute(data_list)
-
-                else:
-                    errors["start_insertion_error"] = "Erro ao abrir novo lançamento. Tente novamente!"
-                    selenium.close()
-                    return False
-
-                sleep(5)
-
-            else:
-                errors["access_error"] = "Erro de acesso. Verifique seu usuário!"
-                selenium.close()
-                return False
-
+        else:
+            status.set_access_error(access_error_msg)
             selenium.close()
-    
-        move_files(files_path, files_sent_successfull+debt_already_exists)
-        status_obj.set_finished_all()
-        status["finished_all"] = status_obj.finished_all
+            return False
 
-    execute(data)
+        selenium.close()
+
+    move_files(files_path, SUCCESSFUL_SENT+EXISTING_FILES)
+    status.set_finished_all()
+
+
+def movint_insertion(routine: Siga, item: dict, status: InsertionStatus) -> None:
+    if routine.new_intern_transaction(item):
+        file_path = get_file_path(item["file-name"])
+
+        if file_path is not None:
+            upload_item_from(routine, file_path)
+            sleep(3)
+            save_item(routine, file_path, item, status)
+
+
+def debt_insertion(routine: Siga, selenium: Selenium, 
+    files_path: list[str], data: list, item: list[dict], 
+    status: InsertionStatus) -> None:
+    
+    if routine.new_debt():
+        set_initial_status(item, status)
+        
+        if routine.debt(item):
+            file_path = get_file_path(files_path, item["file-name"])
+            
+            if file_path is not None:
+                upload_item_from(routine, file_path)
+                sleep(3)
+                save_item(routine, file_path, item, status)
+        else:
+            selenium.close()
+            sleep(5)
+            data = [
+                item for item in data 
+                if not item["file-name"] 
+                in SUCCESSFUL_SENT
+            ]
+            start(data)
+    else:
+        status.set_insertion_error(insert_error_msg)
+        selenium.close()
+        return False
 
 
 def move_files(path: str, success: list) -> None:
@@ -149,7 +147,3 @@ def move_files(path: str, success: list) -> None:
             basedir: str = file[:file.rfind("/")]
             create_dir(basedir, "Lancados")
             move_file_to(f"{basedir}/Lancados/", file)
-
-            
-if __name__ == "__main__":
-    pass

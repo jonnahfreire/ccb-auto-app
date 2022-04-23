@@ -5,7 +5,7 @@ import eel
 
 from tkinter import Tk, messagebox
 
-from utils.main import reset_db
+from utils.main import reset_db, InsertionStatus
 from utils.filemanager import list_files, open_dir
 from utils.filemanager import get_files_by_account
 from utils.filemanager import create_config_path
@@ -16,15 +16,17 @@ from utils.filemanager import remove_directory
 
 from data.main import get_classified_files 
 from data.main import move_classified_files_to_sist_path
-from data.main import get_modelized_debts
+from data.main import get_modelized_items
 
-from autom.routine import insert_debt, status, errors
+from autom.routine import insert_item
 
 from config.globals import sist_path, screen_size
 from config.credentials import Credential
 from config.user import User
 
 from execlogs.logs import *
+
+STATUS: InsertionStatus = None
 
 
 @eel.expose
@@ -99,19 +101,28 @@ def get_work_month_path(month: str) -> str:
 
 
 @eel.expose
-def insert_new_debt(month:str, 
+def insert_new_item(month:str, 
         work_month_path: str, 
-        debt_list: list[dict], 
+        items_list: list[dict], 
         window) -> None:
-        
-    Thread(target=insert_debt,
-        args=(
+
+    global STATUS
+    STATUS = InsertionStatus()
+
+    Thread(
+        target = insert_item,
+        args = (
             month.replace("-", "/"),
             work_month_path,
-            debt_list,
-            window
+            items_list,
+            window,
+            STATUS
         )
     ).start()
+
+    logs: list = get_execlogs()
+    for log in logs: print(log[1])
+    clear_logs()
 
 
 @ eel.expose
@@ -163,14 +174,14 @@ def get_files_from_folder() -> bool:
 
 @eel.expose
 def get_current_status() -> dict:
-    return {"status": status, "errors": errors}
+    global STATUS
+    return STATUS.get_status()
 
 
 @eel.expose
 def clear_status() -> None:
-    global status, errors
-    status = {}
-    errors = {}
+    global STATUS
+    STATUS = None
 
 
 @eel.expose
@@ -180,18 +191,18 @@ def get_data(work_month: str, all: bool = False):
     work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))
 
     files: list = list_files(work_month_path)
-
+    
     if len(files) > 0:
-        debts_1000, debts_1010 = get_files_by_account(files)
+        items_1000, items_1010 = get_files_by_account(files)
 
-        modelized_debts_1000: list[dict] = get_modelized_debts(debts_1000)
-        modelized_debts_1010: list[dict] = get_modelized_debts(debts_1010)
+        modelized_items_1000: list[dict] = get_modelized_items(items_1000)
+        modelized_items_1010: list[dict] = get_modelized_items(items_1010)
 
         if all:
-            all_debts: list[dict] = modelized_debts_1000 + modelized_debts_1010
-            return {"all": all_debts}
+            all_items: list[dict] = modelized_items_1000 + modelized_items_1010
+            return {"all": all_items}
 
-        return {"1000": modelized_debts_1000, "1010": modelized_debts_1010}
+        return {"1000": modelized_items_1000, "1010": modelized_items_1010}
 
     return {"1000": [], "1010": []}
 

@@ -21,14 +21,14 @@ log_path = path.join(sist_path, config, "logs.db")
 struct_dirs_1000 = ["1000", "3006", "3007", "3008", 
                     "3010", "3011", "3012", "3014", 
                     "3015", "3016", "3023", "3026", 
-                    "3027"]
+                    "3027", "1415", "1835"]
 
 struct_dirs_1010 = ["1010", "3010", "3011", "3012",
                     "3016", "3020", "3021", "3023", 
                     "3027", "3030", "3051", "3052", 
                     "3300", "3301", "3302", "3006",
                     "3007", "3008", "3014", "1120", 
-                    "11101", "11102"]
+                    "11101", "11102", "1415", "1835"]
 
 struct_dirs = [struct_dirs_1000, struct_dirs_1010]
 
@@ -53,6 +53,8 @@ debt_code_list = [
     '11102 - BR 05-0632 - PEDRA BRANCA - DISTRITO MINEIROLANDIA',
     '112 - CASAS DE ORACAO EM REFORMA',
     '1120 - REFORMA LAGOA DO MATO',
+    '1415 - MOVIMENTACAO INTERNA',
+    '1835 - RECEITAS',
     '300 - SERVICOS E FORNECIMENTOS EXTERNOS',
     '3000- SERV MANUT DE IMOVEIS E INSTALACOES',
     '3001- SERV MANUT DE MOVEIS E UTENSILIOS',

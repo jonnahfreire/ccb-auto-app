@@ -1,11 +1,11 @@
 import os
 
-from models import debt_models
-from models.debt_models import *
+from models import models
+from models.models import *
 
 from config.globals import sist_path, extensions, accepted_accounts
 
-from utils.main import get_debt_models_list
+from utils.main import get_items_models_list
 from utils.filemanager import copy_file_to, set_initial_struct_dirs
 
 
@@ -15,6 +15,18 @@ def get_data_from_filename(model, file: str) -> dict:
     file_data = [os.path.splitext(f.strip())[0] for f in file.split("-")]
 
     for data in file_data:
+
+        if len(data) > 0 and "CH SAQ" in data:
+            model.doc_num = data.split(" ")[-1].strip()
+
+        if len(data) > 0 and "SUPRIMENTO CAIXA" in data\
+            or "SUPRIMENTO DE CAIXA" in data or "SUPRIMENTO" in data:
+            model.transform = "CHEQUE"
+            model.orig_account = "1010"
+            model.dest_account = "1000"
+            model.complement = data
+            model.receiver = "Congregação Cristã no Brasil"
+            model.hist = "032"
 
         if len(data) > 0 and "NF" in data or "NF RC" in data \
             or "CF" in data or "CF RC" in data or "CP" in data\
@@ -88,21 +100,21 @@ def get_data_from_filename(model, file: str) -> dict:
     return model.get_mapped_data()
 
 
-def get_modelized_debts(debt_list: list[dict]) -> list[dict]:
-    if not debt_list: return []
+def get_modelized_items(items_list: list[dict]) -> list[dict]:
+    if not items_list: return []
 
-    debts_data:list = []
-    account_codes:list = get_debt_models_list(debt_models)
+    items_data:list = []
+    account_codes:list = get_items_models_list(models)
 
     def loop(model, iterator: list):
         for db in iterator:
-            debts_data.append(get_data_from_filename(model, db))
+            items_data.append(get_data_from_filename(model, db))
 
-    for debt in debt_list:
-        model = [eval(f"Model{code}") for code in account_codes if debt.get(code)]
-        if model: loop(model[0](), debt.get(model[0].__name__[5:]))
+    for item in items_list:
+        model = [eval(f"Model{code}") for code in account_codes if item.get(code)]
+        if model: loop(model[0](), item.get(model[0].__name__[5:]))
 
-    return debts_data
+    return items_data
 
 
 def get_unclassified_files_from(path: str) -> list:

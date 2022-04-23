@@ -253,9 +253,12 @@ class Siga:
             insert_execlog(f"{red}File Upload Exception: {yellow}\n\t{ex}{bg}\n")
             return False
 
-    def save_debt(self, debt: dict, save_btn: str = None) -> bool:
+    def save(self, item: dict, save_btn: str = None) -> bool:
         document_already_exists: bool = False
         try:
+            if item["insert-type"] == "MOVINT":
+                save_btn = btn_save_intern_transf
+
             if save_btn is not None:
                 self.driver.find_element(By.XPATH, save_btn).click()
             else:
@@ -267,41 +270,50 @@ class Siga:
             modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
 
             try:
-                # WebDriverWait(self.driver, 3)\
-                #         .until(expected_conditions\
-                #             .presence_of_element_located((By.XPATH, modal_header)))
+                if not item["insert-type"] == "MOVINT":
+                    modal_header_title = self.driver.find_element(By.XPATH, modal_header)
+                    if modal_header_title.size != 0 or modal_header_title.is_diplayed():
+                        document_already_exists = True
+                        self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
 
-                modal_header_title = self.driver.find_element(By.XPATH, modal_header)
-                if modal_header_title.size != 0 or modal_header_title.is_diplayed():
-                    document_already_exists = True
-                    self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
-
-                return False
+                    return False
+            
             except NoSuchElementException as ex:
                 message = "Falha ao fechar modal de 'Documento já existe'"
                 if document_already_exists:
                     message += f"\n\t'Documento com o mesmo número já existe'"
                 insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
                 
-            if debt["payment-form"] == "CHEQUE":
+            if item["insert-type"] == "MOVINT" or item["payment-form"] == "CHEQUE":
                 message = "Falha ao fechar modal de imprimir cópia de cheque"
                 close = '/html/body/div[18]/div/div/a[1]'
                 try:
                     try:
+                        if item["insert-type"] == "MOVINT":
+                            close = '/html/body/div[13]/div/div/a[1]'
+
                         WebDriverWait(self.driver, 4)\
                             .until(expected_conditions\
                                 .presence_of_element_located((By.XPATH, close)))
 
                         self.driver.find_element(By.XPATH, close).click()
+
+                        if item["insert-type"] == "MOVINT":
+                            return True
     
                     except TimeoutException as ex:
                         if document_already_exists:
                             message += f"\n\t'Documento com o mesmo número já existe'"
                         insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
-                        return False
+
+                        if not item["insert-type"] == "MOVINT":
+                            return False
                         
                 except NoSuchElementException as ex:
                     insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
+
+            if item["insert-type"] == "MOVINT":
+                return True
 
             sleep(3)
             message = "Falha ao confirmar modal 'lançamento com sucesso'"
@@ -325,10 +337,10 @@ class Siga:
             return True
 
         except NoSuchElementException as ex:
-            insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{ex.msg}{bg}\n")
+            insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{ex}{bg}\n")
             return False
         except Exception as ex:
-            insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{ex.msg}{bg}\n")
+            insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{ex}{bg}\n")
             return False
 
     def save_and_new_debt(self, debt: dict) -> bool:
@@ -357,10 +369,105 @@ class Siga:
         sleep(2)
         self.driver.find_element(By.XPATH, new_group_debt_select_element).click()
 
-    def new_intern_transaction(self):
-        self.driver.find_element(By.XPATH, new_intern_trans_select_box).click()
-        sleep(2)
-        self.driver.find_element(By.XPATH, new_intern_trans_select_element).click()
+    def new_intern_transaction(self, item: list[dict]) -> bool:
+        try:
+            try:
+                # WebDriverWait(self.driver, 7)\
+                #     .until(expected_conditions\
+                #         .presence_of_element_located((By.XPATH, new_intern_trans_select_box)))
+                self.driver.find_element(By.XPATH, new_intern_trans_select_box).click()
+                sleep(2)
+                self.driver.find_element(By.XPATH, new_intern_trans_select_element).click()
+
+            except TimeoutException as ex:
+                insert_execlog(f"{red}New Movint Exception: {yellow}\n\t{ex}{bg}\n")
+
+            date_picker = '//*[@id="f_data"]'
+
+            transform_drop = '//*[@id="select2-chosen-7"]'
+            transform_input = '//*[@id="s2id_autogen7_search"]' # forma de transferencia
+
+            num_doc_drop = '//*[@id="f_main"]/div[1]/div[3]/div/label'
+            num_doc_input = '//*[@id="f_documento"]'
+
+            value = '//*[@id="f_valor"]'
+
+            receiver = '//*[@id="f_nomefavorecido"]' #favorecido
+
+            orig_account_drop = '//*[@id="select2-chosen-8"]'
+            orig_account_input = '//*[@id="s2id_autogen8_search"]'
+
+            dest_account_drop = '//*[@id="select2-chosen-10"]'
+            dest_account_input = '//*[@id="s2id_autogen10_search"]'
+
+            hist = '//*[@id="select2-chosen-9"]'
+            hist_input = '//*[@id="s2id_autogen9_search"]'
+
+            complement = '//*[@id="f_complemento"]'
+
+            sleep(5)
+            date_picker = self.driver.find_element(By.XPATH, date_picker).send_keys(item["date"])
+
+            sleep(2)
+            self.driver.find_element(By.XPATH, transform_drop).click()
+            transform_input = self.driver.find_element(By.XPATH, transform_input)
+            transform_input.click()
+            sleep(0.5)
+            transform_input.send_keys(item["transform"])
+            transform_input.send_keys(Keys.RETURN)
+
+            sleep(2)
+            self.driver.find_element(By.XPATH, num_doc_input).send_keys(item["doc-num"])
+
+            sleep(2)
+            value = self.driver.find_element(By.XPATH, value)
+            value.click()
+            sleep(0.5)
+            value.send_keys(item["value"])
+            
+            sleep(2)
+            receiver = self.driver.find_element(By.XPATH, receiver)
+            receiver.click()
+            sleep(0.5)
+            receiver.send_keys(item["receiver"])#"Congregação Cristã no Brasil"
+
+            sleep(2)
+            self.driver.find_element(By.XPATH, orig_account_drop).click()
+            sleep(0.5)
+            orig_account_input = self.driver.find_element(By.XPATH, orig_account_input)
+            orig_account_input.send_keys(item["orig-account"])
+            orig_account_input.send_keys(Keys.RETURN)
+            
+            sleep(2)
+            self.driver.find_element(By.XPATH, dest_account_drop).click()
+            sleep(0.5)
+            dest_account_input = self.driver.find_element(By.XPATH, dest_account_input)
+            dest_account_input.send_keys(item["dest-account"])
+            dest_account_input.send_keys(Keys.RETURN)
+
+            sleep(2)
+            self.driver.find_element(By.XPATH, hist).click()
+            sleep(0.5)
+            hist_input = self.driver.find_element(By.XPATH, hist_input)
+            hist_input.send_keys(item["hist"])
+            hist_input.send_keys(Keys.RETURN)
+
+            sleep(2)
+            complement = self.driver.find_element(By.XPATH, complement)
+            complement.click()
+            sleep(0.5)
+            complement.send_keys(item["complement"])#"SUPRIMENTO DE CAIXA"
+            
+            # sleep(2)
+            # self.driver.find_element(By.ID, file_upload_input).send_keys(item[])
+            
+            sleep(2)
+            return True
+        except NoSuchElementException as ex:
+            insert_execlog(f"{red}New Movint Exception: {yellow}\n\t{ex}{bg}\n")
+        
+        except Exception as ex:
+            insert_execlog(f"{red}New Movint Exception: {yellow}\n\t{ex}{bg}\n")
 
     def new_receive(self):
         self.driver.find_element(By.XPATH, new_receive_select_box).click()

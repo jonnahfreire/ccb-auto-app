@@ -18,6 +18,7 @@ class BaseModel:
         self.check_num: str = None
         self.doc_num: str = None
         self.file_type: str = None
+        self.insert_type: str = "DEBT"
 
     def get_mapped_data(self) -> dict:
         return {
@@ -35,10 +36,59 @@ class BaseModel:
             "file-name": self.file_name,
             "check-num": self.check_num,
             "doc-num": self.doc_num,
-            "file-type": self.file_type
+            "file-type": self.file_type,
+            "insert-type": self.insert_type
         }
 
 # ----------------------------------
+# RECEITAS
+class Model1415:
+    """Movimentação Interna"""
+
+    def __init__(self) -> None:
+        self.type: str = "SAQ"
+        self.date: list = []
+        # se a forma de transferência for com CHEQUE, inserir o favorecido como Congregação Cristã no Brasil
+        self.transform: str = None
+        self.doc_num: str = None
+        self.value: str = None
+        self.orig_account: str = None
+        self.dest_account: str = None
+        self.receiver: str = None
+        self.hist: str = None
+        self.complement: str = None
+        self.file_name: str = None
+        self.file_type: str = None
+        self.insert_type: str = "MOVINT"
+
+    def get_mapped_data(self) -> dict:
+        return {
+            "type": self.type,
+            "date": self.date,
+            "transform": self.transform,
+            "doc-num": self.doc_num,
+            "value": self.value,
+            "orig-account": self.orig_account,
+            "dest-account": self.dest_account,
+            "receiver": self.receiver,
+            "hist": self.hist,
+            "complement": self.complement, 
+            "file-name": self.file_name,
+            "file-type": self.file_type,
+            "insert-type": self.insert_type
+        }
+
+
+class Model1835(Model1415):
+    """Receitas em geral"""
+
+    def __init__(self) -> None:
+        super().__init__()
+
+
+# FIM - RECEITAS
+# ----------------------------------
+# DESPESAS
 class Model1120(BaseModel):
 
     def __init__(self) -> None:

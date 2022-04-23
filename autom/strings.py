@@ -20,8 +20,11 @@ new_debt_select_element =  'Despesa'
 
 new_group_debt_select_box = '//*[@id="mainContent"]/div[2]/div[2]/div/div[1]/div/div/div[1]/button/span[2]'
 new_group_debt_select_element = '//*[@id="mainContent"]/div[2]/div[2]/div/div[1]/div/div/div[1]/ul/li[4]/a'
-new_intern_trans_select_box = '//*[@id="mainContent"]/div[2]/div[2]/div/div[1]/div/div/div[1]/button/span[2]'
-new_intern_trans_select_element = '//*[@id="mainContent"]/div[2]/div[2]/div/div[1]/div/div/div[1]/ul/li[6]/a'
+
+new_intern_trans_select_box = '//*[@id="mainContent"]/div[2]/div[3]/div/div[1]/div/div/div[1]/button'
+new_intern_trans_select_element = '//*[@id="mainContent"]/div[2]/div[3]/div/div[1]/div/div/div[1]/ul/li[6]/a'
+btn_save_intern_transf = '//*[@id="f_main"]/div[5]/button[1]'
+
 new_receive_select_box = '//*[@id="mainContent"]/div[2]/div[2]/div/div[1]/div/div/div[1]/button/span[2]'
 new_receive_select_element = '//*[@id="mainContent"]/div[2]/div[2]/div/div[1]/div/div/div[1]/ul/li[1]/a'
 
