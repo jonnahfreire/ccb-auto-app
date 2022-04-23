@@ -286,20 +286,41 @@ $(".btn-add").on("click", () => {
     getFilesFromFolder().then(response => response && init())
 })
 
+const notifications = {
+    items: [1],
+    animate: () => {
+        _$(".notifications svg").style.animationDuration = ".2s";
+        _$(".notifications .notify-sign").style.animationDuration = ".2s";
+    },
+    stop: () => {
+        _$(".notifications svg").style.animationDuration = "0s";
+        _$(".notifications .notify-sign").style.animationDuration = "0s";
+    },
+    hide: () => {
+        _$(".notifications .notify-sign").style.display = "none";
+    }
+}
+
+if (notifications.items.length > 0) {
+    setInterval(()=> {
+        notifications.animate();
+    
+        setTimeout(()=> notifications.stop(), 2000);
+    }, 10000);
+    
+} else {
+    notifications.hide();
+}
+
 const updateStatus = (items, status, interval) => {
     if (Object.keys(status.current).length === 0) return false;
                     
     const currentFileName = status.current["file-name"]
     const current = items.filter(item => 
-        currentFileName.includes(
-            item.querySelector(".filename")
-                .textContent.trim()
-        )
+        currentFileName.includes(item.querySelector(".filename").textContent.trim())
     )[0]
 
-
     if (status.started && !status.finished_all){
-
         if (!$(".status-container .starting").containClass("d-none")) {
             $(".status-container .starting").addClass("d-none");
             $(".status-container .started").removeClass("d-none");
