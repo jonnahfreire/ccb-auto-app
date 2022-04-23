@@ -286,6 +286,69 @@ $(".btn-add").on("click", () => {
     getFilesFromFolder().then(response => response && init())
 })
 
+const updateStatus = (items, status, interval) => {
+    if (Object.keys(status.current).length === 0) return false;
+                    
+    const currentFileName = status.current["file-name"]
+    const current = items.filter(item => 
+        currentFileName.includes(
+            item.querySelector(".filename")
+                .textContent.trim()
+        )
+    )[0]
+
+
+    if (status.started && !status.finished_all){
+
+        if (!$(".status-container .starting").containClass("d-none")) {
+            $(".status-container .starting").addClass("d-none");
+            $(".status-container .started").removeClass("d-none");
+        }
+        
+        if (!current.querySelector(".not-started").classList.contains("d-none")) {
+            current.querySelector(".not-started").classList.add("d-none");
+            current.querySelector(".started").classList.remove("d-none");    
+        }
+        
+        if (current.querySelector(".started").classList.contains("d-none")) {
+            current.querySelector(".started").classList.remove("d-none"); 
+        }
+
+        if (status.finished) {                           
+            current.querySelector(".started").classList.add("d-none"); 
+            current.querySelector(".finished").classList.remove("d-none");
+        }
+
+        if (status.failed) {
+            current.querySelector(".not-started").classList.add("d-none");
+            current.querySelector(".started").classList.add("d-none"); 
+            current.querySelector(".failed").classList.remove("d-none");
+            
+            current.querySelector(".failed").addEventListener("mouseover", () => {
+                current.querySelector(".status-error-msg").classList.remove("d-none")
+            })
+
+            current.querySelector(".failed").addEventListener("mouseout", () => {
+                current.querySelector(".status-error-msg").classList.add("d-none")
+            })
+        }
+    }
+    
+    if (status.finished_all) {
+        if (!status.failed) {
+            current.querySelector(".started").classList.add("d-none"); 
+            current.querySelector(".finished").classList.remove("d-none");
+        } else {
+            current.querySelector(".started").classList.add("d-none"); 
+            current.querySelector(".failed").classList.remove("d-none");
+        }
+        $(".status-container .started").addClass("d-none");
+        $(".status-container .finished").removeClass("d-none");
+        clearInterval(interval);
+        clearStatus();
+    }
+};
+
 // Automation Start
 $(".btn-start").on("click", async() => {
     const monthDirectories = _$$(".month-directories .work-month-directory");
@@ -297,7 +360,6 @@ $(".btn-start").on("click", async() => {
         })[0];
 
     const selectedMonth = $(selectedMonthDir).get(".folder-title", el => el.text());
-    
     const workMonthPath = await getWorkMonthPath(selectedMonth);
     
     getData(selectedMonth.replace("/", "-")).then(response => {
@@ -305,7 +367,6 @@ $(".btn-start").on("click", async() => {
         const items1010 = response["1010"]
 
         const allItems = [...items1000, ...items1010];
-        
         const items = $$(".debt-info");
         const files = {"success": [], "error": []};
 
@@ -321,67 +382,8 @@ $(".btn-start").on("click", async() => {
                 getStatus().then(response => {
                     const status = response.status;
                     const errors = response.errors;
-
-                    if (Object.keys(status.current).length === 0) return false;
                     
-                    const currentFileName = status.current["file-name"]
-                    const current = items.filter(item => 
-                        currentFileName.includes(
-                            item.querySelector(".filename")
-                                .textContent.trim()
-                        )
-                    )[0]
-
-
-                    if (status.started && !status.finished_all){
-
-                        if (!$(".status-container .starting").containClass("d-none")) {
-                            $(".status-container .starting").addClass("d-none");
-                            $(".status-container .started").removeClass("d-none");
-                        }
-                        
-                        if (!current.querySelector(".not-started").classList.contains("d-none")) {
-                            current.querySelector(".not-started").classList.add("d-none");
-                            current.querySelector(".started").classList.remove("d-none");    
-                        }
-                        
-                        if (current.querySelector(".started").classList.contains("d-none")) {
-                            current.querySelector(".started").classList.remove("d-none"); 
-                        }
-
-                        if (status.finished) {                           
-                            current.querySelector(".started").classList.add("d-none"); 
-                            current.querySelector(".finished").classList.remove("d-none");
-                        }
-
-                        if (status.failed) {
-                            current.querySelector(".not-started").classList.add("d-none");
-                            current.querySelector(".started").classList.add("d-none"); 
-                            current.querySelector(".failed").classList.remove("d-none");
-                            
-                            current.querySelector(".failed").addEventListener("mouseover", () => {
-                                current.querySelector(".status-error-msg").classList.remove("d-none")
-                            })
-
-                            current.querySelector(".failed").addEventListener("mouseout", () => {
-                                current.querySelector(".status-error-msg").classList.add("d-none")
-                            })
-                        }
-                    }
-                    
-                    if (status.finished_all) {
-                        if (!status.failed) {
-                            current.querySelector(".started").classList.add("d-none"); 
-                            current.querySelector(".finished").classList.remove("d-none");
-                        } else {
-                            current.querySelector(".started").classList.add("d-none"); 
-                            current.querySelector(".failed").classList.remove("d-none");
-                        }
-                        $(".status-container .started").addClass("d-none");
-                        $(".status-container .finished").removeClass("d-none");
-                        clearInterval(statusCheck);
-                        clearStatus();
-                    }                        
+                    updateStatus(items, status, statusCheck);                      
                 })
             }, statusCheckInterval);
         }
