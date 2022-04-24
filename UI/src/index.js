@@ -195,6 +195,9 @@ const getMappedObject = obj => {
 
 // perfil
 $(".perfil").on("click", () => {
+    !_$(".notification-items-container").classList.contains("d-none")
+    && $(".notification-items-container").addClass("d-none")
+
     $(".perfil-modal-info").toggleClass("d-none");
     $(".perfil-modal-info").addClass("p-m-opacity");
 })
@@ -304,6 +307,11 @@ const notifications = {
         && $(".notifications .notification-items-container").addClass("d-none");
     },
     show: () => {
+        notifications.getNotifications();
+        
+        !_$(".perfil-modal-info").classList.contains("d-none")
+        && $(".perfil-modal-info").addClass("d-none")
+
         $(".notifications .notification-items-container").removeClass("d-none");
         
         if (notifications.items.length > 0){
@@ -327,40 +335,63 @@ const notifications = {
         else notifications.show();
     },
     getNotifications: () => {
+        notifications.items = [];
 
+        const notification = [
+            {
+                icon: "danger",
+                header: "Não foi possível salvar lançamento.",
+                title: "CF 34526 - R$ 230,00 - DP 3026",
+                message: "Documento com o mesmo número já existe."
+            },
+            {
+                icon: "danger",
+                header: "Não foi possível salvar lançamento.",
+                title: "NF 541 - R$ 2.300,00 - DP 1120",
+                message: "Documento com o mesmo número já existe."
+            }
+        ]
+        
+        notification.forEach(item => notifications.items.push(item));
     },
-    setNotifications: (notifications) => {
-        notifications.forEach(notification => {
-            const notificationItem = _$(".notifications .notification-item").cloneNode(true);
+    setNotifications: (notificationData) => {
+        _$$(".notification-item-container .notification-item")
+            .forEach(item => item.remove());
+
+        notificationData.forEach(item => {
+            const notificationItem = _$(".content-model .notification-item").cloneNode(true);
             notificationItem.querySelector(".notification-details-header")
-                .textContent = notification.header;
+                .textContent = item.header;
 
             notificationItem.querySelector(".title")
-                .textContent = notification.title;
+                .textContent = item.title;
 
             notificationItem.querySelector(".message")
-                .textContent = notification.message;
+                .textContent = item.message;
             
-            notificationItem.classList.remove("d-none")
             _$(".notifications .notification-item-container")
                 .append(notificationItem);
 
             // Add Event To Remove Notifications
             // ...
+            notificationItem.querySelector(".notification-delete-x")
+                .addEventListener("click", () => {
+                    notifications.removeItem(notificationItem);
+                })
         })
+    },
+    removeItem: (item) => {
+        item.remove()
+        // Make request to back-end, to delete notification
+        // ...
+
+        // getNotifications again, to populate the items list
     }
 }
 
 $(".notifications .bell").on("click", () => notifications.toggle())
 
-const notification = {
-    icon: "danger",
-    header: "Não foi possível salvar lançamento.",
-    title: "CF 34526 - R$ 230,00 - DP 3026",
-    message: "Documento com o mesmo número já existe."
-}
-
-notifications.items.push(notification)
+notifications.getNotifications();
 
 if (notifications.items.length > 0) {
     setInterval(()=> {
