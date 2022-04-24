@@ -11,6 +11,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.common.exceptions import NoSuchElementException, TimeoutException
 
 from execlogs.logs import *
+from execlogs.notifications import *
 from cli.colors import *
 
 
@@ -18,6 +19,7 @@ class Siga:
 
     def __init__(self, driver) -> None:
         self.driver = driver
+        self.notification: Notification = Notification()
 
     def login(self, user: str, passw: str) -> bool:
         try:
@@ -266,9 +268,6 @@ class Siga:
 
             sleep(4)
             # modal ja existe documento com o mesmo numero
-            modal_header = '/html/body/div[17]/div[1]/h3' 
-            modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
-
             try:
                 if not item["insert-type"] == "MOVINT":
                     modal_header_title = self.driver.find_element(By.XPATH, modal_header)
@@ -276,6 +275,12 @@ class Siga:
                         document_already_exists = True
                         self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
 
+                    insert_notification({
+                        "icon": "danger",
+                        "header": self.notification.header_error,
+                        "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
+                        "message": self.notification.document_exists_msg
+                    })
                     return False
             
             except NoSuchElementException as ex:
@@ -297,8 +302,15 @@ class Siga:
                                 .presence_of_element_located((By.XPATH, close)))
 
                         self.driver.find_element(By.XPATH, close).click()
-
+                        
                         if item["insert-type"] == "MOVINT":
+                            insert_notification({
+                                "icon": "success",
+                                "header": self.notification.header_success,
+                                "title": f'{item["file-name"]} - R$ {item["value"]} - SAQ {item["orig-account"]}',
+                                "message": self.notification.document_sent_success
+                            })
+                            
                             return True
     
                     except TimeoutException as ex:
@@ -329,6 +341,13 @@ class Siga:
                 confirm_modal = self.driver.find_element(By.XPATH, modal_header_success_confirm)
                 if confirm_modal.size != 0 or confirm_modal.is_diplayed():
                     confirm_modal.click()
+
+                    insert_notification({
+                        "icon": "success",
+                        "header": self.notification.header_success,
+                        "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
+                        "message": self.notification.document_sent_success
+                    })
                     return True
 
             except NoSuchElementException as ex:

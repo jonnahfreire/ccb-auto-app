@@ -33,8 +33,9 @@ save_and_new_debt_btn = '//*[@id="f_main"]/div[11]/button[2]'
 
 file_upload_place = '//*[@id="tabAnexoAnexar"]/div/label'
 
+modal_btn_no_xpath = '/html/body/div[17]/div[3]/a[2]'
 modal_header_success_confirm = '/html/body/div[17]/div[3]/a' # Modal que aparece quando confirma o lançamento
-modal_header = '/html/body/div[17]/div[1]' # Modal que aparece quando confirma o lançamento e já existe um documento lançado com o mesmo número
+modal_header = '/html/body/div[17]/div[1]/h3' # Modal que aparece quando confirma o lançamento e já existe um documento lançado com o mesmo número
 confirm_modal_header = '/html/body/div[17]/div[3]/a[1]' # Botão de confirmar o modal que aparece quando já existe um lançamento com o mesmo número
 reject_modal_header = '/html/body/div[17]/div[3]/a[2]' # Botão de cancelar o modal que aparece quando já existe um lançamento com o mesmo número
 

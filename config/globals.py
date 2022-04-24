@@ -17,6 +17,7 @@ sist_path = path.join(user_docs_path, sist_name)
 config = ".config" if not sys.platform == "win32" else "config"
 db_path = path.join(sist_path, config, "user.db")
 log_path = path.join(sist_path, config, "logs.db")
+notification_path = path.join(sist_path, config, "notifications.db")
 
 struct_dirs_1000 = ["1000", "3006", "3007", "3008", 
                     "3010", "3011", "3012", "3014", 

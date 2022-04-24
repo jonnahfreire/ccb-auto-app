@@ -25,6 +25,7 @@ from config.credentials import Credential
 from config.user import User
 
 from execlogs.logs import *
+from execlogs.notifications import *
 
 STATUS: InsertionStatus = None
 
@@ -124,6 +125,21 @@ def insert_new_item(month:str,
     for log in logs: print(log[1])
     clear_logs()
 
+
+@eel.expose
+def remove_notification(id: int) -> bool:
+    return delete_notification(id)
+
+
+@eel.expose
+def clear_all_notifications() -> bool:
+    return clear_notifications()
+
+
+@eel.expose
+def get_notification_list() -> list[dict]:
+    return get_notifications()
+    
 
 @ eel.expose
 def alert(title: str, msg:str) -> None:
