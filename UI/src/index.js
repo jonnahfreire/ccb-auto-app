@@ -289,17 +289,44 @@ $(".btn-add").on("click", () => {
 const notifications = {
     items: [1],
     animate: () => {
-        _$(".notifications svg").style.animationDuration = ".2s";
+        _$(".notifications .bell").style.animationDuration = ".2s";
         _$(".notifications .notify-sign").style.animationDuration = ".2s";
     },
     stop: () => {
-        _$(".notifications svg").style.animationDuration = "0s";
+        _$(".notifications .bell").style.animationDuration = "0s";
         _$(".notifications .notify-sign").style.animationDuration = "0s";
     },
     hide: () => {
-        _$(".notifications .notify-sign").style.display = "none";
+        notifications.items.length == 0 
+        && (_$(".notifications .notify-sign").style.display = "none");
+
+        !_$(".notifications .notification-items-container").classList.contains("d-none")
+        && $(".notifications .notification-items-container").addClass("d-none");
+    },
+    show: () => {
+        $(".notifications .notification-items-container").removeClass("d-none");
+        
+        if (notifications.items.length > 0)
+            $(".notifications .notification-item-container").removeClass("d-none");
+        else
+            $(".notifications .no-notifications").removeClass("d-none");
+
+        $(".content").on("click", () => notifications.hide());
+    },
+    isHidden: () => {
+        return _$(".notifications .notification-items-container").classList.contains("d-none")
+    },
+    isShown: () => {
+        return !_$(".notifications .notification-items-container").classList.contains("d-none")
+    },
+    toggle: () => {
+        if (notifications.isShown()) notifications.hide();
+        else notifications.show();
     }
 }
+
+$(".notifications").on("click", () => notifications.toggle())
+
 
 if (notifications.items.length > 0) {
     setInterval(()=> {
