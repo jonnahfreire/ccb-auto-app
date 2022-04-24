@@ -14,7 +14,7 @@ const folderContextMenu        = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
 const timeout = 100;
 const statusCheckInterval = 200;
-const system = {"running": false};
+const automation = {"running": false};
 
 
 async function getFilesFromFolder() {
@@ -83,6 +83,14 @@ async function removeMonthDirectory(dirname) {
 
 async function removeCurrentUser() {
     return await eel.remove_current_user()()
+};
+
+async function removeNotification(id) {
+    return await eel.remove_notification(id)()
+};
+
+async function getNotifications() {
+    return await eel.get_notification_list()()
 };
 
 async function monthHasInsertedDebts(month) {
@@ -301,26 +309,17 @@ const notifications = {
     },
     hide: () => {
         notifications.items.length == 0 
-        && (_$(".notifications .notify-sign").style.display = "none");
+        && (_$(".notifications .notify-sign").style.display = "none")
+        && $(".notifications .no-notifications").removeClass("d-none");
 
         !_$(".notifications .notification-items-container").classList.contains("d-none")
         && $(".notifications .notification-items-container").addClass("d-none");
     },
     show: () => {
-        notifications.getNotifications();
-        
         !_$(".perfil-modal-info").classList.contains("d-none")
         && $(".perfil-modal-info").addClass("d-none")
 
         $(".notifications .notification-items-container").removeClass("d-none");
-        
-        if (notifications.items.length > 0){
-            $(".notifications .notification-item-container").removeClass("d-none");
-            notifications.setNotifications(notifications.items);
-
-        } else {
-            $(".notifications .no-notifications").removeClass("d-none");
-        }
 
         $(".content").on("click", () => notifications.hide());
     },
@@ -334,25 +333,34 @@ const notifications = {
         if (notifications.isShown()) notifications.hide();
         else notifications.show();
     },
+    update: () => notifications.getNotifications(),
+    intervals: [],
     getNotifications: () => {
-        notifications.items = [];
+        getNotifications().then(response => {
+            notifications.items = response;
 
-        const notification = [
-            {
-                icon: "danger",
-                header: "Não foi possível salvar lançamento.",
-                title: "CF 34526 - R$ 230,00 - DP 3026",
-                message: "Documento com o mesmo número já existe."
-            },
-            {
-                icon: "danger",
-                header: "Não foi possível salvar lançamento.",
-                title: "NF 541 - R$ 2.300,00 - DP 1120",
-                message: "Documento com o mesmo número já existe."
+            notifications.setNotifications(notifications.items);
+
+            let animInterval = null;
+            if (notifications.items.length > 0){
+                $(".notifications .no-notifications").addClass("d-none");
+                _$(".notifications .notify-sign").style.display = "flex";
+                
+                animInterval = setInterval(()=> {
+                    notifications.animate();
+                
+                    setTimeout(()=> notifications.stop(), 2000);
+                }, 10000);
+                notifications.intervals.push(animInterval);
+    
+            } else {
+                $(".notifications .no-notifications").removeClass("d-none");
+                _$(".notifications .notify-sign").style.display = "none";
+                notifications.stop();
+                notifications.intervals
+                    .forEach(interval => clearInterval(interval))
             }
-        ]
-        
-        notification.forEach(item => notifications.items.push(item));
+        })    
     },
     setNotifications: (notificationData) => {
         _$$(".notification-item-container .notification-item")
@@ -360,8 +368,19 @@ const notifications = {
 
         notificationData.forEach(item => {
             const notificationItem = _$(".content-model .notification-item").cloneNode(true);
+            
+            notificationItem.setAttribute("data-id", item.id)
+
             notificationItem.querySelector(".notification-details-header")
                 .textContent = item.header;
+            
+            item.icon === "danger"
+            && notificationItem.querySelector(".notification-item-icon .text-danger")
+                .classList.remove("d-none");
+            
+            item.icon === "success"
+            && notificationItem.querySelector(".notification-item-icon .text-success")
+                .classList.remove("d-none");
 
             notificationItem.querySelector(".title")
                 .textContent = item.title;
@@ -372,44 +391,36 @@ const notifications = {
             _$(".notifications .notification-item-container")
                 .append(notificationItem);
 
-            // Add Event To Remove Notifications
-            // ...
             notificationItem.querySelector(".notification-delete-x")
                 .addEventListener("click", () => {
-                    notifications.removeItem(notificationItem);
+                    removeNotification(item.id)
+                        .then(response => {
+                            if (response) {
+                                notificationItem.style.animationPlayState = "running";
+                                setTimeout(() => notifications.removeItem(notificationItem), 1000);
+                            }
+                        })
                 })
         })
     },
     removeItem: (item) => {
-        item.remove()
-        // Make request to back-end, to delete notification
-        // ...
-
-        // getNotifications again, to populate the items list
+        item.remove();
+        notifications.getNotifications();
     }
 }
 
 $(".notifications .bell").on("click", () => notifications.toggle())
-
 notifications.getNotifications();
 
-if (notifications.items.length > 0) {
-    setInterval(()=> {
-        notifications.animate();
-    
-        setTimeout(()=> notifications.stop(), 2000);
-    }, 10000);
-    
-} else {
-    notifications.hide();
-}
 
 const updateStatus = (items, status, interval) => {
+    notifications.update();
+
     if (Object.keys(status.current).length === 0) return false;
                     
     const currentFileName = status.current["file-name"]
     const current = items.filter(item => 
-        currentFileName.includes(item.querySelector(".filename").textContent.trim())
+        currentFileName.includes(item.querySelector(".file-name").textContent.trim())
     )[0]
 
     if (status.started && !status.finished_all){
@@ -437,6 +448,9 @@ const updateStatus = (items, status, interval) => {
             current.querySelector(".started").classList.add("d-none"); 
             current.querySelector(".failed").classList.remove("d-none");
             
+            current.querySelector(".status-error-msg .error-message")
+                .textContent = status.fail_cause
+
             current.querySelector(".failed").addEventListener("mouseover", () => {
                 current.querySelector(".status-error-msg").classList.remove("d-none")
             })
@@ -459,6 +473,7 @@ const updateStatus = (items, status, interval) => {
         $(".status-container .finished").removeClass("d-none");
         clearInterval(interval);
         clearStatus();
+        automation.running = false;
     }
 };
 
@@ -486,7 +501,7 @@ $(".btn-start").on("click", async() => {
         if (allItems) {
             insertItem(selectedMonth, workMonthPath, allItems, true);
 
-            system.running = true;
+            automation.running = true;
 
             $(".status-container .not-started").addClass("d-none");
             $(".status-container .starting").removeClass("d-none");        
@@ -592,34 +607,34 @@ const fillContent = (itemList, account) => {
             const model = _$(".content-model .debt-info").cloneNode(true);
             
             if (item.fileType === "pdf") {
-                $(model).get(".filetype svg.pdf", el => el.removeClass("d-none"));
+                $(model).get(".file-type svg.pdf", el => el.removeClass("d-none"));
 
             } else if (item.fileType === "jpg" || item.fileType === "jpeg") {
-                $(model).get(".filetype svg.jpg", el => el.removeClass("d-none"));
+                $(model).get(".file-type svg.jpg", el => el.removeClass("d-none"));
 
             }else if (item.fileType === "png") {
-                $(model).get(".filetype svg.png", el => el.removeClass("d-none"));
+                $(model).get(".file-type svg.png", el => el.removeClass("d-none"));
             }
 
             if (item.fileName.includes("DB AT")) {
                 let fileName = item.fileName.replace("DB AT", "");
                 fileName = fileName.length > 12 ? `${fileName.slice(0, 12)}...`: fileName;
-                $(model).get(".filename", el => el.setText(fileName));
+                $(model).get(".file-name", el => el.setText(fileName));
 
             } else {
-                $(model).get(".filename", el=> el.setText(item.fileName));
+                $(model).get(".file-name", el=> el.setText(item.fileName));
             }
 
             const date = `${item.date[0]}/${item.date[1]}/${item.date[2]}`;
 
-            $(model).get(".filedate", el => el.setText(date));
-            $(model).get(".filevalue", el => el.setText(itemValue));
+            $(model).get(".file-date", el => el.setText(date));
+            $(model).get(".file-value", el => el.setText(itemValue));
 
             if (item.insertType === "MOVINT") {
-                $(model).get(".fileinserttype", el => el.setText(`${item.type} ${item.destAccount}`));
+                $(model).get(".file-insert-type", el => el.setText(`${item.type} ${item.destAccount}`));
 
             } else {
-                $(model).get(".fileinserttype", el => el.setText("DP " + item.expenditure));
+                $(model).get(".file-insert-type", el => el.setText("DP " + item.expenditure));
             }
                
             account === "1000" && $(".account1000-content .message").addClass("d-none");
@@ -790,7 +805,7 @@ const init = () => {
                 }
 
                 $(directoryModel).on("click", () => {
-                    if (!system.running) {  
+                    if (!automation.running) {  
                         const finished = _$(".status-container .finished");
                         const started = _$(".status-container .started");
                         const notStarted = _$(".status-container .not-started");
@@ -829,6 +844,7 @@ const handleMonthPopover = () => {
     $$(".month-directories .work-month-directory").on("mouseenter", (e) => {
         const month = e.target.textContent.trim().replace("/", "-");
         
+        folderContextMenu.classList.contains("d-none") &&
         monthHasInsertedDebts(month).then(response => {
             response && showMonthPopover(e.target);
         })
