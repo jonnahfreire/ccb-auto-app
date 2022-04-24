@@ -5,27 +5,27 @@ import eel
 
 from tkinter import Tk, messagebox
 
-from utils.main import reset_db, InsertionStatus
-from utils.filemanager import list_files, open_dir
-from utils.filemanager import get_files_by_account
-from utils.filemanager import create_config_path
-from utils.filemanager import set_initial_struct_dirs
-from utils.filemanager import get_month_directories
-from utils.filemanager import select_dir
-from utils.filemanager import remove_directory
+from app.utils.main import reset_db, InsertionStatus
+from app.utils.filemanager import list_files, open_dir
+from app.utils.filemanager import get_files_by_account
+from app.utils.filemanager import create_config_path
+from app.utils.filemanager import set_initial_struct_dirs
+from app.utils.filemanager import get_month_directories
+from app.utils.filemanager import select_dir
+from app.utils.filemanager import remove_directory
 
-from data.main import get_classified_files 
-from data.main import move_classified_files_to_sist_path
-from data.main import get_modelized_items
+from app.data.main import get_classified_files 
+from app.data.main import move_classified_files_to_sist_path
+from app.data.main import get_modelized_items
 
-from autom.routine import insert_item
+from app.autom.routine import insert_item
 
-from config.globals import sist_path, screen_size
-from config.credentials import Credential
-from config.user import User
+from app.config.globals import sist_path, screen_size
+from app.config.credentials import Credential
+from app.config.user import User
 
-from execlogs.logs import *
-from execlogs.notifications import *
+from app.execlogs.logs import *
+from app.execlogs.notifications import *
 
 STATUS: InsertionStatus = None
 
@@ -224,7 +224,7 @@ def get_data(work_month: str, all: bool = False):
 
 
 def main() -> None:
-    eel.init("./UI/src")
+    eel.init("src")
     eel.start("index.html", port=8090, size=(int(screen_size[0]), int(screen_size[1])), position=(230, 50))
 
 
