@@ -260,7 +260,7 @@ body {width: 100%; height: 100%; user-select: none;}
     transform: scale(1.2);
 }
 
-.actual-month {
+.current-month {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -276,7 +276,7 @@ body {width: 100%; height: 100%; user-select: none;}
     color: #FFF;
 }
 
-.actual-month span {
+.current-month span {
     margin-top: 5px;
     font-size: small;
     margin-left: 5px;
