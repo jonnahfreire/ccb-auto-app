@@ -287,7 +287,7 @@ $(".btn-add").on("click", () => {
 })
 
 const notifications = {
-    items: [1],
+    items: [],
     animate: () => {
         _$(".notifications .bell").style.animationDuration = ".2s";
         _$(".notifications .notify-sign").style.animationDuration = ".2s";
@@ -306,10 +306,13 @@ const notifications = {
     show: () => {
         $(".notifications .notification-items-container").removeClass("d-none");
         
-        if (notifications.items.length > 0)
+        if (notifications.items.length > 0){
             $(".notifications .notification-item-container").removeClass("d-none");
-        else
+            notifications.setNotifications(notifications.items);
+
+        } else {
             $(".notifications .no-notifications").removeClass("d-none");
+        }
 
         $(".content").on("click", () => notifications.hide());
     },
@@ -322,11 +325,42 @@ const notifications = {
     toggle: () => {
         if (notifications.isShown()) notifications.hide();
         else notifications.show();
+    },
+    getNotifications: () => {
+
+    },
+    setNotifications: (notifications) => {
+        notifications.forEach(notification => {
+            const notificationItem = _$(".notifications .notification-item").cloneNode(true);
+            notificationItem.querySelector(".notification-details-header")
+                .textContent = notification.header;
+
+            notificationItem.querySelector(".title")
+                .textContent = notification.title;
+
+            notificationItem.querySelector(".message")
+                .textContent = notification.message;
+            
+            notificationItem.classList.remove("d-none")
+            _$(".notifications .notification-item-container")
+                .append(notificationItem);
+
+            // Add Event To Remove Notifications
+            // ...
+        })
     }
 }
 
-$(".notifications").on("click", () => notifications.toggle())
+$(".notifications .bell").on("click", () => notifications.toggle())
 
+const notification = {
+    icon: "danger",
+    header: "Não foi possível salvar lançamento.",
+    title: "CF 34526 - R$ 230,00 - DP 3026",
+    message: "Documento com o mesmo número já existe."
+}
+
+notifications.items.push(notification)
 
 if (notifications.items.length > 0) {
     setInterval(()=> {
@@ -676,7 +710,7 @@ const showMonthPopover = (element) => {
 const init = () => {
     const actualWorkMonth = setSelectMonths().replace("/", "-");
 
-    $(".container-content .actual-month span")
+    $(".container-content .current-month span")
         .setText(actualWorkMonth.replace("-", "/"));
     
     getUserName().then(response => {
