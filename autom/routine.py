@@ -35,6 +35,10 @@ def get_file_path(files_path: str, filename: str) -> str:
 def insert_item(work_month: str, work_month_path:str, 
     data: list, window: bool, status: InsertionStatus) -> None:
 
+    del SUCCESSFUL_SENT[:]
+    del FAIL_SENDING   [:]
+    del EXISTING_FILES [:]
+
     if len(data) == 0: return
 
     user, passwd = Credential().get_user_credentials()
