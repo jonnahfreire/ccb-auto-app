@@ -105,6 +105,115 @@ body {width: 100%; height: 100%; user-select: none;}
 }
 
 
+.notifications .notification-items-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    position: absolute;
+    top: 10%;
+    z-index: 999;
+
+    width: 400px;
+    height: 200px;
+    max-height: 200px;
+
+    background-color: #FFF;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    border-radius: 5px;
+
+    box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
+    overflow-y: scroll;
+    
+    cursor: auto;
+}
+
+.notifications .notification-items-container .no-notifications {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: inherit;
+}
+
+.notification-item-container {
+    padding: 2px;
+}
+
+.notification-item {
+    background-color: #f8f8f8;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: 4px;
+    
+    font-size: small;
+    
+    margin-bottom: 3px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.notification-item-icon {
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    margin: auto 5px auto 5px;
+
+    width: fit-content;
+    height: inherit;
+}
+
+.notification-item-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+.notification-details {
+    display: flex;
+    flex-direction: column;
+
+    flex: 2;
+    margin-right: 5px;
+}
+
+.notification-details .item-details {
+    display: flex;
+    flex-direction: column;
+    font-size: 12px;
+    margin-top: 5px;
+    padding-top: 5px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.notification-details .item-details .title,
+.notification-details .item-details .message {
+    width: 280px;
+    max-width: 280px;
+}
+
+.notification-details .item-details .title,
+.notification-details .item-details .message {
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-item .remove-notification {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 25px;
+    height: inherit;
+    cursor: pointer;
+}
+
+.notification-item .remove-notification:hover {
+    transform: scale(1.2);
+}
+
 .notifications .notify-sign {
     background-color: gold;
     position: relative;
@@ -134,7 +243,7 @@ body {width: 100%; height: 100%; user-select: none;}
     100% {transform: translateX(-2px);}
 }
 
-.notifications svg {
+.notifications .bell {
     width: fit-content;
     height: 20px;
 
@@ -147,7 +256,7 @@ body {width: 100%; height: 100%; user-select: none;}
     transition: .2s linear;
 }
 
-.notifications svg:hover {
+.notifications .bell:hover {
     transform: scale(1.2);
 }
 
@@ -797,6 +906,7 @@ body {width: 100%; height: 100%; user-select: none;}
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
     transition: .5s linear;
 }
+
 
 .container-settings {
     width: 100%;
