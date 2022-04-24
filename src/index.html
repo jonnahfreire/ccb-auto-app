@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="./assets/favicon.png" type="image/png" />
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Bootstrap-v5.0.2 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+   
+    <!-- Bootstrap Icons -->
+    <link rel=”stylesheet” href=”https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css” />
+    <link rel=”stylesheet” href=”https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css” integrity=”sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T” crossorigin=”anonymous”>
+   
+    <!-- FontAwesome Icons -->
+    <script src="https://kit.fontawesome.com/6991472a3e.js" crossorigin="anonymous"></script>
+    
+    <!-- Svg Icons -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+        </symbol>
+        <symbol id="info-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+        </symbol>
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+        </symbol>
+    </svg>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+    <script src="./helper.js"></script>
+    <title>CCB AUTO</title>
+</head>
+<body>
+    <div class="container-request-user-credentials d-none">
+        <div id="user-success-inserted-alert" class="alert alert-success user-config-form-alert d-none" role="alert">
+            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+            Usuário salvo com sucesso!
+        </div>
+
+        <div id="user-failed-insert-alert" class="alert alert-danger user-config-form-alert d-none" role="alert">
+            <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+            Não foi possível inserir usuário!
+        </div>
+        
+        <div id="container-form-user-credentials">
+            <form class="form form-group" id="form-user-credentials">
+                <div class="form-group mb-2">
+                    <h5 class="form-group mb-4 form-title">Insira suas informações de acesso ao CCB SIGA</h5>
+                    <div class="col d-flex align-items-center form-floating mb-3">
+                        <input class="form-control form-control-sm form-control-plain-text user-credential-input border-0" id="user" type="text" placeholder="Usuário" required maxlength="30" autofocus/>
+                        <label for="user">Usuário</label>
+                        <svg class="bi flex-shrink-0 me-2 user-icon-success d-none" width="24" height="24" style="position: absolute; right: 2px; color: rgb(3, 114, 3);" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+                    </div>
+                    <div class="input-container d-flex mb-3">
+                        <div class="col form-floating d-flex align-items-center">
+                            <input class="form-control form-control-sm user-credential-input border-0" id="pass" type="password" placeholder="Senha" required maxlength="25">
+                            <label for="pass">Senha</label>
+                            <svg class="bi flex-shrink-0 me-2 d-none pass-icon-success" width="24" height="24" style="position: absolute; right: 2px; color: rgb(3, 114, 3);" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+                            <i class="far fa-eye-slash" id="togglePassword" style="position: absolute; right: 10px; cursor: pointer;"></i>
+                        </div>
+                    </div>
+                    <div class="input-container input-group d-flex mb-2">
+                        <div class="col form-floating d-flex align-items-center">
+                            <input class="form-control form-control-sm user-credential-input border-0" id="pass-confirm" type="password" placeholder="Confirmar senha" required maxlength="25">
+                            <label for="pass-confirm">Confirmar senha</label>
+                            <svg class="bi flex-shrink-0 me-2 d-none pass2-icon-success" width="24" height="24" style="position: absolute; right: 2px; color: rgb(3, 114, 3);" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+                            <i class="far fa-eye-slash" id="toggleConfirmPassword" style="position: absolute; right: 10px; cursor: pointer;"></i>
+                        </div>
+                    </div>
+                    <div class="pass-feedback d-none alert alert-danger mb-0 d-flex align-items-center justify-content-start" style="font-size: small; height: 45px;">
+                        <svg class="bi flex-shrink-0 me-2" width="20" height="20" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        <span>Senhas não conferem.</span>
+                    </div>
+                    
+                    <input class="btn btn-primary form-control mb-1 border-0" id="btn-save-credentials" type="submit" value="Salvar">
+                </div>
+            </form>
+        </div>    
+    </div>
+
+    <div class="container-content d-none">
+        <div class="container-content-header d-none">
+            <div class="header-system-title">
+                <img src="./assets/favicon.ico" alt="logo" style="width: 30px;">
+                <span>CCB AUTO</span>
+            </div>
+            <div class="separator"></div>
+
+            <!-- Notifications -->
+            <div class="notifications">
+                <div class="notification-items-container d-none">
+                    <div class="no-notifications d-none">
+                        <span>
+                            Nenhuma notificação para exibir.
+                        </span>
+                    </div>
+                    <div class="notification-item-container"></div>
+                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-bell-fill bell" viewBox="0 0 16 16">
+                    <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2zm.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901z"/>
+                </svg>
+                <span class="notify-sign"></span>
+            </div>  <!-- End Notifications -->
+            
+            <div class="current-month">
+                Mês: <span></span>
+            </div>
+            
+            <!-- Perfil -->
+            <div class="perfil">
+                <div class="user-content">
+                    <span id="username" style="margin-left: 5px;"></span>
+                </div>
+                <i class="fa-solid fa-user" style="color: #FFF; padding: 10px; margin-right: 5px;"></i>
+                
+                <div class="perfil-modal-info d-none">
+                    <h6>Perfil</h6>
+                    <div class="sep"></div>
+                    <div class="perfil-modal-items">
+                        <div class="perfil-modal-item remove-user">
+                            <div class="item-title">
+                                <p>Redefinir usuário</p>
+                            </div>
+                            <div class="item-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-lock" viewBox="0 0 16 16">
+                                    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2zM5 8h6a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="sep"></div>
+                        <div class="perfil-modal-item">
+                            <div class="item-title settings">
+                                <p>Configurações</p>
+                            </div>
+                            <div class="item-icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+                                    <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+                                    <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292-.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.945 8.93l-.319-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 4.377l-.16-.292c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- <div class="sep"></div> -->
+                    </div>
+                </div> 
+            </div> <!-- End Perfil -->
+        </div>
+        <!-- Settings -->
+        <div class="container-settings d-none">
+            <div class="settings-header">
+                <div class="btn-go-back">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="currentColor" class="bi bi-arrow-left-circle" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M1 8a7 7 0 1 0 14 0A7 7 0 0 0 1 8zm15 0A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-4.5-.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+                    </svg>
+                </div>
+            </div>
+            <!-- Settings Page -->
+            <div class="settings-content">
+                Settings page
+                
+            </div> <!-- End Settings Page -->
+        </div> <!-- End Settings -->
+
+        <!-- Content -->
+        <div class="content d-none">
+            <div class="content-title">
+                <span>Mês de trabalho</span>
+            </div>
+            <div class="content-header month-directories"></div>
+            <div class="content-title desp-receitas">
+                <span>Despesas / Receitas</span>
+            </div>
+            <div class="base-accounts">
+                <div class="account1000">
+                    <div class="content-title sub-account">
+                        <span>Caixa Geral - 1000</span>
+                    </div>
+                    <div class="account1000-content">
+                        <span class="message">Nenhuma despesa / receita encontrada.</span>
+                    </div>
+                </div>
+                <div class="account1010">
+                    <div class="content-title sub-account">
+                        <span>Banco - 1010</span>
+                    </div>
+                    <div class="account1010-content">
+                        <span class="message">Nenhuma despesa / receita encontrada.</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-btn" role="group">
+                <div class="status-container d-none">
+                    <span>Status:</span>
+                    <span class="status not-started bg-warning-2" aria-label="Status">Não iniciado</span>
+                    
+                    <span class="status starting bg-primary d-none" aria-label="Status">
+                        <span class="status-msg">Iniciando, aguarde..</span>
+                        <span class="status loading spinner-border ms-auto" role="status" aria-hidden="true" style="width: 18px; height: 18px;padding-left: 5px;"></span>
+                    </span>
+                    
+                    <span class="status started bg-success d-none">
+                        <span class="status-msg">Em andamento..</span>
+                        <span class="status loading spinner-border ms-auto" role="status" aria-hidden="true" style="width: 18px; height: 18px;padding-left: 5px;"></span>
+                    </span>
+                    <span class="status finished bg-primary d-none">Finalizado</span>
+                </div>
+                <button type="button" class="btn btn-primary f-btn btn-sm btn-create" >Criar Diretório</button>
+                <button type="button" class="btn btn-primary f-btn btn-sm btn-add">Adicionar Despesas</button>
+                <button type="button" class="btn btn-success f-btn btn-sm btn-start">Iniciar Lançamentos</button>
+            </div>
+        </div> <!-- End Content -->
+
+        <!-- Context Menu -->
+        <div class="folder-context-menu d-none" style="position: absolute;">
+            <div class="context-items open-folder">
+                <span class="item-title open-folder-local">Abrir local</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder-symlink" viewBox="0 0 16 16">
+                    <path d="m11.798 8.271-3.182 1.97c-.27.166-.616-.036-.616-.372V9.1s-2.571-.3-4 2.4c.571-4.8 3.143-4.8 4-4.8v-.769c0-.336.346-.538.616-.371l3.182 1.969c.27.166.27.576 0 .742z"/>
+                    <path d="m.5 3 .04.87a1.99 1.99 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14h10.348a2 2 0 0 0 1.991-1.819l.637-7A2 2 0 0 0 13.81 3H9.828a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 6.172 1H2.5a2 2 0 0 0-2 2zm.694 2.09A1 1 0 0 1 2.19 4h11.62a1 1 0 0 1 .996 1.09l-.636 7a1 1 0 0 1-.996.91H2.826a1 1 0 0 1-.995-.91l-.637-7zM6.172 2a1 1 0 0 1 .707.293L7.586 3H2.19c-.24 0-.47.042-.683.12L1.5 2.98a1 1 0 0 1 1-.98h3.672z"/>
+                </svg>
+            </div>
+            <div class="context-item-separator"></div>
+            <div class="context-items remove-folder">
+                <span class="item-title remove">Remover</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.53Zm5.058 0a.5.5 0 0 1 .47.53l-.5 8.5a.5.5 0 1 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Z"/>
+                </svg>
+            </div>
+        </div> <!-- End Context Menu -->
+
+        <!-- Popover Month Contains Finished Debts -->
+        <div class="popover-finished-debts d-none bg-success">
+            <span>Contém despesas lançadas.</span>
+        </div>
+
+        <!-- Select Month Modal -->
+        <div class="select-month-modal-backdrop d-none">
+            <div class="modal-select-month">
+                <div class="modal-select-header">
+                    <h6 class="modal-month-title">Selecione o mês</h6>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>
+                        <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>
+                    </svg>
+                </div>
+                <div class="modal-month-body">
+                    <div class="form-group d-flex inline work-month-select">
+                        <label for="work-month-select"></label>
+                        <select class="form-control form-control-sm " id="work-month-select">
+                            <option value="" style="display: none;"></option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-primary btn-sm btn-ok">OK</button>
+                </div>
+                <div class="modal-month-footer">
+                </div>
+            </div>
+        </div>
+
+        <!-- Remove Folder Context Modal -->
+        <div class="remove-month-modal-backdrop d-none">
+            <div class="modal-remove-month">
+                <div class="modal-remove-header">
+                    <h6 class="modal-remove-title">Remover Diretório?</h6>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>
+                        <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>
+                    </svg>
+                </div>
+                <div class="modal-remove-body">
+                    <p>Esta ação irá remover o mês selecionado, e todas as despesas.</p>
+                </div>
+                <div class="modal-remove-footer">
+                    <button type="button" class="btn btn-primary btn-sm btn-ok">OK</button>
+                    <button type="button" class="btn btn-danger btn-sm btn-cancel">Cancelar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remove User Modal -->
+        <div class="remove-user-modal-backdrop d-none">
+            <div class="modal-remove-user">
+                <div class="modal-remove-header">
+                    <h6 class="modal-remove-title">Remover Usuário?</h6>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>
+                        <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>
+                    </svg>
+                </div>
+                <div class="modal-remove-user-body">
+                    <p>Esta ação irá remover o usuário atual.</p>
+                </div>
+                <div class="modal-remove-user-footer">
+                    <button type="button" class="btn btn-primary btn-sm btn-ok">OK</button>
+                    <button type="button" class="btn btn-danger btn-sm btn-cancel">Cancelar</button>
+                </div>
+            </div>
+        </div>
+                
+        <!-- Models -->
+        <div class="content-model d-none">
+            <div class="notification-item">
+                <div class="notification-item-icon">
+                    <svg class="bi flex-shrink-0 me-2 text-danger item-icon d-none" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                    <svg class="bi flex-shrink-0 me-2 text-success item-icon d-none" width="24" height="24" role="img" aria-label="Success:"><use xlink:href="#check-circle-fill"/></svg>
+                </div>
+                <span class="notification-details">
+                    <span class="notification-details-header"></span>
+                    <span class="item-details">
+                        <span class="title"></span>
+                        <span class="message"></span>
+                    </span>
+                </span>
+                <div class="remove-notification">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg notification-delete-x" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>
+                        <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="work-month-directory">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder" viewBox="0 0 16 16">
+                    <path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996 1.09l.637 7a1 1 0 0 0 .995.91h10.348a1 1 0 0 0 .995-.91l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/>
+                </svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-folder2-open d-none" viewBox="0 0 16 16">
+                    <path d="M1 3.5A1.5 1.5 0 0 1 2.5 2h2.764c.958 0 1.76.56 2.311 1.184C7.985 3.648 8.48 4 9 4h4.5A1.5 1.5 0 0 1 15 5.5v.64c.57.265.94.876.856 1.546l-.64 5.124A2.5 2.5 0 0 1 12.733 15H3.266a2.5 2.5 0 0 1-2.481-2.19l-.64-5.124A1.5 1.5 0 0 1 1 6.14V3.5zM2 6h12v-.5a.5.5 0 0 0-.5-.5H9c-.964 0-1.71-.629-2.174-1.154C6.374 3.334 5.82 3 5.264 3H2.5a.5.5 0 0 0-.5.5V6zm-.367 1a.5.5 0 0 0-.496.562l.64 5.124A1.5 1.5 0 0 0 3.266 14h9.468a1.5 1.5 0 0 0 1.489-1.314l.64-5.124A.5.5 0 0 0 14.367 7H1.633z"/>
+                </svg>
+                <span class="folder-title"></span>
+            </div>
+
+            <div class="modal-select-month">
+                <div class="form-group d-flex inline work-month-select-container">
+                    <label for="work-month-select">Mês: </label>
+                    <select class="form-control form-control-sm" id="work-month-select">
+                        <option value="" style="display: none;"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="model-item debt-info">
+                <span class="debt-item file-type">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-pdf pdf d-none" viewBox="0 0 16 16">
+                        <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2z"/>
+                        <path d="M4.603 14.087a.81.81 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.68 7.68 0 0 1 1.482-.645 19.697 19.697 0 0 0 1.062-2.227 7.269 7.269 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.188-.012.396-.047.614-.084.51-.27 1.134-.52 1.794a10.954 10.954 0 0 0 .98 1.686 5.753 5.753 0 0 1 1.334.05c.364.066.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.856.856 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.712 5.712 0 0 1-.911-.95 11.651 11.651 0 0 0-1.997.406 11.307 11.307 0 0 1-1.02 1.51c-.292.35-.609.656-.927.787a.793.793 0 0 1-.58.029zm1.379-1.901c-.166.076-.32.156-.459.238-.328.194-.541.383-.647.547-.094.145-.096.25-.04.361.01.022.02.036.026.044a.266.266 0 0 0 .035-.012c.137-.056.355-.235.635-.572a8.18 8.18 0 0 0 .45-.606zm1.64-1.33a12.71 12.71 0 0 1 1.01-.193 11.744 11.744 0 0 1-.51-.858 20.801 20.801 0 0 1-.5 1.05zm2.446.45c.15.163.296.3.435.41.24.19.407.253.498.256a.107.107 0 0 0 .07-.015.307.307 0 0 0 .094-.125.436.436 0 0 0 .059-.2.095.095 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a3.876 3.876 0 0 0-.612-.053zM8.078 7.8a6.7 6.7 0 0 0 .2-.828c.031-.188.043-.343.038-.465a.613.613 0 0 0-.032-.198.517.517 0 0 0-.145.04c-.087.035-.158.106-.196.283-.04.192-.03.469.046.822.024.111.054.227.09.346z"/>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filetype-jpg jpg d-none" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2h-1v-1h1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5Zm-4.34 8.132c.076.153.123.317.14.492h-.776a.797.797 0 0 0-.097-.249.689.689 0 0 0-.17-.19.707.707 0 0 0-.237-.126.96.96 0 0 0-.299-.044c-.285 0-.507.1-.665.302-.156.201-.234.484-.234.85v.498c0 .234.032.439.097.615a.881.881 0 0 0 .304.413.87.87 0 0 0 .519.146.967.967 0 0 0 .457-.096.67.67 0 0 0 .272-.264c.06-.11.091-.23.091-.363v-.255H8.24v-.59h1.576v.798c0 .193-.032.377-.097.55a1.29 1.29 0 0 1-.293.458 1.37 1.37 0 0 1-.495.313c-.197.074-.43.111-.697.111a1.98 1.98 0 0 1-.753-.132 1.447 1.447 0 0 1-.533-.377 1.58 1.58 0 0 1-.32-.58 2.482 2.482 0 0 1-.105-.745v-.506c0-.362.066-.678.2-.95.134-.271.328-.482.582-.633.256-.152.565-.228.926-.228.238 0 .45.033.636.1.187.066.347.158.48.275.133.117.238.253.314.407ZM0 14.786c0 .164.027.319.082.465.055.147.136.277.243.39.11.113.245.202.407.267.164.062.354.093.569.093.42 0 .748-.115.984-.345.238-.23.358-.566.358-1.005v-2.725h-.791v2.745c0 .202-.046.357-.138.466-.092.11-.233.164-.422.164a.499.499 0 0 1-.454-.246.577.577 0 0 1-.073-.27H0Zm4.92-2.86H3.322v4h.791v-1.343h.803c.287 0 .531-.057.732-.172.203-.118.358-.276.463-.475.108-.201.161-.427.161-.677 0-.25-.052-.475-.158-.677a1.176 1.176 0 0 0-.46-.477c-.2-.12-.443-.179-.732-.179Zm.546 1.333a.795.795 0 0 1-.085.381.574.574 0 0 1-.238.24.794.794 0 0 1-.375.082H4.11v-1.406h.66c.218 0 .389.06.512.182.123.12.185.295.185.521Z"/>
+                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filetype-png png d-none" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M14 4.5V14a2 2 0 0 1-2 2v-1a1 1 0 0 0 1-1V4.5h-2A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v9H2V2a2 2 0 0 1 2-2h5.5L14 4.5Zm-3.76 8.132c.076.153.123.317.14.492h-.776a.797.797 0 0 0-.097-.249.689.689 0 0 0-.17-.19.707.707 0 0 0-.237-.126.96.96 0 0 0-.299-.044c-.285 0-.506.1-.665.302-.156.201-.234.484-.234.85v.498c0 .234.032.439.097.615a.881.881 0 0 0 .304.413.87.87 0 0 0 .519.146.967.967 0 0 0 .457-.096.67.67 0 0 0 .272-.264c.06-.11.091-.23.091-.363v-.255H8.82v-.59h1.576v.798c0 .193-.032.377-.097.55a1.29 1.29 0 0 1-.293.458 1.37 1.37 0 0 1-.495.313c-.197.074-.43.111-.697.111a1.98 1.98 0 0 1-.753-.132 1.447 1.447 0 0 1-.533-.377 1.58 1.58 0 0 1-.32-.58 2.482 2.482 0 0 1-.105-.745v-.506c0-.362.067-.678.2-.95.134-.271.328-.482.582-.633.256-.152.565-.228.926-.228.238 0 .45.033.636.1.187.066.348.158.48.275.133.117.238.253.314.407Zm-8.64-.706H0v4h.791v-1.343h.803c.287 0 .531-.057.732-.172.203-.118.358-.276.463-.475a1.42 1.42 0 0 0 .161-.677c0-.25-.053-.475-.158-.677a1.176 1.176 0 0 0-.46-.477c-.2-.12-.443-.179-.732-.179Zm.545 1.333a.795.795 0 0 1-.085.381.574.574 0 0 1-.238.24.794.794 0 0 1-.375.082H.788v-1.406h.66c.218 0 .389.06.512.182.123.12.185.295.185.521Zm1.964 2.666V13.25h.032l1.761 2.675h.656v-3.999h-.75v2.66h-.032l-1.752-2.66h-.662v4h.747Z"/>
+                    </svg>
+                </span>
+                <span class="debt-item file-name"></span>
+                <span class="debt-item file-date"></span>
+                <span class="debt-item file-value"></span>
+                <span class="debt-item file-insert-type"></span>
+                
+                <span class="debt-item status not-started bg-warning-2">Não iniciado</span>
+                <span class="debt-item status started bg-success d-none">
+                    Iniciado
+                    <span class="loading spinner-border ms-auto" role="status" aria-hidden="true" style="width: 18px; height: 18px;"></span>
+                </span>
+                <span class="debt-item status finished bg-primary d-none">Finalizado</span>
+                <span class="debt-item status failed bg-danger d-none">
+                    <span class="status-error">Falhou</span>
+                    <span class="status-error-msg d-none">
+                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Danger:"><use xlink:href="#exclamation-triangle-fill"/></svg>
+                        <span class="error-message"></span>
+                    </span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M13.854 2.146a.5.5 0 0 1 0 .708l-11 11a.5.5 0 0 1-.708-.708l11-11a.5.5 0 0 1 .708 0Z"/>
+                        <path fill-rule="evenodd" d="M2.146 2.146a.5.5 0 0 0 0 .708l11 11a.5.5 0 0 0 .708-.708l-11-11a.5.5 0 0 0-.708 0Z"/>
+                    </svg>
+                </span>
+            </div>
+        </div> <!-- End Models -->
+
+        <!-- backdrop alert -->
+        <div class="well backdrop-alert d-none">
+            <div class="d-flex loading-alert">
+                <strong></strong>
+                <div class="spinner-border ms-auto" role="status" aria-hidden="true"></div>
+            </div>
+        </div>
+        <div class="footer-info">
+            <span>&copy; 2022 </span> <a href="https://github.com/jonnahfreire" target="_blank">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github" viewBox="0 0 16 16">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                @jonnahfreire
+            </a>
+        </div>
+    </div>
+    <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript" src="index.js"></script>
+</body>
+</html>
