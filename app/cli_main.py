@@ -65,7 +65,7 @@ def cli_main():
         # clear_logs()
 
         # sleep(2000)
-        # return
+        return
         option: str = select_initial_routine(modelized_items_1000, modelized_items_1010)
 
         if option.strip() == "1000":

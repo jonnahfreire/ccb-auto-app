@@ -129,6 +129,7 @@ def get_classified_files(path:str) -> list[dict]:
     if isinstance(path, str) and os.path.exists(path):
         files: list[str] = get_unclassified_files_from(path)
 
+        # despesas gerais
         file_data_list: list[dict] = [
             _ for _ in [
                 get_data_from_filename(BaseModel(), file) 
@@ -137,51 +138,74 @@ def get_classified_files(path:str) -> list[dict]:
             if _["expenditure"] is not None
             and _["expenditure"] in accepted_accounts
         ]
+        # ------------------------------------------------------------
 
+        # movimentação interna
+        for file in files:
+            modelized_file = get_data_from_filename(Model1415(), file)
+            
+            if modelized_file.get("orig-account") is not None\
+                and modelized_file.get("dest-account") is not None:
+                file_data_list.append(modelized_file)
+        # -------------------------------------------------------------
         return file_data_list
     return []
 
 
 def move_classified_files_to_sist_path(
-    path: str, file: list[dict]) -> bool:
+    path: str, file: dict) -> bool:
     
     files: list[str] = get_unclassified_files_from(path)
+    keys: list = file.keys()
 
-    if file["expenditure"] is not None:
-        base_account: str = file["cost-account"]
-        debt_account: str = file["expenditure"]
-        work_month: str = "-".join(file["date"])[3:]
+    base_account: str = None
+    sub_account: str = None
+    base_account_path: str = None
+    filename: str = None
 
-        work_month_path: str = os.path.join(sist_path, work_month)
-        if not os.path.exists(work_month_path):
-            set_initial_struct_dirs(work_month_path)
+    work_month: str = "-".join(file["date"])[3:]
+    work_month_path: str = os.path.join(sist_path, work_month)
 
-        base_account_path: str = os.path.join(sist_path, work_month, base_account)
+    if not os.path.exists(work_month_path):
+        set_initial_struct_dirs(work_month_path)
 
-        if not os.path.exists(base_account_path):
-            return False
+    # despesas gerias
+    if "expenditure" in keys:
+        if file["expenditure"] is not None:
+            base_account = file["cost-account"]
+            sub_account = file["expenditure"]
+            base_account_path = os.path.join(sist_path, work_month, base_account)
 
-        debt_account_path: list = [
-            p for p in os.listdir(base_account_path)
-            if debt_account in p    
-        ][0]
-        base_account_path = os.path.join(base_account_path, debt_account_path)
+            for item in files:
+                if file["file-name"] in item and  ":".join(file["date"]) in item\
+                    or "_".join(file["date"]) in item and file["emitter"] in item\
+                    and file["value"] in item:
+                    filename = item
+    # --------------------------------------------------------------------------------
 
+    # movimentação interna
+    if "orig-account" in keys and "dest-account" in keys\
+        and "insert-type" in keys:
+        if file.get("insert-type") == "MOVINT":
+            base_account = file["dest-account"]
+            sub_account = "1415"
+            base_account_path = os.path.join(sist_path, work_month, base_account)
 
-        filename: str = [
-            _ for _ in files
-            if file["file-name"] in _
-            and ":".join(file["date"]) in _
-            or "_".join(file["date"]) in _
-            and file["emitter"] in _
-            and file["value"] in _
-        ][0]
-        filepath = os.path.join(path, filename)
-        return copy_file_to(base_account_path, filepath)
+            for item in files:
+                if file["file-name"] in item and ":".join(file["date"]) in item\
+                    or "_".join(file["date"]) in item and file["value"] in item\
+                    or file["complement"] in item:
+                    filename = item
+    # --------------------------------------------------------------------------------
     
-    return False
+    if not os.path.exists(base_account_path) or filename is None:
+        return False
 
+    sub_account_path: list = [
+        p for p in os.listdir(base_account_path)
+        if sub_account in p    
+    ][0]
 
-if __name__ == "__main__":
-    pass
-
+    base_account_path = os.path.join(base_account_path, sub_account_path)
+    filepath = os.path.join(path, filename)
+    return copy_file_to(base_account_path, filepath)

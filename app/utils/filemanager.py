@@ -1,5 +1,5 @@
 import os
-from tkinter import Tk, messagebox, filedialog
+from tkinter import Tk, filedialog
 from app.utils.main import WIN
 from app.config.globals import struct_dirs, debt_code_list, sist_path, config
 from app.execlogs.logs import *
@@ -22,7 +22,12 @@ def create_config_path() -> bool:
 
 def get_month_directories() -> list:
     if os.path.exists(sist_path):
-        return [month for month in sorted(os.listdir(sist_path)) if not month.startswith(".")]
+        return [
+            month for month in sorted(os.listdir(sist_path)) 
+            if not month.startswith(".")
+            and os.path.isdir(os.path.join(sist_path, month))
+            and not os.path.isfile(os.path.join(sist_path, month))
+        ]
 
     return []
 
@@ -181,7 +186,7 @@ def rename_file_to(filename: str, newname: str) -> bool:
 def select_dir() -> str:
     root = Tk()
     root.withdraw()
-    dirpath = filedialog.askdirectory(title="Selecione o diretório das despesas")
+    dirpath = filedialog.askdirectory(title="Selecione o diretório dos arquivos")
     root.destroy()
     return dirpath
 

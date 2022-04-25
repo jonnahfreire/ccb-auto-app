@@ -12,7 +12,7 @@ const containerContentHeader   = _$(".container-content-header");
 const content                  = _$(".container-content .content");
 const folderContextMenu        = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
-const timeout = 100;
+const timeout = 2000;
 const statusCheckInterval = 200;
 const automation = {"running": false};
 
@@ -895,12 +895,12 @@ window.onload = () => {
 }
 
 
-// $(window).on('contextmenu', e => {
-//     if (e.button == 2){
-//         e.preventDefault();
-//         return false;
-//     }
-// })
+$(window).on('contextmenu', e => {
+    if (e.button == 2){
+        e.preventDefault();
+        return false;
+    }
+})
 
 $(window).on('keyup', e => {
     if (e.key === 93){

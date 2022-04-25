@@ -102,23 +102,15 @@ def get_work_month_path(month: str) -> str:
 
 
 @eel.expose
-def insert_new_item(month:str, 
-        work_month_path: str, 
-        items_list: list[dict], 
-        window) -> None:
-
+def insert_new_item(month:str, work_month_path: str, 
+    items_list: list[dict], window) -> None:
     global STATUS
     STATUS = InsertionStatus()
 
     Thread(
-        target = insert_item,
-        args = (
-            month.replace("-", "/"),
-            work_month_path,
-            items_list,
-            window,
-            STATUS
-        )
+        target = insert_item, 
+        args = (month.replace("-", "/"), 
+        work_month_path, items_list, window, STATUS)
     ).start()
 
     logs: list = get_execlogs()
@@ -152,9 +144,12 @@ def alert(title: str, msg:str) -> None:
 
 
 @eel.expose
-def month_has_inserted_debts(month: str) -> dict[str]:
+def month_has_inserted_debts(month: str) -> bool:
     sleep(0.3)
     work_month_path: str = os.path.join(sist_path, month)
+
+    if not os.path.isdir(work_month_path):
+        return False
 
     dirs: list = os.listdir(work_month_path)
     debt_dirs: list = [os.listdir(os.path.join(work_month_path, _dir)) for _dir in dirs]
@@ -201,10 +196,13 @@ def clear_status() -> None:
 
 
 @eel.expose
-def get_data(work_month: str, all: bool = False):
+def get_data(work_month: str, all: bool = False) -> dict:
 
-    if work_month is None: pass
+    if work_month is None: return
     work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))
+    
+    if ".pdf" in work_month_path or ".png" in work_month_path or ".jpg" in work_month_path:
+        return
 
     files: list = list_files(work_month_path)
     
@@ -229,8 +227,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    logs: list = get_execlogs()
-    for log in logs: print(log[1])
     main()
-    clear_logs()
     

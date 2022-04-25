@@ -57,10 +57,8 @@ def upload_item_from(routine: Siga, file_path: str) -> None:
 def save_item(routine: Siga, file_path: str, item: dict, status: InsertionStatus) -> None:
     if routine.save(item):
         status.set_finished(True)
-        print(f"{item['file-name']} salvo com sucesso")
 
     else:
-        print(f"falha em salvar: {item['file-name']}")
         status.set_fail_cause(save_error_msg)
         status.set_failed(True)
         FAIL_SENDING.append(file_path)
