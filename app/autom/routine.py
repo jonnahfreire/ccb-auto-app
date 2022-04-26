@@ -11,6 +11,8 @@ from app.utils.main import InsertionStatus
 from app.utils.filemanager import create_dir
 from app.utils.filemanager import get_files_path, move_file_to
 
+from app.execlogs.notifications import *
+from app.data.main import check_name_pattern
 
 SUCCESSFUL_SENT: list = []
 FAIL_SENDING   : list = []
@@ -88,58 +90,112 @@ def start(files_path: str, work_month: str,
 
             if item["insert-type"] == "MOVINT":
                 set_initial_status(item, status)
-                movint_insertion(siga, item, status)
+                if movint_insertion(siga, item, status):
+                    status.set_finished(True)
 
             if item["insert-type"] == "DEBT":
-                debt_insertion(siga, selenium, files_path, items_list, item, status)
+                set_initial_status(item, status)
+                if debt_insertion(siga, files_path, item, status):
+                    status.set_finished(True)
 
         else:
+            insert_notification({
+                "icon": "danger",
+                "header": "Não foi possível logar no sistema.",
+                "title": "ccb-auto: não conseguiu autenticar usuário.",
+                "message": "Verifique seu acesso, ou redefina os dados de acesso."
+            })
             status.set_access_error(access_error_msg)
             selenium.close()
-            return False
-
+            break
+        sleep(3)
         selenium.close()
+
+
+    if status.errors["access_error"] is not None:
+        return status.set_failed_all()
 
     move_files(files_path, SUCCESSFUL_SENT+EXISTING_FILES)
     status.set_finished_all()
 
 
-def movint_insertion(routine: Siga, item: dict, status: InsertionStatus) -> None:
-    if routine.new_intern_transaction(item):
-        file_path = get_file_path(item["file-name"])
+def movint_insertion(routine: Siga, item: dict, status: InsertionStatus) -> bool:
+    if check_name_pattern(item):
+        if routine.new_intern_transaction(item):
+            file_path = get_file_path(item["file-name"])
 
-        if file_path is not None:
-            upload_item_from(routine, file_path)
-            sleep(3)
-            save_item(routine, file_path, item, status)
-
-
-def debt_insertion(routine: Siga, selenium: Selenium, 
-    files_path: list[str], data: list, item: list[dict], 
-    status: InsertionStatus) -> None:
-    
-    if routine.new_debt():
-        set_initial_status(item, status)
-        
-        if routine.debt(item):
-            file_path = get_file_path(files_path, item["file-name"])
-            
             if file_path is not None:
                 upload_item_from(routine, file_path)
                 sleep(3)
                 save_item(routine, file_path, item, status)
-        else:
-            selenium.close()
-            sleep(5)
-            data = [
-                item for item in data 
-                if not item["file-name"] 
-                in SUCCESSFUL_SENT
-            ]
-            start(data)
+                return True
     else:
-        status.set_insertion_error(insert_error_msg)
-        selenium.close()
+        insert_notification({
+            "icon": "danger",
+            "header": "Não foi possível iniciar lançamento.",
+            "title": f'{item["file-name"]} - R$ {item["value"]}',
+            "message": "O padrão de nomeação não foi reconhecido"
+        })
+        status.set_failed(True)
+        status.set_fail_cause("O padrão de nomeação não foi reconhecido")
+        return False
+
+
+def debt_insertion(routine: Siga, files_path: list[str], item: dict, 
+    status: InsertionStatus) -> bool:
+
+    # checar se o padrão de nomeação do arquivo está correto
+    if check_name_pattern(item):    
+        if routine.new_debt():    
+            if routine.debt(item):
+                file_path = get_file_path(files_path, item["file-name"])
+                
+                if file_path is not None:
+                    upload_item_from(routine, file_path)
+                    sleep(3)
+                    save_item(routine, file_path, item, status)
+                    return True
+                    
+                else:
+                    insert_notification({
+                        "icon": "danger",
+                        "header": Notification().header_error,
+                        "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
+                        "message": "Caminho do arquivo não foi encontrado!"
+                    })
+                    status.set_failed(True)
+                    status.set_fail_cause("Caminho do arquivo não foi encontrado!")
+                    return False
+            else:
+                insert_notification({
+                    "icon": "danger",
+                    "header": Notification().header_error,
+                    "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
+                    "message": "Erro ao inserir dados. Contate o desenvolvedor!"
+                })
+                status.set_failed(True)
+                status.set_fail_cause("Erro ao inserir dados do lançamento.")
+                return False
+        else:
+            insert_notification({
+                "icon": "danger",
+                "header": "Não foi possível iniciar lançamento.",
+                "title": "ccb-auto: não foi possível abrir rotina de despesas.",
+                "message": "Erro de rotina. Contate o desenvolvedor!"
+            })
+            status.set_failed(True)
+            status.set_fail_cause("Não foi possível abrir rotina de despesas.")
+            status.set_insertion_error(insert_error_msg)
+            return False
+    else:
+        insert_notification({
+            "icon": "danger",
+            "header": "Não foi possível iniciar lançamento.",
+            "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
+            "message": "O padrão de nomeação não foi reconhecido"
+        })
+        status.set_failed(True)
+        status.set_fail_cause("O padrão de nomeação não foi reconhecido")
         return False
 
 
@@ -149,3 +205,4 @@ def move_files(path: str, success: list) -> None:
             basedir: str = file[:file.rfind("/")]
             create_dir(basedir, "Lancados")
             move_file_to(f"{basedir}/Lancados/", file)
+
