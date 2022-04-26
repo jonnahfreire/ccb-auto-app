@@ -33,8 +33,8 @@ class InsertionStatus:
         self.failed_all: bool = False
         self.fail_cause: str = None
         self.errors: dict = {
-            "start_insertion_error": "",
-            "access_error": ""
+            "start_insertion_error": None,
+            "access_error": None
         }
     
     def set_current(self, current: dict):
