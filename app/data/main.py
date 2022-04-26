@@ -15,6 +15,7 @@ def get_data_from_filename(model, file: str) -> dict:
     file_data = [os.path.splitext(f.strip())[0] for f in file.split("-")]
 
     for data in file_data:
+        data = data.upper()
 
         if len(data) > 0 and "CH SAQ" in data:
             model.doc_num = data.split(" ")[-1].strip()
@@ -84,7 +85,7 @@ def get_data_from_filename(model, file: str) -> dict:
             and not "CF" in data and not data.split(" ")[0].strip() == "CH"\
             and not "DB AT" in data and not "05_" in data\
             and not data.count("_") == 2 and not "DP" in data\
-            and not "RC" in data:
+            and not "RC" in data and not "R$" in data:
             model.emitter = data.strip()
         
         if len(data) > 0 and not "NF" in data\
@@ -145,7 +146,8 @@ def get_classified_files(path:str) -> list[dict]:
             modelized_file = get_data_from_filename(Model1415(), file)
             
             if modelized_file.get("orig-account") is not None\
-                and modelized_file.get("dest-account") is not None:
+                and modelized_file.get("dest-account") is not None\
+                and modelized_file.get("complement") is not None:
                 file_data_list.append(modelized_file)
         # -------------------------------------------------------------
         return file_data_list
@@ -209,3 +211,38 @@ def move_classified_files_to_sist_path(
     base_account_path = os.path.join(base_account_path, sub_account_path)
     filepath = os.path.join(path, filename)
     return copy_file_to(base_account_path, filepath)
+
+
+def check_name_pattern(item: dict) -> bool:
+    if item["insert-type"] == "DEBT":
+        if len(item["date"]) == 3 and item["value"] is not None\
+            and item["num"] is not None and item["expenditure"] is not None\
+            and item["emitter"] is not None:
+
+            # se for pagamento com dinheiro, e não com cheque
+            if item["cost-account"] == "1000" and item["doc-num"] is None\
+                and item["check-num"] == None:
+                return True
+
+            # se for pagamento com cheque, e não um débito automático
+            if item["cost-account"] == "1010" and item["doc-num"] is None\
+                and item["check-num"] is not None:
+                return True
+
+            # se for débito automático, e não um pagamento com cheque
+            if item["cost-account"] == "1010" and item["check-num"] is None\
+                and item["doc-num"] is not None:
+                return True
+
+    if item["insert-type"] == "MOVINT":
+        # se for retirada do banco para o caixa, ou da aplicação para o banco
+        if item["orig-account"] == "1010" and item["dest-account"] == "1000"\
+            or item["orig-account"] == "1033" and item["dest-account"] == "1010"\
+            and item["doc-num"] is not None and item["complement"] is not None\
+            and str(item["type"]).upper() == "SAQ" and len(item["date"]) == 3\
+            and item["value"] is not None:
+            return True
+        
+        # Verificações futuras
+    
+    return False
