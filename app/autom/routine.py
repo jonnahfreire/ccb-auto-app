@@ -102,9 +102,6 @@ def start(files_path: str, work_month: str,
         set_initial_status(item, status)
 
         if check_name_pattern(item):
-            print("ITEM: ", item["file-name"], " verificado.")
-            print(item)
-            return
             selenium.start()
             siga: Siga = Siga(selenium.get_driver())
             
