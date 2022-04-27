@@ -84,8 +84,8 @@ def get_data_from_filename(model, file: str) -> dict:
         if len(data) > 0 and not "NF" in data\
             and not "CF" in data and not data.split(" ")[0].strip() == "CH"\
             and not "DB AT" in data and not "05_" in data\
-            and not data.count("_") == 2 and not "DP" in data\
-            and not "RC" in data and not "R$" in data:
+            and not data.count("_") == 2 and not ":" in data\
+            and not "DP" in data and not "RC" in data and not "R$" in data:
             model.emitter = data.strip()
         
         if len(data) > 0 and not "NF" in data\

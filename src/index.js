@@ -12,8 +12,8 @@ const containerContentHeader   = _$(".container-content-header");
 const content                  = _$(".container-content .content");
 const folderContextMenu        = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
-const timeout = 2000;
-const statusCheckInterval = 200;
+const timeout = 100;
+const statusCheckInterval = 100;
 const automation = {"running": false};
 
 
@@ -57,7 +57,7 @@ async function getData(month) {
     return await eel.get_data(month)()
 };
 
-async function createWorkDirectory(month) {
+async function createWorkingDirectory(month) {
     return await eel.create_work_directory(month)()
 };
 
@@ -89,6 +89,10 @@ async function removeNotification(id) {
     return await eel.remove_notification(id)()
 };
 
+async function removeAllNotifications() {
+    return await eel.clear_all_notifications()()
+};
+
 async function getNotifications() {
     return await eel.get_notification_list()()
 };
@@ -110,8 +114,8 @@ const toggleInputPass = (el, inputElement) => {
     });
 }
 
-// Set user
-$("#form-user-credentials").on("submit", (e) => {
+
+const handleFormCredentialSubmit = (e) => {
     e.preventDefault();
     
     const passSuccessIcons = [
@@ -123,16 +127,16 @@ $("#form-user-credentials").on("submit", (e) => {
         $('#togglePassword'),
         $('#toggleConfirmPassword')
     ]
-
+    
     if(user.value.length > 0 && password.value.length > 0 
         && confirmPassword.value.length > 0 
         && password.value === confirmPassword.value) {
         
         passSuccessIcons.forEach(icon => icon.removeClass("d-none"));
         passEyeIcons.forEach(icon => icon.addClass("d-none"));
-
+    
         $(".pass-feedback").addClass('d-none');
-
+    
         const username = user.value;
         const pass = password.value;
         
@@ -142,7 +146,7 @@ $("#form-user-credentials").on("submit", (e) => {
             if (response) {
                 Array.prototype.slice.call(userCredentialInputs)
                     .forEach(input => input.value = "");
-
+    
                 $("#user-success-inserted-alert").removeClass("d-none");
                 
                 setTimeout(() => {
@@ -166,7 +170,7 @@ $("#form-user-credentials").on("submit", (e) => {
         passEyeIcons.forEach(icon => icon.removeClass("d-none"));
         $(".pass-feedback").removeClass('d-none');
     }
-})
+}
 
 
 const getMappedObject = obj => {
@@ -201,17 +205,8 @@ const getMappedObject = obj => {
     return mapped.data;
 }
 
-// perfil
-$(".perfil").on("click", () => {
-    !_$(".notification-items-container").classList.contains("d-none")
-    && $(".notification-items-container").addClass("d-none")
 
-    $(".perfil-modal-info").toggleClass("d-none");
-    $(".perfil-modal-info").addClass("p-m-opacity");
-})
-
-// Remove user
-$(".perfil-modal-info .remove-user").on("click", () => {
+const handleRemoveUser = () => {
     const removeUserBackdrop = _$(".remove-user-modal-backdrop");
     $(removeUserBackdrop).removeClass("d-none");
     
@@ -221,27 +216,25 @@ $(".perfil-modal-info .remove-user").on("click", () => {
         _$(removeUserModal).get("svg"),
         _$(removeUserModal).get(".btn-cancel")
     ]
-
+    
     btnCancel.forEach(btn => 
         $(btn).on("click", () => $(removeUserBackdrop).addClass("d-none")))
         
-    const btnOk = _$(removeUserModal).get(".modal-remove-user-footer .btn-ok");
-    $(btnOk).on("click", () => {
-        removeCurrentUser().then(response => {
-            response && window.location.reload();
-        })
-    });
-})
-
-
-// Settings
-$(".perfil-modal-info .settings").on("click", () => {
+        const btnOk = _$(removeUserModal).get(".modal-remove-user-footer .btn-ok");
+        $(btnOk).on("click", () => {
+            removeCurrentUser().then(response => {
+                response && window.location.reload();
+            })
+        });
+};
+    
+const handleSettingsClick = () => {
     const content = $(".content")
     const settingsContainer = $(".container-settings")
-
+    
     content.addClass("d-none");
     settingsContainer.removeClass("d-none");
-
+    
     $(".container-settings .btn-go-back").on("click", () => {
             settingsContainer.addClass("d-none");
             content.removeClass("d-none");
@@ -253,49 +246,67 @@ $(".perfil-modal-info .settings").on("click", () => {
             content.removeClass("d-none");
         }
     };
-})
+};
 
-// Perfil modal
-$(".container-settings").on("click", () => {
+
+const handleContainerSettingsClick = () => {
+    !_$(".notification-items-container").classList.contains("d-none")
+    && $(".notification-items-container").addClass("d-none");
+
     $(".perfil-modal-info").addClass("d-none");
-    $(".perfil-modal-info").removeClass("p-m-opacity");
-})
+};
 
-$(".content").on("click", () => {
+const handleOpenPerfil = () => {
+    !_$(".notification-items-container").classList.contains("d-none")
+    && $(".notification-items-container").addClass("d-none");
+
+    $(".perfil-modal-info").toggleClass("d-none");
+}
+
+const handleContentClick = () => {
     $(".perfil-modal-info").addClass("d-none");
-    $(".perfil-modal-info").removeClass("p-m-opacity");
-})
+};
 
-$("body").on("click", () => {
+const handleBodyClick = () => {
     $(".popover-finished-debts").addClass("d-none");
     $(".folder-context-menu").addClass("d-none");
+    
     $(".folder-context-menu").removeClass("f-c-opacity");
-})
+};
 
-$(".btn-create").on("click", () => {
+const handleCreateWorkingMonth = () => {
+    if (automation.running) {
+        modalAlertSysRunning.show("Não é possível criar diretórios enquanto existir lançamentos em andamento.");
+        return false;
+    }
+    
     const modalSelectBackdrop = $(".select-month-modal-backdrop");
     modalSelectBackdrop.removeClass("d-none");
-
+    
     let selectedMonth = null;
     $(".modal-select-month svg").on("click", () => {
         modalSelectBackdrop.addClass("d-none");
     })
-
+    
     $("#work-month-select").on('change', (e) => {
         selectedMonth = e.target.value;
     })
-
+    
     $(".select-month-modal-backdrop .btn-ok").on("click", () => {
         modalSelectBackdrop.addClass("d-none")   
         
-        selectedMonth && createWorkDirectory(selectedMonth)
+        selectedMonth && createWorkingDirectory(selectedMonth)
             .then(response => response && init())
     })
-})
+};
 
-$(".btn-add").on("click", () => {
+const handleAddItems = () => {
+    if (automation.running) {
+        modalAlertSysRunning.show("Não é possível inserir despesas ou receitas enquanto existe lançamentos em andamento.");
+        return false;
+    }
     getFilesFromFolder().then(response => response && init())
-})
+};
 
 const notifications = {
     items: [],
@@ -317,7 +328,14 @@ const notifications = {
     },
     show: () => {
         !_$(".perfil-modal-info").classList.contains("d-none")
-        && $(".perfil-modal-info").addClass("d-none")
+        && $(".perfil-modal-info").addClass("d-none");
+
+        if (notifications.items.length > 0){
+            $(".notifications .clear-notifications").removeClass("d-none");
+            $(".notifications .notification-clear-all span").on("click", () => {
+                notifications.removeAll();
+            });
+        }
 
         $(".notifications .notification-items-container").removeClass("d-none");
 
@@ -354,6 +372,7 @@ const notifications = {
                 notifications.intervals.push(animInterval);
     
             } else {
+                $(".notifications .clear-notifications").addClass("d-none");
                 $(".notifications .no-notifications").removeClass("d-none");
                 _$(".notifications .notify-sign").style.display = "none";
                 notifications.stop();
@@ -406,11 +425,23 @@ const notifications = {
     removeItem: (item) => {
         item.remove();
         notifications.getNotifications();
+    },
+    removeAll: () => {
+        _$$(".notifications .notification-item")
+            .forEach(item => {
+                id = Number.parseInt(item.getAttribute("data-id"));
+                item.style.animationPlayState = "running";
+                
+                removeNotification(id)
+                    .then(response => {
+                        if (response) {
+                            setTimeout(() => notifications.removeItem(item), 1000);
+                        }
+                    })
+            });
+        setTimeout(() => notifications.getNotifications(), 1000);
     }
 }
-
-$(".notifications .bell").on("click", () => notifications.toggle())
-notifications.getNotifications();
 
 
 const updateStatus = (items, status, interval) => {
@@ -446,6 +477,7 @@ const updateStatus = (items, status, interval) => {
         if (status.failed) {
             current.querySelector(".not-started").classList.add("d-none");
             current.querySelector(".started").classList.add("d-none"); 
+            current.querySelector(".finished").classList.add("d-none"); 
             current.querySelector(".failed").classList.remove("d-none");
             
             current.querySelector(".status-error-msg .error-message")
@@ -466,46 +498,66 @@ const updateStatus = (items, status, interval) => {
             current.querySelector(".started").classList.add("d-none"); 
             current.querySelector(".finished").classList.remove("d-none");
         } else {
+            current.querySelector(".finished").classList.add("d-none");
             current.querySelector(".started").classList.add("d-none"); 
             current.querySelector(".failed").classList.remove("d-none");
         }
+        
         $(".status-container .started").addClass("d-none");
-        $(".status-container .finished").removeClass("d-none");
+        $(".status-container .finished").addClass("d-none");
+
+        if (status.finished_all_with_exceptions) {
+            $(".status-container .finished-with-exceptions").removeClass("d-none");
+
+        } else if(status.failed_all) {
+            $(".status-container .finished-with-fail").removeClass("d-none");
+
+        } else {
+            $(".status-container .finished").removeClass("d-none");
+        }
+
         clearInterval(interval);
         clearStatus();
         automation.running = false;
     }
 };
 
-// Automation Start
-$(".btn-start").on("click", async() => {
+const startInsertions = async() => {
+    if (automation.running) {
+        modalAlertSysRunning.show("Já existe um processo em andamento, aguarde finalizar.");
+        return false;
+    }
+    
     const monthDirectories = _$$(".month-directories .work-month-directory");
-        
+    if (monthDirectories.length == 0) {
+        return false;
+    }
+    
     const selectedMonthDir = [...monthDirectories].filter(month => {
             if ($(month).containClass("work-month-directory-selected")){
                 return month
             }
         })[0];
-
+    
     const selectedMonth = $(selectedMonthDir).get(".folder-title", el => el.text());
     const workMonthPath = await getWorkMonthPath(selectedMonth);
     
     getData(selectedMonth.replace("/", "-")).then(response => {
         const items1000 = response["1000"]
         const items1010 = response["1010"]
-
+    
         const allItems = [...items1000, ...items1010];
         const items = $$(".debt-info");
         const files = {"success": [], "error": []};
-
-        if (allItems) {
+    
+        if (allItems.length > 0) {
             insertItem(selectedMonth, workMonthPath, allItems, true);
-
+    
             automation.running = true;
-
+    
             $(".status-container .not-started").addClass("d-none");
             $(".status-container .starting").removeClass("d-none");        
-
+    
             const statusCheck = setInterval(() => {
                 getStatus().then(response => {
                     const status = response.status;
@@ -514,11 +566,11 @@ $(".btn-start").on("click", async() => {
                     updateStatus(items, status, statusCheck);                      
                 })
             }, statusCheckInterval);
+        } else {
+            modalAlertItemsNotFound.show();
         }
-
     })
-})
-// End Automation
+};
 
 
 const getMonths = () => {
@@ -589,6 +641,10 @@ function getPosition(el) {
 
 
 const fillContent = (itemList, account) => {
+
+    if (automation.running) {
+        return false;
+    }
 
     // clear content
     account == "1000" && _$$(".account1000-content .model-item")
@@ -753,18 +809,126 @@ const showMonthPopover = (element) => {
     monthPopover.style.top = position.y + 60 + "px";
 }
 
+const setDirectories = (directoriesData, currentMonth) => {
+    if (directoriesData.length > 0) {
+        const directoryContainer = _$(".month-directories");
+
+        directoryContainer.querySelectorAll(".work-month-directory")
+            .forEach(item => item.remove());
+        
+        directoriesData.forEach(month => {
+            const directoryModel = _$(".content-model .work-month-directory").cloneNode(true);
+
+            $(directoryModel).get(".folder-title", el => el.setText(month.replace("-", "/")));
+            directoryContainer.append(directoryModel);
+
+            if (month === currentMonth) {
+                $(directoryModel).addClass("work-month-directory-selected");
+                $(directoryModel).get(".bi-folder", el => el.addClass("d-none"));
+                $(directoryModel).get(".bi-folder2-open", el => el.removeClass("d-none"));
+            }
+
+            $(directoryModel).on("click", () => {
+                if (!automation.running) {  
+                    const finished   = _$(".status-container .finished");
+                    const started    = _$(".status-container .started");
+                    const notStarted = _$(".status-container .not-started");
+                    !$(started).containClass("d-none") && $(finished).addClass("d-none");
+                    !$(finished).containClass("d-none") && $(finished).addClass("d-none");
+                    !$(notStarted).containClass("d-none") && $(notStarted).removeClass("d-none");
+                    
+                    directoryContainer.querySelectorAll(".work-month-directory-selected")
+                        .forEach(dir => {
+                            dir.classList.contains("work-month-directory-selected")
+                                && dir.classList.remove("work-month-directory-selected");
+                            
+                            dir.querySelector(".bi-folder").classList.remove("d-none");
+                            dir.querySelector(".bi-folder2-open").classList.add("d-none");
+                        });
+                    
+                    if (!directoryModel.classList.contains("work-month-directory-selected")){
+                        directoryModel.classList.add("work-month-directory-selected");
+                        $(directoryModel).get(".bi-folder", el => el.toggleClass("d-none"));
+                        $(directoryModel).get(".bi-folder2-open", el => el.toggleClass("d-none"));
+                    }
+
+                    setData(month);
+
+                } else {
+                    modalAlertSysRunning.show("Não é possível visualizar os mêses enquanto a automação está em andamento.");
+                }
+
+            })
+        })
+
+        handleMonthPopover();
+        handleFolderContextClick();
+    }
+};
+
+const modalAlertSysRunning = {
+    backdrop: null,
+    show: (msg) => {
+        const backdrop = _$(".system-running-modal-backdrop")
+        backdrop.classList.remove("d-none");
+        modalAlertSysRunning.backdrop = backdrop;
+
+        backdrop.querySelector(".modal-alert-running .alert-message")
+            .textContent = msg;
+
+        const btnClose = [
+            backdrop.querySelector(".btn-ok"),
+            backdrop.querySelector("svg")                            
+        ]
+    
+        btnClose.forEach(btn => {
+            btn.addEventListener("click", () => {
+                backdrop.classList.add("d-none");
+            });
+        });
+    },
+    hide: () => modalAlertSysRunning.backdrop.classList.add("d-none")
+};
+
+const modalAlertItemsNotFound = {
+    backdrop: null,
+    show: () => {
+        const backdrop = _$(".system-running-modal-backdrop")
+        backdrop.classList.remove("d-none");
+        modalAlertItemsNotFound.backdrop = backdrop;
+        
+        backdrop.querySelector(".modal-alert-running .modal-alert-title")
+            .textContent = "Atenção!";
+
+        backdrop.querySelector(".modal-alert-running .alert-message")
+            .textContent = "Não foi encontrado lançamentos a ser realizado para o mês selecionado. Insira lançamentos.";
+
+        const btnClose = [
+            backdrop.querySelector(".btn-ok"),
+            backdrop.querySelector("svg")                            
+        ]
+    
+        btnClose.forEach(btn => {
+            btn.addEventListener("click", () => {
+                backdrop.classList.add("d-none");
+            });
+        });
+    },
+    hide: () => modalAlertItemsNotFound.backdrop.classList.add("d-none")
+};
+
 const init = () => {
-    const actualWorkMonth = setSelectMonths().replace("/", "-");
+    const currentWorkingMonth = setSelectMonths().replace("/", "-");
 
     $(".container-content .current-month span")
-        .setText(actualWorkMonth.replace("-", "/"));
+        .setText(currentWorkingMonth.replace("-", "/"));
     
     getUserName().then(response => {
         username = response; 
         $(".perfil .user-content #username").setText(username)
     })
 
-    createWorkDirectory(actualWorkMonth)
+    createWorkingDirectory(currentWorkingMonth)
         .then(response => {
             if (response === null) {
                 const text = "Verificando diretório de trabalho, aguarde...";
@@ -786,58 +950,9 @@ const init = () => {
         })
     
     getMonthDirectoryList().then(response => {
-        if (response.length > 0) {
-            const directoryContainer = _$(".month-directories");
-
-            directoryContainer.querySelectorAll(".work-month-directory")
-                .forEach(item => item.remove());
-            
-            response.forEach(month => {
-                const directoryModel = _$(".content-model .work-month-directory").cloneNode(true);
-
-                $(directoryModel).get(".folder-title", el => el.setText(month.replace("-", "/")));
-                directoryContainer.append(directoryModel);
-
-                if (month === actualWorkMonth) {
-                    $(directoryModel).addClass("work-month-directory-selected");
-                    $(directoryModel).get(".bi-folder", el => el.addClass("d-none"));
-                    $(directoryModel).get(".bi-folder2-open", el => el.removeClass("d-none"));
-                }
-
-                $(directoryModel).on("click", () => {
-                    if (!automation.running) {  
-                        const finished = _$(".status-container .finished");
-                        const started = _$(".status-container .started");
-                        const notStarted = _$(".status-container .not-started");
-                        !$(started).containClass("d-none") && $(finished).addClass("d-none");
-                        !$(finished).containClass("d-none") && $(finished).addClass("d-none");
-                        !$(notStarted).containClass("d-none") && $(notStarted).removeClass("d-none");
-                    }
-
-                    directoryContainer.querySelectorAll(".work-month-directory-selected")
-                        .forEach(dir => {
-                            dir.classList.contains("work-month-directory-selected")
-                                && dir.classList.remove("work-month-directory-selected");
-                            
-                            dir.querySelector(".bi-folder").classList.remove("d-none");
-                            dir.querySelector(".bi-folder2-open").classList.add("d-none");
-                        });
-                    
-                    if (!directoryModel.classList.contains("work-month-directory-selected")){
-                        directoryModel.classList.add("work-month-directory-selected");
-                        $(directoryModel).get(".bi-folder", el => el.toggleClass("d-none"));
-                        $(directoryModel).get(".bi-folder2-open", el => el.toggleClass("d-none"));
-                    }
-
-                    setData(month);
-                })
-            })
-
-            handleMonthPopover();
-            handleFolderContextClick();
-        }
+        response && setDirectories(response, currentWorkingMonth);
     })
-    setData(actualWorkMonth);
+    setData(currentWorkingMonth);
 }
 
 const handleMonthPopover = () => {
@@ -877,8 +992,46 @@ const splashScreen = {
     "dismiss": () => alertBackdrop.classList.remove("d-none")
 }
 
+const listeners = {
+    start: () => {
+        // Set user
+        $("#form-user-credentials").on("submit", (e) => handleFormCredentialSubmit(e));
+
+        // Notifications
+        $(".notifications .bell").on("click", () => notifications.toggle());
+
+        // Automation Start
+        $(".btn-start").on("click", startInsertions);
+
+        // Add Items
+        $(".btn-add").on("click", handleAddItems);
+
+        // Create working month directory
+        $(".btn-create").on("click", handleCreateWorkingMonth);
+
+        // Perfil click
+        $(".container-settings").on("click", handleContainerSettingsClick);
+        
+        // Content click
+        $(".content").on("click", handleContentClick);
+        
+        // Body click
+        $("body").on("click", handleBodyClick);
+        
+        // Open perfil modal
+        $(".perfil").on("click", handleOpenPerfil);
+        
+        // Remove user
+        $(".perfil-modal-info .remove-user").on("click", handleRemoveUser);
+
+        // Settings
+        $(".perfil-modal-info .settings").on("click", handleSettingsClick);
+    }
+};
 
 window.onload = () => {
+    listeners.start();
+
     isUserSet().then(response => {
         splashScreen.show();
         if(response) {
@@ -886,6 +1039,8 @@ window.onload = () => {
             splashScreen.dismiss();
             setSelectMonths();
             setTimeout(() => init(), timeout); //1000
+
+            notifications.getNotifications();
         }
 
         toggleInputPass(togglePassword, password);
@@ -895,12 +1050,12 @@ window.onload = () => {
 }
 
 
-$(window).on('contextmenu', e => {
-    if (e.button == 2){
-        e.preventDefault();
-        return false;
-    }
-})
+// $(window).on('contextmenu', e => {
+//     if (e.button == 2){
+//         e.preventDefault();
+//         return false;
+//     }
+// })
 
 $(window).on('keyup', e => {
     if (e.key === 93){

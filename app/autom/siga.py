@@ -275,12 +275,6 @@ class Siga:
                         document_already_exists = True
                         self.driver.find_element(By.XPATH, modal_btn_no_xpath).click()
 
-                    insert_notification({
-                        "icon": "danger",
-                        "header": self.notification.header_error,
-                        "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-                        "message": self.notification.document_exists_msg
-                    })
                     return False
             
             except NoSuchElementException as ex:
@@ -302,16 +296,8 @@ class Siga:
                                 .presence_of_element_located((By.XPATH, close)))
 
                         self.driver.find_element(By.XPATH, close).click()
-                        
-                        if item["insert-type"] == "MOVINT":
-                            insert_notification({
-                                "icon": "success",
-                                "header": self.notification.header_success,
-                                "title": f'{item["file-name"]} - R$ {item["value"]} - SAQ {item["orig-account"]}',
-                                "message": self.notification.document_sent_success
-                            })
                             
-                            return True
+                        return True
     
                     except TimeoutException as ex:
                         if document_already_exists:
@@ -342,12 +328,6 @@ class Siga:
                 if confirm_modal.size != 0 or confirm_modal.is_diplayed():
                     confirm_modal.click()
 
-                    insert_notification({
-                        "icon": "success",
-                        "header": self.notification.header_success,
-                        "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-                        "message": self.notification.document_sent_success
-                    })
                     return True
 
             except NoSuchElementException as ex:
@@ -405,23 +385,15 @@ class Siga:
 
             transform_drop = '//*[@id="select2-chosen-7"]'
             transform_input = '//*[@id="s2id_autogen7_search"]' # forma de transferencia
-
-            num_doc_drop = '//*[@id="f_main"]/div[1]/div[3]/div/label'
             num_doc_input = '//*[@id="f_documento"]'
-
             value = '//*[@id="f_valor"]'
-
             receiver = '//*[@id="f_nomefavorecido"]' #favorecido
-
             orig_account_drop = '//*[@id="select2-chosen-8"]'
             orig_account_input = '//*[@id="s2id_autogen8_search"]'
-
             dest_account_drop = '//*[@id="select2-chosen-10"]'
             dest_account_input = '//*[@id="s2id_autogen10_search"]'
-
             hist = '//*[@id="select2-chosen-9"]'
             hist_input = '//*[@id="s2id_autogen9_search"]'
-
             complement = '//*[@id="f_complemento"]'
 
             sleep(5)

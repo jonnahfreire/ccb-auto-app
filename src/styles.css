@@ -123,8 +123,6 @@ body {width: 100%; height: 100%; user-select: none;}
     border-radius: 5px;
 
     box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.1);
-    overflow-y: scroll;
-    
     cursor: auto;
 }
 
@@ -139,8 +137,43 @@ body {width: 100%; height: 100%; user-select: none;}
 }
 
 .notification-item-container {
+    max-height: fit-content;
+
+    overflow-y: scroll;
     padding: 2px;
+
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    flex: 2;
 }
+
+.notification-item-container::-webkit-scrollbar {
+    width: 0;
+}
+
+.notification-items-container .clear-notifications {
+    background-color: #f8f8f8;
+    height: 22px;
+    
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+.notification-items-container .notification-clear-all {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-items-container .clear-notifications span {
+    font-size: smaller;
+    margin-right: 3px;
+    cursor: pointer;
+}
+
+.notification-items-container .clear-notifications span:hover {
+    text-decoration: underline;
+}
+
 
 @keyframes remove-notification-item {
     from {transform: translateX(-10%); opacity: 0.7;}
@@ -343,11 +376,6 @@ body {width: 100%; height: 100%; user-select: none;}
 
     font-size: small;
     transition: .2s all;
-    opacity: 0;
-}
-
-.p-m-opacity {
-    opacity: 1;
 }
 
 .f-c-opacity {
@@ -653,7 +681,8 @@ body {width: 100%; height: 100%; user-select: none;}
 
 .select-month-modal-backdrop,
 .remove-month-modal-backdrop,
-.remove-user-modal-backdrop {
+.remove-user-modal-backdrop,
+.system-running-modal-backdrop {
     width: 100%;
     height: 100%;
 
@@ -665,7 +694,8 @@ body {width: 100%; height: 100%; user-select: none;}
 
 .modal-select-month,
 .modal-remove-month,
-.modal-remove-user {
+.modal-remove-user,
+.modal-alert-running {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -692,9 +722,14 @@ body {width: 100%; height: 100%; user-select: none;}
     z-index: 999;
 }
 
-.modal-remove-user {
+.modal-remove-user, .modal-alert-running {
     width: 260px;
     height: 150px;
+}
+
+.modal-alert-running {
+    justify-content: space-between;
+    height: fit-content;
 }
 
 .modal-remove-month {
@@ -702,7 +737,9 @@ body {width: 100%; height: 100%; user-select: none;}
     height: 150px;
 }
 
-.modal-select-header, .modal-remove-header {
+.modal-select-header, 
+.modal-remove-header,
+.modal-alert-header {
     display: flex;
     flex-direction: row;
 
@@ -711,7 +748,8 @@ body {width: 100%; height: 100%; user-select: none;}
 }
 
 .modal-select-header .modal-month-title, 
-.modal-remove-header .modal-remove-title {
+.modal-remove-header .modal-remove-title,
+.modal-alert-header .modal-alert-title {
     vertical-align: middle;
     text-align: center;
     width: inherit;
@@ -721,12 +759,15 @@ body {width: 100%; height: 100%; user-select: none;}
     border-bottom: 1px solid rgba(0, 0, 0, 0.3);
 }
 
-.modal-remove-header .modal-remove-title  {
+.modal-remove-header .modal-remove-title,
+.modal-alert-header .modal-alert-title {
     text-align: left;
     padding-left: 10px;
 }
 
-.modal-select-header svg, .modal-remove-header svg {
+.modal-select-header svg, 
+.modal-remove-header svg,
+.modal-alert-header svg {
     width: 35px;
     height: 35px;
     margin-top: 5px;
@@ -738,7 +779,8 @@ body {width: 100%; height: 100%; user-select: none;}
 
 .modal-month-body, 
 .modal-remove-body,
-.modal-remove-user-body {
+.modal-remove-user-body,
+.modal-alert-running-body {
     width: inherit;
     height: 90px;
     display: flex;
@@ -749,13 +791,22 @@ body {width: 100%; height: 100%; user-select: none;}
 }
 
 .modal-remove-body,
-.modal-remove-user-body  {
+.modal-remove-user-body,
+.modal-alert-running-body {
     height: 50px;
     padding: 10px;
     align-items: center;
     justify-content: center;
 
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.modal-alert-running-body {
+    height: 80px;
+
+    padding-top: 0;
+    padding-bottom: 0;
+    margin: 0;
 }
 
 .work-month-select {
@@ -772,12 +823,14 @@ body {width: 100%; height: 100%; user-select: none;}
     z-index: 999;
 }
 
-.modal-remove-body-message p {
-    text-align: justify;
+.modal-remove-body-message p,
+.modal-alert-running-body p {
+    text-align: left;
 }
 
 .modal-remove-footer,
-.modal-remove-user-footer {
+.modal-remove-user-footer,
+.modal-alert-running-footer {
     width: inherit;
     height: 40px;
 
@@ -786,8 +839,13 @@ body {width: 100%; height: 100%; user-select: none;}
     justify-content: flex-end;
 }
 
+.modal-alert-running-footer {
+    height: 40px;
+}
+
 .modal-remove-footer .btn-ok,
 .modal-remove-user-footer .btn-ok,
+.modal-alert-running-footer .btn-ok,
 .modal-remove-footer .btn-cancel,
 .modal-remove-user-footer .btn-cancel {
     margin-right: 10px;
@@ -909,8 +967,6 @@ body {width: 100%; height: 100%; user-select: none;}
 .debt-item.status.bg-danger .status-error-msg {
     position: absolute;
 
-    background-color: rgba(255, 0, 0, .5);
-
     top: 17%;
     right: 2.5%;
 
@@ -920,6 +976,7 @@ body {width: 100%; height: 100%; user-select: none;}
 
     box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.1);
     transition: .5s linear;
+    z-index: 999;
 }
 
 

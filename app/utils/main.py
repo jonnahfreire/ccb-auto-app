@@ -29,6 +29,7 @@ class InsertionStatus:
         self.started: bool = False
         self.finished: bool = False
         self.finished_all: bool = False
+        self.finished_all_with_exceptions: bool = False
         self.failed: bool = False
         self.failed_all: bool = False
         self.fail_cause: str = None
@@ -51,6 +52,9 @@ class InsertionStatus:
         
     def set_finished_all(self):
         self.finished_all = True
+    
+    def set_finished_all_with_exceptions(self):
+        self.finished_all_with_exceptions = True
     
     def set_failed(self, failed: bool):
         self.failed = failed
@@ -75,6 +79,7 @@ class InsertionStatus:
                 "started": self.started,
                 "finished": self.finished,
                 "finished_all": self.finished_all,
+                "finished_all_with_exceptions": self.finished_all_with_exceptions,
                 "failed": self.failed,
                 "failed_all": self.failed_all,
                 "fail_cause": self.fail_cause,
