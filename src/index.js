@@ -12,7 +12,7 @@ const containerContentHeader   = _$(".container-content-header");
 const content                  = _$(".container-content .content");
 const folderContextMenu        = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
-const timeout = 100;
+const timeout = 1000;
 const statusCheckInterval = 100;
 const automation = {"running": false};
 
@@ -809,6 +809,45 @@ const showMonthPopover = (element) => {
     monthPopover.style.top = position.y + 60 + "px";
 }
 
+
+const handleFolderClick = (directoryContainer, directoryModel, month) => {
+    if (!automation.running) {  
+        const notStarted = _$(".status-container .not-started");
+        !$(notStarted).containClass("d-none") && $(notStarted).removeClass("d-none");
+        
+        const statusItems = [
+            _$(".status-container .started"),
+            _$(".status-container .finished"),
+            _$(".status-container .failed"),
+            _$(".status-container .finished-with-exceptions")
+        ]
+
+        statusItems.forEach(item => {
+            !$(item).containClass("d-none") && $(item).addClass("d-none");
+        })
+        
+        directoryContainer.querySelectorAll(".work-month-directory-selected")
+            .forEach(dir => {
+                dir.classList.contains("work-month-directory-selected")
+                    && dir.classList.remove("work-month-directory-selected");
+                
+                dir.querySelector(".bi-folder").classList.remove("d-none");
+                dir.querySelector(".bi-folder2-open").classList.add("d-none");
+            });
+        
+        if (!directoryModel.classList.contains("work-month-directory-selected")){
+            directoryModel.classList.add("work-month-directory-selected");
+            $(directoryModel).get(".bi-folder", el => el.toggleClass("d-none"));
+            $(directoryModel).get(".bi-folder2-open", el => el.toggleClass("d-none"));
+        }
+
+        setData(month);
+
+    } else {
+        modalAlertSysRunning.show("Não é possível visualizar os mêses enquanto a automação está em andamento.");
+    }
+};
+
 const setDirectories = (directoriesData, currentMonth) => {
     if (directoriesData.length > 0) {
         const directoryContainer = _$(".month-directories");
@@ -829,35 +868,7 @@ const setDirectories = (directoriesData, currentMonth) => {
             }
 
             $(directoryModel).on("click", () => {
-                if (!automation.running) {  
-                    const finished   = _$(".status-container .finished");
-                    const started    = _$(".status-container .started");
-                    const notStarted = _$(".status-container .not-started");
-                    !$(started).containClass("d-none") && $(finished).addClass("d-none");
-                    !$(finished).containClass("d-none") && $(finished).addClass("d-none");
-                    !$(notStarted).containClass("d-none") && $(notStarted).removeClass("d-none");
-                    
-                    directoryContainer.querySelectorAll(".work-month-directory-selected")
-                        .forEach(dir => {
-                            dir.classList.contains("work-month-directory-selected")
-                                && dir.classList.remove("work-month-directory-selected");
-                            
-                            dir.querySelector(".bi-folder").classList.remove("d-none");
-                            dir.querySelector(".bi-folder2-open").classList.add("d-none");
-                        });
-                    
-                    if (!directoryModel.classList.contains("work-month-directory-selected")){
-                        directoryModel.classList.add("work-month-directory-selected");
-                        $(directoryModel).get(".bi-folder", el => el.toggleClass("d-none"));
-                        $(directoryModel).get(".bi-folder2-open", el => el.toggleClass("d-none"));
-                    }
-
-                    setData(month);
-
-                } else {
-                    modalAlertSysRunning.show("Não é possível visualizar os mêses enquanto a automação está em andamento.");
-                }
-
+                handleFolderClick(directoryContainer, directoryModel, month);   
             })
         })
 
@@ -923,9 +934,8 @@ const init = () => {
     $(".container-content .current-month span")
         .setText(currentWorkingMonth.replace("-", "/"));
     
-    getUserName().then(response => {
-        username = response; 
-        $(".perfil .user-content #username").setText(username)
+    getUserName().then(username => {
+        username && $(".perfil .user-content #username").setText(username)
     })
 
     createWorkingDirectory(currentWorkingMonth)
