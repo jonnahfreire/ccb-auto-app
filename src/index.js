@@ -305,7 +305,11 @@ const handleAddItems = () => {
         modalAlertSysRunning.show("Não é possível inserir despesas ou receitas enquanto existe lançamentos em andamento.");
         return false;
     }
-    getFilesFromFolder().then(response => response && init())
+    getFilesFromFolder().then(response => {
+        notifications.getNotifications();
+
+        response && init();
+    });
 };
 
 const notifications = {
