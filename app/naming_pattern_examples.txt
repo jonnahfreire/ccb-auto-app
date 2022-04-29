@@ -1,0 +1,19 @@
+# ---------------------------------------------------------------------------------------------
+# Movimentação Interna:
+#  - caixa 1000:
+#     	CH SAQ numero_cheque - dia_mes_ano - R$ valor - SUPRIMENTO CAIXA 1000
+# ---------------------------------------------------------------------------------------------
+#
+# Despesas caixa 1000
+#       CF numero_cf - dia_mes_ano - R$ valor - emissor - DP codigo_despesa
+#----------------------------------------------------------------------------------------------
+#
+# Despesas em cheques 1010
+#       NF numero_nf - CH numero_cheque - dia_mes_ano - R$ valor - emissor - DP codigo_despesa
+# ---------------------------------------------------------------------------------------------
+#
+# Débito Automático
+#       DB AT LUZ numero_nf - dia_mes_ano - R$ valor - emissor - DP 3006
+#       DB AT FONE numero_nf - dia_mes_ano - R$ valor - emissor - DP 3008
+#----------------------------------------------------------------------------------------------
+
