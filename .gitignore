@@ -14,7 +14,6 @@ app/UI/__pycache__/*
 app/execlogs/logs.db
 test.py
 build
-dist
 main.spec
 compile.sh
 ANOTACOES.txt 
