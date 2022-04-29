@@ -818,12 +818,13 @@ const handleFolderClick = (directoryContainer, directoryModel, month) => {
         const statusItems = [
             _$(".status-container .started"),
             _$(".status-container .finished"),
-            _$(".status-container .failed"),
+            _$(".status-container .finished-with-fail"),
             _$(".status-container .finished-with-exceptions")
         ]
 
         statusItems.forEach(item => {
-            !$(item).containClass("d-none") && $(item).addClass("d-none");
+            !(item.classList.contains("d-none"))
+            && _$(item).classList.add("d-none");
         })
         
         directoryContainer.querySelectorAll(".work-month-directory-selected")
@@ -1060,12 +1061,12 @@ window.onload = () => {
 }
 
 
-$(window).on('contextmenu', e => {
-    if (e.button == 2){
-        e.preventDefault();
-        return false;
-    }
-})
+// $(window).on('contextmenu', e => {
+//     if (e.button == 2){
+//         e.preventDefault();
+//         return false;
+//     }
+// })
 
 $(window).on('keyup', e => {
     if (e.key === 93){
