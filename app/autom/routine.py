@@ -90,12 +90,12 @@ def save_item(routine: Siga, file_path: str, item: dict, status: InsertionStatus
 
 def start(files_path: str, work_month: str, 
     user: dict, items_list: list[dict], 
-    window: bool, status: InsertionStatus) -> None:
+    no_window: bool, status: InsertionStatus) -> None:
     
     username: str = user["name"]
     passwd: str = user["passwd"]
 
-    selenium: Selenium = Selenium(ccb_siga, window)
+    selenium: Selenium = Selenium(ccb_siga, no_window)
     status.set_starting()
 
     for item in items_list:
