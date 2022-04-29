@@ -154,8 +154,11 @@ def get_classified_files(path:str) -> list[dict]:
     return []
 
 
-def move_classified_files_to_sist_path(
+def move_classified_files(
     path: str, file: dict) -> bool:
+
+    if not check_name_pattern(file):
+        return False
     
     files: list[str] = get_unclassified_files_from(path)
     keys: list = file.keys()
@@ -179,7 +182,8 @@ def move_classified_files_to_sist_path(
             base_account_path = os.path.join(sist_path, work_month, base_account)
 
             for item in files:
-                if file["file-name"] in item and  ":".join(file["date"]) in item\
+                if file["file-name"] is not None and file["file-name"] in item\
+                    and file["date"] is not None and  ":".join(file["date"]) in item\
                     or "_".join(file["date"]) in item and file["emitter"] in item\
                     and file["value"] in item:
                     filename = item
