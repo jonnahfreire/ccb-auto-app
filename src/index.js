@@ -1061,12 +1061,12 @@ window.onload = () => {
 }
 
 
-// $(window).on('contextmenu', e => {
-//     if (e.button == 2){
-//         e.preventDefault();
-//         return false;
-//     }
-// })
+$(window).on('contextmenu', e => {
+    if (e.button == 2){
+        e.preventDefault();
+        return false;
+    }
+})
 
 $(window).on('keyup', e => {
     if (e.key === 93){
