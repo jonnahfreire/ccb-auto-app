@@ -154,8 +154,11 @@ def get_classified_files(path:str) -> list[dict]:
     return []
 
 
-def move_classified_files_to_sist_path(
+def move_classified_files(
     path: str, file: dict) -> bool:
+
+    if not check_name_pattern(file):
+        return False
     
     files: list[str] = get_unclassified_files_from(path)
     keys: list = file.keys()
