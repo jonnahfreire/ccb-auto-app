@@ -35,14 +35,9 @@ def get_data_from_filename(model, file: str) -> dict:
             model.type = "NOTA FISCAL"
             model.hist1 = "021"
             model.hist2 = "023"
-            model.num = data.replace("CF", "")\
-                            .replace("CF RC", "")\
-                            .replace("NF", "")\
-                            .replace("NF RC", "")\
-                            .replace("RC", "")\
-                            .replace("CP", "")\
-                            .replace("CP RC", "").strip()
-
+            sg_list: list = ["CF", "CF RC", "NF", "NF RC", "RC", "CP", "CP RC"] 
+            model.num = [data.replace(sg, "") for sg in sg_list][0].strip()
+                            
         if len(data) > 0 and data[:3] == "05_":
             model.cost_center = data.replace("_", "-").strip()
 
