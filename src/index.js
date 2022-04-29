@@ -305,7 +305,11 @@ const handleAddItems = () => {
         modalAlertSysRunning.show("Não é possível inserir despesas ou receitas enquanto existe lançamentos em andamento.");
         return false;
     }
-    getFilesFromFolder().then(response => response && init())
+    getFilesFromFolder().then(response => {
+        notifications.getNotifications();
+
+        response && init();
+    });
 };
 
 const notifications = {
@@ -412,6 +416,8 @@ const notifications = {
 
             notificationItem.querySelector(".notification-delete-x")
                 .addEventListener("click", () => {
+                    if (automation.running) return false;
+
                     removeNotification(item.id)
                         .then(response => {
                             if (response) {
@@ -427,6 +433,8 @@ const notifications = {
         notifications.getNotifications();
     },
     removeAll: () => {
+        if (automation.running) return false;
+        
         _$$(".notifications .notification-item")
             .forEach(item => {
                 id = Number.parseInt(item.getAttribute("data-id"));
