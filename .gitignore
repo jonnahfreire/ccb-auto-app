@@ -15,5 +15,4 @@ app/execlogs/logs.db
 test.py
 build
 main.spec
-compile.sh
 ANOTACOES.txt 
