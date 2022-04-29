@@ -15,7 +15,7 @@ from app.utils.filemanager import select_dir
 from app.utils.filemanager import remove_directory
 
 from app.data.main import get_classified_files 
-from app.data.main import move_classified_files_to_sist_path
+from app.data.main import move_classified_files
 from app.data.main import get_modelized_items
 
 from app.autom.routine import insert_item
@@ -32,12 +32,10 @@ STATUS: InsertionStatus = None
 
 @eel.expose
 def is_user_set() -> bool:
-    create_config_path()
     user_credential = Credential()
     user_data = user_credential.get_user_credentials()
 
     return not len(user_data) == 0
-
 
 @eel.expose
 def remove_current_user() -> bool:
@@ -91,7 +89,7 @@ def get_screen_size():
 
 @eel.expose
 def create_work_directory(work_month: str) -> bool:
-    work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))                   
+    work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))                
     return set_initial_struct_dirs(work_month_path)
 
 
@@ -176,9 +174,25 @@ def get_files_from_folder() -> bool:
     success: bool = False
     if path is not None:
         classified_files = get_classified_files(path)
+        for item in classified_files:
+            success = move_classified_files(path, item)
 
-        for i in classified_files:
-            success = move_classified_files_to_sist_path(path, i)
+            if not success:
+                if item["insert-type"] == "MOVINT":
+                    insert_notification({
+                        "icon": "danger",
+                        "header": "Não foi possível adicionar documento.",
+                        "title": f'{item["file-name"]} - R$ {item["value"]}',
+                        "message": "O padrão de nomeação não foi reconhecido"
+                    })
+
+                if item["insert-type"] == "DEBT":
+                    insert_notification({
+                        "icon": "danger",
+                        "header": "Não foi possível adicionar documento.",
+                        "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
+                        "message": "O padrão de nomeação não foi reconhecido"
+                    })
         
     return success
 
@@ -222,10 +236,10 @@ def get_data(work_month: str, all: bool = False) -> dict:
 
 
 def main() -> None:
+    create_config_path()
     eel.init("src")
     eel.start("index.html", port=8090, size=(int(screen_size[0]), int(screen_size[1])), position=(230, 50))
 
 
 if __name__ == "__main__":
     main()
-    
