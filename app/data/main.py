@@ -1,4 +1,5 @@
 import os
+from time import sleep
 
 from app.models import models
 from app.models.models import *
@@ -6,7 +7,11 @@ from app.models.models import *
 from app.config.globals import sist_path, extensions, accepted_accounts
 
 from app.utils.main import get_items_models_list
-from app.utils.filemanager import copy_file_to, set_initial_struct_dirs
+from app.utils.filemanager import copy_file_to
+from app.utils.filemanager import set_initial_struct_dirs
+from app.utils.filemanager import get_month_directories
+
+from app.execlogs.notifications import document_already_inserted, document_pattern_not_match
 
 
 def get_data_from_filename(model, file: str) -> dict:
@@ -90,7 +95,7 @@ def get_data_from_filename(model, file: str) -> dict:
             model.type = "RECIBO"
             model.hist1, model.hist2 = "024", "024"
         
-        if len(data) > 0 and "DP" in data:
+        if len(data) > 0 and "DP" in data.upper():
             model.expenditure = data.replace("DP", "").strip()
 
     return model.get_mapped_data()
@@ -125,25 +130,41 @@ def get_classified_files(path:str) -> list[dict]:
     if isinstance(path, str) and os.path.exists(path):
         files: list[str] = get_unclassified_files_from(path)
 
-        # despesas gerais
-        file_data_list: list[dict] = [
-            _ for _ in [
-                get_data_from_filename(BaseModel(), file) 
-                for file in files
-            ]
-            if _["expenditure"] is not None
-            and _["expenditure"] in accepted_accounts
-        ]
-        # ------------------------------------------------------------
+        inserted_files: list = []
+        for month in get_month_directories():
+            [inserted_files.append(item) for item in get_month_inserted_items(month)]
 
-        # movimentação interna
+        modelized_files: list = []
         for file in files:
-            modelized_file = get_data_from_filename(Model1415(), file)
+            item: dict = {}
+            modelized_db_item: dict = get_data_from_filename(BaseModel(), file)
+            modelized_mi_item: dict = get_data_from_filename(Model1415(), file)
+
+            # despesas gerais
+            if check_name_pattern(modelized_db_item):
+                item = modelized_db_item
             
-            if modelized_file.get("orig-account") is not None\
-                and modelized_file.get("dest-account") is not None\
-                and modelized_file.get("complement") is not None:
-                file_data_list.append(modelized_file)
+            #movimentação interna
+            if check_name_pattern(modelized_mi_item):
+                item = modelized_mi_item
+
+            if not file in inserted_files:
+                modelized_files.append(item)
+            else:
+                document_already_inserted(item)
+
+        file_data_list: list[dict] = []
+        for modelized_item in modelized_files:
+            # despesas gerais
+            if modelized_item["expenditure"] is not None\
+               and modelized_item["expenditure"] in accepted_accounts:
+               file_data_list.append(modelized_item)
+        # ------------------------------------------------------------
+            # movimentação interna
+            if modelized_item.get("orig-account") is not None\
+                and modelized_item.get("dest-account") is not None\
+                and modelized_item.get("complement") is not None:
+                file_data_list.append(modelized_item)
         # -------------------------------------------------------------
         return file_data_list
     return []
@@ -244,3 +265,29 @@ def check_name_pattern(item: dict) -> bool:
         # Verificações futuras
     
     return False
+
+
+def get_month_inserted_items(month: str) -> list:
+    sleep(0.3)
+    work_month_path: str = os.path.join(sist_path, month)
+
+    if not os.path.isdir(work_month_path):
+        return False
+
+    dirs: list = os.listdir(work_month_path)
+    items_dirs: list = [os.listdir(os.path.join(work_month_path, _dir)) for _dir in dirs]
+    
+    files: list = []
+    for item_dir in items_dirs:
+        for _dir in item_dir:
+            path_1000: str = os.path.join(sist_path, month, "1000", _dir, "Lancados")
+            path_1010: str = os.path.join(sist_path, month, "1010", _dir, "Lancados")
+            
+            if os.path.exists(path_1000):
+                [files.append(item) for item in os.listdir(os.path.join(path_1000))]
+            
+            if os.path.exists(path_1010):
+                [files.append(item) for item in os.listdir(os.path.join(path_1010))]
+
+        
+    return files
