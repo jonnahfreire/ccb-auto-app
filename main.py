@@ -14,7 +14,8 @@ from app.utils.filemanager import get_month_directories
 from app.utils.filemanager import select_dir
 from app.utils.filemanager import remove_directory
 
-from app.data.main import get_classified_files 
+from app.data.main import get_classified_files
+from app.data.main import get_month_inserted_items
 from app.data.main import move_classified_files
 from app.data.main import get_modelized_items
 
@@ -143,29 +144,8 @@ def alert(title: str, msg:str) -> None:
 
 
 @eel.expose
-def month_has_inserted_debts(month: str) -> bool:
-    sleep(0.3)
-    work_month_path: str = os.path.join(sist_path, month)
-
-    if not os.path.isdir(work_month_path):
-        return False
-
-    dirs: list = os.listdir(work_month_path)
-    debt_dirs: list = [os.listdir(os.path.join(work_month_path, _dir)) for _dir in dirs]
-    
-    files: list = []
-    for debt_dir in debt_dirs:
-        for _dir in debt_dir:
-            path_1000: str = os.path.join(sist_path, month, "1000", _dir, "Lancados")
-            path_1010: str = os.path.join(sist_path, month, "1010", _dir, "Lancados")
-            
-            if os.path.exists(path_1000):
-                files.append(os.listdir(os.path.join(path_1000)))
-            
-            if os.path.exists(path_1010):
-                files.append(os.listdir(os.path.join(path_1010)))
-        
-    return len(files) > 0
+def month_has_inserted_debts(month: str) -> bool:        
+    return len(get_month_inserted_items(month)) > 0
     
 
 @eel.expose 
@@ -180,21 +160,7 @@ def get_files_from_folder() -> bool:
             success = move_classified_files(path, item)
 
             if not success:
-                if item["insert-type"] == "MOVINT":
-                    insert_notification({
-                        "icon": "danger",
-                        "header": "Não foi possível adicionar documento.",
-                        "title": f'{item["file-name"]} - R$ {item["value"]}',
-                        "message": "O padrão de nomeação não foi reconhecido"
-                    })
-
-                if item["insert-type"] == "DEBT":
-                    insert_notification({
-                        "icon": "danger",
-                        "header": "Não foi possível adicionar documento.",
-                        "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-                        "message": "O padrão de nomeação não foi reconhecido"
-                    })
+                document_already_inserted(item)
         
     return success
 
