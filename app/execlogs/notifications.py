@@ -1,3 +1,4 @@
+from re import template
 import sqlite3
 from sqlite3 import Connection, Cursor
 
@@ -128,36 +129,34 @@ def get_notifications() -> list:
 
 
 def document_pattern_not_match(item: dict) -> None:
-    if item["insert-type"] == "MOVINT":
-        insert_notification({
+    template: dict = {
             "icon": "danger",
             "header": "Não foi possível adicionar documento.",
-            "title": f'{item["file-name"]} - R$ {item["value"]}',
+            "title": None,
             "message": "O padrão de nomeação não foi reconhecido"
-        })
+        }
+
+    if item["insert-type"] == "MOVINT":
+        template["title"] = f'{item["file-name"]} - R$ {item["value"]}'
+        insert_notification(template)
 
     if item["insert-type"] == "DEBT":
-        insert_notification({
-            "icon": "danger",
-            "header": "Não foi possível adicionar documento.",
-            "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-            "message": "O padrão de nomeação não foi reconhecido"
-        })
+        template["title"] = f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}'
+        insert_notification(template)
 
 
 def document_already_inserted(item: dict) -> None:
-    if item["insert-type"] == "MOVINT":
-        insert_notification({
+    template: dict = {
             "icon": "danger",
             "header": "Não foi possível adicionar documento.",
-            "title": f'{item["file-name"]} - R$ {item["value"]}',
+            "title": None,
             "message": "Documento já consta nos lançamentos realizados."
-        })
+        }
+
+    if item["insert-type"] == "MOVINT":
+        template["title"] = f'{item["file-name"]} - R$ {item["value"]}'
+        insert_notification(template)
 
     if item["insert-type"] == "DEBT":
-        insert_notification({
-            "icon": "danger",
-            "header": "Não foi possível adicionar documento.",
-            "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-            "message": "Documento já consta nos lançamentos realizados."
-        })
+        template["title"] = f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}'
+        insert_notification(template)
