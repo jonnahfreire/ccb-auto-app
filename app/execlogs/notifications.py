@@ -125,3 +125,39 @@ def get_notifications() -> list:
 
     notification_obj.commit()
     return notification_list
+
+
+def document_pattern_not_match(item: dict) -> None:
+    if item["insert-type"] == "MOVINT":
+        insert_notification({
+            "icon": "danger",
+            "header": "Não foi possível adicionar documento.",
+            "title": f'{item["file-name"]} - R$ {item["value"]}',
+            "message": "O padrão de nomeação não foi reconhecido"
+        })
+
+    if item["insert-type"] == "DEBT":
+        insert_notification({
+            "icon": "danger",
+            "header": "Não foi possível adicionar documento.",
+            "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
+            "message": "O padrão de nomeação não foi reconhecido"
+        })
+
+
+def document_already_inserted(item: dict) -> None:
+    if item["insert-type"] == "MOVINT":
+        insert_notification({
+            "icon": "danger",
+            "header": "Não foi possível adicionar documento.",
+            "title": f'{item["file-name"]} - R$ {item["value"]}',
+            "message": "Documento já consta nos lançamentos realizados."
+        })
+
+    if item["insert-type"] == "DEBT":
+        insert_notification({
+            "icon": "danger",
+            "header": "Não foi possível adicionar documento.",
+            "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
+            "message": "Documento já consta nos lançamentos realizados."
+        })
