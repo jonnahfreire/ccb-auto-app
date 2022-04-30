@@ -59,33 +59,14 @@ def upload_item_from(routine: Siga, file_path: str) -> None:
 def save_item(routine: Siga, file_path: str, item: dict, status: InsertionStatus) -> None:
     if routine.save(item):
         status.set_finished(True)
-        if item["insert-type"] == "MOVINT":
-            insert_notification({
-                "icon": "success",
-                "header": Notification().header_success,
-                "title": f'{item["file-name"]} - R$ {item["value"]} - SAQ {item["orig-account"]}',
-                "message": Notification().document_sent_success
-            })
-
-        if item["insert-type"] == "DEBT": 
-            insert_notification({
-                "icon": "success",
-                "header": Notification().header_success,
-                "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-                "message": Notification().document_sent_success
-            })
+        insertion_success_notification(item)
 
     else:
         status.set_fail_cause(save_error_msg)
         status.set_failed(True)
         FAIL_SENDING.append(file_path)
         EXISTING_FILES.append(file_path)
-        insert_notification({
-            "icon": "danger",
-            "header": Notification().header_error,
-            "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-            "message": Notification().document_exists_msg
-        })
+        document_already_exists_notification(item)
 
 
 def start(files_path: str, work_month: str, 
@@ -121,12 +102,7 @@ def start(files_path: str, work_month: str,
                         status.set_finished(True)
 
             else:
-                insert_notification({
-                    "icon": "danger",
-                    "header": "Não foi possível logar no sistema.",
-                    "title": "ccb-auto: não conseguiu autenticar usuário.",
-                    "message": "Verifique seu acesso, ou redefina os dados de acesso."
-                })
+                login_error_notification()
                 status.set_access_error(access_error_msg)
                 selenium.close()
                 break
@@ -134,21 +110,7 @@ def start(files_path: str, work_month: str,
             selenium.close()
 
         else:
-            if item["insert-type"] == "MOVINT":
-                insert_notification({
-                    "icon": "danger",
-                    "header": "Não foi possível iniciar lançamento.",
-                    "title": f'{item["file-name"]} - R$ {item["value"]}',
-                    "message": "O padrão de nomeação não foi reconhecido"
-                })
-
-            if item["insert-type"] == "DEBT":
-                insert_notification({
-                    "icon": "danger",
-                    "header": "Não foi possível iniciar lançamento.",
-                    "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-                    "message": "O padrão de nomeação não foi reconhecido"
-                })
+            name_pattern_error_notification(item)
             FAIL_SENDING.append(item)
             status.set_failed(True)
             status.set_fail_cause("O padrão de nomeação não foi reconhecido")
@@ -183,6 +145,11 @@ def movint_insertion(routine: Siga, item: dict, status: InsertionStatus) -> bool
             sleep(3)
             save_item(routine, file_path, item, status)
             return True
+        else:
+            filepath_error_notification(item)
+            status.set_failed(True)
+            status.set_fail_cause("Caminho do arquivo não foi encontrado!")
+            return False
 
     return False
 
@@ -201,32 +168,17 @@ def debt_insertion(routine: Siga, files_path: list[str], item: dict,
                 return True
                 
             else:
-                insert_notification({
-                    "icon": "danger",
-                    "header": Notification().header_error,
-                    "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-                    "message": "Caminho do arquivo não foi encontrado!"
-                })
+                filepath_error_notification(item)
                 status.set_failed(True)
                 status.set_fail_cause("Caminho do arquivo não foi encontrado!")
                 return False
         else:
-            insert_notification({
-                "icon": "danger",
-                "header": Notification().header_error,
-                "title": f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}',
-                "message": "Erro ao inserir dados. Contate o desenvolvedor!"
-            })
+            insertion_error_notification(item)
             status.set_failed(True)
             status.set_fail_cause("Erro ao inserir dados do lançamento.")
             return False
     else:
-        insert_notification({
-            "icon": "danger",
-            "header": "Não foi possível iniciar lançamento.",
-            "title": "ccb-auto: não foi possível abrir rotina de despesas.",
-            "message": "Erro de rotina. Contate o desenvolvedor!"
-        })
+        start_insertion_error_notification()
         status.set_failed(True)
         status.set_fail_cause("Não foi possível abrir rotina de despesas.")
         status.set_insertion_error(insert_error_msg)
