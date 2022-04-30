@@ -1,4 +1,3 @@
-from re import template
 import sqlite3
 from sqlite3 import Connection, Cursor
 
@@ -128,14 +127,7 @@ def get_notifications() -> list:
     return notification_list
 
 
-def document_pattern_not_match(item: dict) -> None:
-    template: dict = {
-            "icon": "danger",
-            "header": "Não foi possível adicionar documento.",
-            "title": None,
-            "message": "O padrão de nomeação não foi reconhecido"
-        }
-
+def insert_based_template_notification(template: dict, item: dict) -> None:
     if item["insert-type"] == "MOVINT":
         template["title"] = f'{item["file-name"]} - R$ {item["value"]}'
         insert_notification(template)
@@ -143,20 +135,99 @@ def document_pattern_not_match(item: dict) -> None:
     if item["insert-type"] == "DEBT":
         template["title"] = f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}'
         insert_notification(template)
+
+
+def login_error_notification() -> None:
+    insert_notification({
+        "icon": "danger",
+        "header": "Não foi possível logar no sistema.",
+        "title": "ccb-auto: não conseguiu autenticar usuário.",
+        "message": "Verifique seu acesso, ou redefina os dados de acesso."
+    })
+
+
+def document_pattern_not_match(item: dict) -> None:
+    template: dict = {
+        "icon": "danger",
+        "header": "Não foi possível adicionar documento.",
+        "title": None,
+        "message": "O padrão de nomeação não foi reconhecido"
+    }
+
+    insert_based_template_notification(template, item)
 
 
 def document_already_inserted(item: dict) -> None:
     template: dict = {
-            "icon": "danger",
-            "header": "Não foi possível adicionar documento.",
-            "title": None,
-            "message": "Documento já consta nos lançamentos realizados."
-        }
+        "icon": "danger",
+        "header": "Não foi possível adicionar documento.",
+        "title": None,
+        "message": "Documento já consta nos lançamentos realizados."
+    }
 
-    if item["insert-type"] == "MOVINT":
-        template["title"] = f'{item["file-name"]} - R$ {item["value"]}'
-        insert_notification(template)
+    insert_based_template_notification(template, item)
 
-    if item["insert-type"] == "DEBT":
-        template["title"] = f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}'
-        insert_notification(template)
+
+def document_already_exists_notification(item: dict) -> None:
+    template: dict = {
+        "icon": "danger",
+        "header": Notification().header_error,
+        "title": None,
+        "message": Notification().document_exists_msg
+    }
+
+    insert_based_template_notification(template, item)
+
+
+def insertion_success_notification(item: dict) -> None:
+    template: dict = {
+        "icon": "success",
+        "header": Notification().header_success,
+        "title": None,
+        "message": Notification().document_sent_success
+    }
+
+    insert_based_template_notification(template, item)
+
+
+def name_pattern_error_notification(item: dict) -> None:
+    template: dict = {
+        "icon": "danger",
+        "header": "Não foi possível iniciar lançamento.",
+        "title": None,
+        "message": "O padrão de nomeação não foi reconhecido."
+    }
+
+    insert_based_template_notification(template, item)
+
+
+def filepath_error_notification(item: dict) -> None:
+    template: dict = {
+        "icon": "danger",
+        "header": Notification().header_error,
+        "title": None,
+        "message": "Caminho do arquivo não foi encontrado!"
+    }
+
+    insert_based_template_notification(template, item)
+
+
+def insertion_error_notification(item: dict) -> None:
+    template: dict = {
+        "icon": "danger",
+        "header": Notification().header_error,
+        "title": None,
+        "message": "Erro ao inserir dados. Contate o desenvolvedor!"
+    }
+
+    insert_based_template_notification(template, item)
+
+
+def start_insertion_error_notification() -> None:
+    insert_notification({
+        "icon": "danger",
+        "header": "Não foi possível iniciar lançamento.",
+        "title": "ccb-auto: não foi possível abrir rotina de despesas.",
+        "message": "Erro de rotina. Contate o desenvolvedor!"
+    })
+
