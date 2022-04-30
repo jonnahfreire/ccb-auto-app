@@ -14,5 +14,6 @@ app/UI/__pycache__/*
 app/execlogs/logs.db
 test.py
 build
+old-release
 main.spec
 ANOTACOES.txt 
