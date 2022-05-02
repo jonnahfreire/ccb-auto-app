@@ -1,5 +1,6 @@
 import os
 from time import sleep
+import tabula
 
 from app.models import models
 from app.models.models import *
@@ -11,7 +12,100 @@ from app.utils.filemanager import copy_file_to
 from app.utils.filemanager import set_initial_struct_dirs
 from app.utils.filemanager import get_month_directories
 
-from app.execlogs.notifications import document_already_inserted, document_pattern_not_match
+from app.execlogs.notifications import document_already_inserted
+
+
+
+class BankExtractData:
+    """Extrai os dados a partir do extrato bancário em PDF
+
+    Uso: 
+        extract = BankExtractData(extract_path : str)
+
+        data = extract.get_extract_data()
+
+        expenditures = extract.get_bank_expenditures()
+
+        revenues = extract.get_bank_revenues()
+    """
+
+    def __init__(self, extract_path: str) -> None:
+        self.path: str = extract_path
+        self.extract_data: list[dict] = []
+        self.expenditures: list[dict] = []
+        self.revenues: list[dict] = []
+
+        self.get_extract_data()
+        
+    def get_extract_data(self) -> list[dict]:
+        df = tabula.read_pdf(self.path, pages = "all")
+        data = [str(row).splitlines() for row in df]
+
+        for page in range(len(data)):
+            self.get_extract_modelized_data(data, page)
+        
+        return self.extract_data
+
+    # despesas bancárias
+    def get_bank_expenditures(self) -> list[dict]:
+        if not self.expenditures:
+            item = [item for item in self.extract_data if "D" in item.values()]
+            self.expenditures.append(item)
+
+        return self.expenditures
+
+    # receitas bancárias
+    def get_bank_revenues(self):
+        if not self.revenues:
+            item = [item for item in self.extract_data if "C" in item.values()]
+            self.revenues.append(item)
+
+        return self.revenues
+
+    def get_extract_modelized_data(self, data: list, page: int) -> None:
+        data_step1:list = []
+        data_step2:list = []
+        
+        for data in data[page]:
+            data_step1.append(data.replace(" ", "-"))
+
+        for data in data_step1:
+            if data_step1.index(data) == 1 and page == 1:
+                saldo_anterior = data.split("-")[-2]
+
+            if not data_step1.index(data) == 0 and not data_step1.index(data) == 1:
+                data_step2.append(
+                    [d for d in data.split("-") 
+                    if not d == '' and not "NaN" in d
+                ][1:-2])
+
+        for data in data_step2:
+            row: list[str] = []
+
+            if len(data) == 5 and not "Lançamentos" in data and not "Data" in data and not "APLICACAO" in data:
+                row = [data[0], data[1]] + [f"{data[2]} {data[3]}"] + [data[4]]
+
+            elif "APLICACAO" in data: 
+                row = data
+            
+            if len(data) == 6:
+                row = [data[0], data[1]] + [f"{data[2]} {data[3]}"] + [data[4], data[5]]
+
+            if len(data) == 7:
+                row = [data[0], data[1]] + [f"{data[2]} {data[3]} {data[4]}"] + [data[5], data[6]]
+
+            if len(row) > 0:
+                model = {
+                    "date" : row[0],
+                    "num"  : row[1],
+                    "desc" : row[2],
+                    "value": row[3],
+                    "type" : row[4]
+                }
+                model["type"] == "C" and self.revenues.append(model)
+                model["type"] == "D" and self.expenditures.append(model)
+                self.extract_data.append(model)
+                
 
 
 def get_data_from_filename(model, file: str) -> dict:
