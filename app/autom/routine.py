@@ -56,7 +56,9 @@ def upload_item_from(routine: Siga, file_path: str) -> None:
         FAIL_SENDING.append(file_path)
 
 
-def save_item(routine: Siga, file_path: str, item: dict, status: InsertionStatus) -> None:
+def save_item(routine: Siga, file_path: str, item: dict,
+    status: InsertionStatus) -> None:
+    
     if routine.save(item):
         status.set_finished(True)
         insertion_success_notification(item)
