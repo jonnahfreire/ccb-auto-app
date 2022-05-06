@@ -61,6 +61,34 @@ class BankExtractData:
             self.revenues.append(item)
 
         return self.revenues
+    
+    def get_modelized_bank_expenditures(self):
+        modelized_bank_expenditures: list[dict] = []
+        model = Model3030()
+        model2 = Model002()
+        for item in self.get_bank_expenditures():
+            values = item.values()
+            if "DB CEST PJ" in values or "MANUT CAD" in values:
+                model.date = item.get("date").split("/")
+
+                model.num = item.get("doc-num")
+                if item.get("desc") == "DEB CEST PJ":
+                    model.num = str(int(item.get("doc-num")[0]) + 1) + item.get("doc-num")[1:]
+
+                model.value     = item.get("value")
+                model.doc_num   = item.get("doc-num")
+                model.file_name = item.get("desc")
+                modelized_bank_expenditures.append(model.get_mapped_data())
+
+            if item.get("desc") == "APLICACAO":
+                model2.value = item.get("value")
+                model2.num   = item.get("doc-num")
+                model2.doc_num   = item.get("doc-num")
+                model2.file_name = item.get("desc")
+                model2.date  = item.get("date").split("/")
+                modelized_bank_expenditures.append(model2.get_mapped_data())  
+        
+        return modelized_bank_expenditures
 
     def get_extract_modelized_data(self, data: list, page: int) -> None:
         data_step1:list = []
@@ -97,7 +125,7 @@ class BankExtractData:
             if len(row) > 0:
                 model = {
                     "date" : row[0],
-                    "num"  : row[1],
+                    "doc-num"  : row[1],
                     "desc" : row[2],
                     "value": row[3],
                     "type" : row[4]
