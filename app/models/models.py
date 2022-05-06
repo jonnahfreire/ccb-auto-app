@@ -48,7 +48,8 @@ class Model1415:
     def __init__(self) -> None:
         self.type: str = "SAQ"
         self.date: list = []
-        # se a forma de transferência for com CHEQUE, inserir o favorecido como Congregação Cristã no Brasil
+        # se a forma de transferência for com CHEQUE, 
+        # inserir o favorecido como Congregação Cristã no Brasil
         self.transform: str = None
         self.doc_num: str = None
         self.value: str = None
@@ -89,6 +90,22 @@ class Model1835(Model1415):
 # FIM - RECEITAS
 # ----------------------------------
 # DESPESAS
+
+class Model002(Model1415):
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.type: str = "APLICACAO"
+        self.transform: str = "TRANSF. BANCARIA"
+        self.hist: str = "002"
+        self.orig_account: str = "1010"
+        self.dest_account: str = "1033"
+        self.file_type: str = "pdf"
+        self.receiver: str = "None"
+        self.complement: str = "None"
+
+
+# ----------------------------------
 class Model1120(BaseModel):
 
     def __init__(self) -> None:
@@ -197,7 +214,19 @@ class Model3030(BaseModel):
 
     def __init__(self) -> None:
         super().__init__()
+        self.type: str = "RECIBO"
         self.expenditure: str = "3030"
+        self.hist1: str = "012"
+        self.emitter = "CAIXA ECONOMICA FEDERAL"
+        self.hist2: str = "None"
+        self.cost_center: str = "ADM"
+        self.cost_account: str = "1010"
+        self.payment_form: str = "DEBITO AUTOMATICO"
+        self.file_name: str = "None"
+        self.check_num: str = "None"
+        self.doc_num: str = None
+        self.file_type: str = "pdf"
+        self.insert_type: str = "DEBT"
 
 
 #----------------------------------
