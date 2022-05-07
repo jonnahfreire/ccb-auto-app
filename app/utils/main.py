@@ -1,6 +1,5 @@
 import os, sys
 from time import sleep
-import pyautogui
 
 # from PyPDF2 import PdfFileMerger
 from app.config.credentials import Credential
@@ -95,12 +94,6 @@ def reset_db() -> bool:
 
 def clear() -> None:
     os.system("cls") if WIN else os.system("clear")
-
-
-def enter(times: int = 1, delay: int = 0.5):
-    for _ in range(times):
-        pyautogui.press("enter")
-        sleep(delay)
 
 
 def get_class_list_by_module(module):
