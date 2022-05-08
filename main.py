@@ -103,7 +103,7 @@ def get_work_month_path(month: str) -> str:
 
 @eel.expose
 def insert_new_item(month:str, work_month_path: str, 
-    items_list: list[dict], no_window) -> None:
+    items_list: list, no_window) -> None:
     global STATUS
     STATUS = InsertionStatus()
 
@@ -129,7 +129,7 @@ def clear_all_notifications() -> bool:
 
 
 @eel.expose
-def get_notification_list() -> list[dict]:
+def get_notification_list() -> list:
     return get_notifications()
     
 

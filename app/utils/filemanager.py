@@ -81,7 +81,7 @@ def create_dir(path: str, dirname: str) -> bool:
     return False
 
 
-def get_files_path(work_path: str) -> list[str]:
+def get_files_path(work_path: str) -> list:
     files_path: list[str] = []
 
     for dir in struct_dirs:
@@ -94,7 +94,7 @@ def get_files_path(work_path: str) -> list[str]:
     return files_path
 
 
-def list_files(base_path: str) -> list[dict]:
+def list_files(base_path: str) -> list:
     base_accounts:list = []
 
     if os.path.exists(base_path):
@@ -114,7 +114,7 @@ def list_files(base_path: str) -> list[dict]:
     return account_files
 
 
-def get_files_by_account(files: list) -> tuple[list]:
+def get_files_by_account(files: list) -> tuple:
     items_1000, items_1010 = [], []
 
     for items in files:

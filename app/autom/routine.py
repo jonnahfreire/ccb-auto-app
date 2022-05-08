@@ -72,7 +72,7 @@ def save_item(routine: Siga, file_path: str, item: dict,
 
 
 def start(files_path: str, work_month: str, 
-    user: dict, items_list: list[dict], 
+    user: dict, items_list: list, 
     no_window: bool, status: InsertionStatus) -> None:
     
     username: str = user["name"]
@@ -156,7 +156,7 @@ def movint_insertion(routine: Siga, item: dict, status: InsertionStatus) -> bool
     return False
 
 
-def debt_insertion(routine: Siga, files_path: list[str], item: dict, 
+def debt_insertion(routine: Siga, files_path: list, item: dict, 
     status: InsertionStatus) -> bool:
     
     if routine.new_debt():    

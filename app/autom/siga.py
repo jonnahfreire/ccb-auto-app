@@ -368,7 +368,7 @@ class Siga:
         sleep(2)
         self.driver.find_element(By.XPATH, new_group_debt_select_element).click()
 
-    def new_intern_transaction(self, item: list[dict]) -> bool:
+    def new_intern_transaction(self, item: list) -> bool:
         try:
             try:
                 # WebDriverWait(self.driver, 7)\

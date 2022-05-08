@@ -117,7 +117,7 @@ def model_name_exists(module, model_name: str) -> bool:
     return model_name in models_name
         
 
-def get_items_models_list(module) -> list[dict]:
+def get_items_models_list(module) -> list:
     return [
         _class.__name__[5:]
         for _class in get_class_list_by_module(module)    

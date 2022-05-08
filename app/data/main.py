@@ -37,7 +37,7 @@ class BankExtractData:
 
         self.get_extract_data()
         
-    def get_extract_data(self) -> list[dict]:
+    def get_extract_data(self) -> list:
         df = tabula.read_pdf(self.path, pages = "all")
         data = [str(row).splitlines() for row in df]
 
@@ -47,7 +47,7 @@ class BankExtractData:
         return self.extract_data
 
     # despesas bancárias
-    def get_bank_expenditures(self) -> list[dict]:
+    def get_bank_expenditures(self) -> list:
         if not self.expenditures:
             item = [item for item in self.extract_data if "D" in item.values()]
             self.expenditures.append(item)
@@ -223,7 +223,7 @@ def get_data_from_filename(model, file: str) -> dict:
     return model.get_mapped_data()
 
 
-def get_modelized_items(items_list: list[dict]) -> list[dict]:
+def get_modelized_items(items_list: list) -> list:
     if not items_list: return []
 
     items_data:list = []
@@ -248,7 +248,7 @@ def get_unclassified_files_from(path: str) -> list:
     return files
 
 
-def get_classified_files(path:str) -> list[dict]:
+def get_classified_files(path:str) -> list:
     if isinstance(path, str) and os.path.exists(path):
         files: list[str] = get_unclassified_files_from(path)
 
