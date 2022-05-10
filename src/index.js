@@ -302,7 +302,6 @@ const handleSettingsClick = () => {
     $$("input[name='window-check']").on("change", (e) => {
         const show = e.target.value == 1 ? true : false;
 
-        console.log(show);
         setBrowserWindowShow(show).then(response => {
             response && browserWindow.on();
             !response && browserWindow.off();
