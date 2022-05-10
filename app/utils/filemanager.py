@@ -25,6 +25,7 @@ def get_month_directories() -> list:
         return [
             month for month in sorted(os.listdir(sist_path)) 
             if not month.startswith(".")
+            and not month == "config"
             and os.path.isdir(os.path.join(sist_path, month))
             and not os.path.isfile(os.path.join(sist_path, month))
         ]
@@ -38,8 +39,9 @@ def set_initial_struct_dirs(work_month_path: str) -> bool:
             os.mkdir(sist_path)
         
         if WIN:
-            if os.path.exists(config):
-                os.system("attrib -h {}".format(config))
+            win_config_path = os.path.join(sist_path, config)
+            if os.path.exists(win_config_path):
+                os.system("attrib +h {}".format(win_config_path))
         
         # Create ccb-autom/03-2022 Ex.
         if not os.path.exists(work_month_path):
@@ -146,7 +148,7 @@ def remove_directory(dirname: str) -> bool:
         if not WIN: 
             os.system(f"rm -rf '{dirpath}'")
         else: # Windows Implementation
-            os.system(f"DEL /S '{dirpath}/*'")
+            os.system(f"RMDIR /S /Q {dirpath}")
 
         return True 
     return False
@@ -166,7 +168,7 @@ def copy_file_to(path: str, filename: str) -> bool:
             os.system(f"cp '{filename}' '{path}'")
             
         else: # Windows Implementation
-            os.system(f"copy '{filename}' '{path}'")
+            os.system(f"copy /Y \"{filename}\" {path}")
         
         return True
     return False
@@ -186,6 +188,7 @@ def rename_file_to(filename: str, newname: str) -> bool:
 def select_dir() -> str:
     root = Tk()
     root.withdraw()
+    root.attributes('-topmost', True)
     dirpath = filedialog.askdirectory(title="Selecione o diretório dos arquivos")
     root.destroy()
     return dirpath
