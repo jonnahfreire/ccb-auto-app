@@ -1,7 +1,7 @@
 import sqlite3
 from sqlite3 import Connection, Cursor
 
-from app.config.globals import notification_path
+from app.config.paths import notification_path
 
 class Notification:
 

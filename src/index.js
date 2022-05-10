@@ -53,16 +53,28 @@ async function openDirectory(path) {
     return await eel.open_directory(path)()
 }
 
+async function selectFile() {
+    return await eel.select_file_path()()
+}
+
 async function getData(month) {
     return await eel.get_data(month)()
+};
+
+async function getDriverPath() {
+    return await eel.get_driver_path()()
+};
+
+async function setDriverPath(path) {
+    return await eel.set_driver_path(path)()
 };
 
 async function createWorkingDirectory(month) {
     return await eel.create_work_directory(month)()
 };
 
-async function insertItem(month, workMonthPath, itemsList, window=false) {
-    return await eel.insert_new_item(month,workMonthPath, itemsList, window)()
+async function insertItem(month, workMonthPath, itemsList, showBrowserWindow=false) {
+    return await eel.insert_new_item(month,workMonthPath, itemsList, showBrowserWindow)()
 };
 
 async function getWorkMonthPath(month) {
@@ -95,6 +107,14 @@ async function removeAllNotifications() {
 
 async function getNotifications() {
     return await eel.get_notification_list()()
+};
+
+async function setBrowserWindowShow(show = false) {
+    return await eel.set_browser_window_show(show)()
+};
+
+async function getBrowserWindowShow() {
+    return await eel.get_browser_window_show()()
 };
 
 async function monthHasInsertedDebts(month) {
@@ -229,23 +249,65 @@ const handleRemoveUser = () => {
 };
     
 const handleSettingsClick = () => {
-    const content = $(".content")
-    const settingsContainer = $(".container-settings")
+    const content = $(".content");
+    const settingsContainer = $(".container-settings");
+    const driverPath = _$("#driver-path");
     
+    containerContentHeader.classList.add("d-none");
     content.addClass("d-none");
     settingsContainer.removeClass("d-none");
     
     $(".container-settings .btn-go-back").on("click", () => {
             settingsContainer.addClass("d-none");
             content.removeClass("d-none");
+            containerContentHeader.classList.remove("d-none");
     })
     
     document.onkeyup = function(e) {
         if (e.altKey && e.key === "ArrowLeft") {
             settingsContainer.addClass("d-none");
             content.removeClass("d-none");
+            containerContentHeader.classList.remove("d-none");
         }
     };
+
+    getDriverPath().then(response => {
+        response && (
+            driverPath.textContent = response.length > 100 ?
+                `${response.substring(0, 100)}...` : response
+        );
+    })
+
+    $("#select-driver-path").on("click", () => {
+        selectFile().then(response => {
+            response && setDriverPath(response).then(success => {
+                success && (
+                    driverPath.textContent = response.length > 100 ?
+                    `${response.substring(0, 100)}...` : response
+                );
+            })
+        })
+    })
+
+    const browserWindow = {
+        on: () => _$("#browser-window-check-yes").setAttribute("checked", true),
+        off: () => _$("#browser-window-check-no").setAttribute("checked", true)
+    };
+
+    getBrowserWindowShow().then(response => {
+        response && browserWindow.on();
+        !response && browserWindow.off();
+    })
+
+    $$("input[name='window-check']").on("change", (e) => {
+        const show = e.target.value == 1 ? true : false;
+
+        console.log(show);
+        setBrowserWindowShow(show).then(response => {
+            response && browserWindow.on();
+            !response && browserWindow.off();
+        })
+    })
 };
 
 
@@ -549,6 +611,10 @@ const startInsertions = async() => {
     
     const selectedMonth = $(selectedMonthDir).get(".folder-title", el => el.text());
     const workMonthPath = await getWorkMonthPath(selectedMonth);
+
+    const showBrowserWindow = await getBrowserWindowShow();
+
+    console.log("Show Beowser Window: ", showBrowserWindow);
     
     getData(selectedMonth.replace("/", "-")).then(response => {
         const items1000 = response["1000"]
@@ -559,7 +625,7 @@ const startInsertions = async() => {
         const files = {"success": [], "error": []};
     
         if (allItems.length > 0) {
-            insertItem(selectedMonth, workMonthPath, allItems, true);
+            insertItem(selectedMonth, workMonthPath, allItems, showBrowserWindow);
     
             automation.running = true;
     

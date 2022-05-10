@@ -1,6 +1,5 @@
 import os
 from threading import Thread
-from time import sleep
 import eel
 
 from tkinter import Tk, messagebox
@@ -11,7 +10,7 @@ from app.utils.filemanager import get_files_by_account
 from app.utils.filemanager import create_config_path
 from app.utils.filemanager import set_initial_struct_dirs
 from app.utils.filemanager import get_month_directories
-from app.utils.filemanager import select_dir
+from app.utils.filemanager import select_dir, select_file
 from app.utils.filemanager import remove_directory
 
 from app.data.main import get_classified_files
@@ -21,7 +20,12 @@ from app.data.main import get_modelized_items
 
 from app.autom.routine import insert_item
 
-from app.config.globals import sist_path, screen_size
+from app.config.globals import screen_size
+from app.config.paths import syspath
+from app.config.settings import set_chromedriver_path
+from app.config.settings import get_chromedriver_path
+from app.config.settings import set_browserwindow_show
+from app.config.settings import get_browserwindow_show
 from app.config.credentials import Credential
 from app.config.user import User
 
@@ -45,13 +49,33 @@ def remove_current_user() -> bool:
 
 
 @eel.expose
+def set_driver_path(driver_path: str) -> bool:
+    return set_chromedriver_path(driver_path)
+
+
+@eel.expose
+def get_driver_path() -> str:
+    return get_chromedriver_path()
+
+
+@eel.expose
+def set_browser_window_show(show: bool) -> bool:
+    return set_browserwindow_show(show)
+
+
+@eel.expose
+def get_browser_window_show() -> bool:
+    return get_browserwindow_show()
+
+
+@eel.expose
 def get_month_directory_list() -> list:
     return get_month_directories()
 
 
 @eel.expose
 def get_sys_path() -> str:
-    return sist_path
+    return syspath
 
 @eel.expose
 def open_directory(path: str) -> None:
@@ -80,24 +104,29 @@ def set_user_credential(username: str, passwd: str) -> bool:
 
 
 @eel.expose
-def get_folder_path():
+def get_folder_path() -> str:
     return select_dir()
 
 
 @eel.expose
-def get_screen_size():
+def select_file_path() -> str:
+    return select_file()
+
+
+@eel.expose
+def get_screen_size() -> list:
     return screen_size
 
 
 @eel.expose
 def create_work_directory(work_month: str) -> bool:
-    work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))                   
+    work_month_path: str = os.path.join(syspath, work_month.replace("/", "-"))                   
     return set_initial_struct_dirs(work_month_path)
 
 
 @eel.expose
 def get_work_month_path(month: str) -> str:
-    work_month_path: str = os.path.join(sist_path, month.replace("/", "-"))                   
+    work_month_path: str = os.path.join(syspath, month.replace("/", "-"))                   
     return work_month_path
 
 
@@ -181,7 +210,7 @@ def clear_status() -> None:
 def get_data(work_month: str, all: bool = False) -> dict:
 
     if work_month is None: return
-    work_month_path: str = os.path.join(sist_path, work_month.replace("/", "-"))
+    work_month_path: str = os.path.join(syspath, work_month.replace("/", "-"))
     
     if ".pdf" in work_month_path or ".png" in work_month_path or ".jpg" in work_month_path:
         return

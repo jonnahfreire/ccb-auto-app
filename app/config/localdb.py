@@ -1,13 +1,13 @@
 import sqlite3
 from sqlite3 import Cursor, Connection
 
-from app.config.globals import db_path
+from app.config.paths import dbpath
 
 
 class LocalDB:
 
     def __init__(self) -> None:
-        self.dbname: str = db_path
+        self.dbname: str = dbpath
         self.cursor: Cursor = None
         self.conn: Connection = None
     

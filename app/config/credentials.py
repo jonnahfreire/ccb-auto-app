@@ -40,11 +40,9 @@ class Credential:
         if self.username and self.userpass\
             and not user or not username in user and not userpass in user:
             if db.cursor.execute("INSERT INTO user (username, userpass) VALUES (?,?) ",(self.username, self.userpass)): 
-                print('Usuário inserido com sucesso!')
                 db.commit()
                 return True
             else:
-                print('Não foi possível inserir usuário!')
                 db.commit()
                 return False
         else:

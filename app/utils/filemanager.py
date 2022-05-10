@@ -1,16 +1,17 @@
 import os
-from tkinter import Tk, filedialog
+from tkinter import PhotoImage, Tk, filedialog
 from app.utils.main import WIN
-from app.config.globals import struct_dirs, debt_code_list, sist_path, config
+from app.config.globals import struct_dirs, debt_code_list
+from app.config.paths import syspath, config
 from app.execlogs.logs import *
 from app.cli.colors import *
 
 
 def create_config_path() -> bool:
-    config_dir = os.path.join(sist_path, config)
+    config_dir = os.path.join(syspath, config)
     try:
-        if not os.path.exists(sist_path):
-            os.mkdir(sist_path)
+        if not os.path.exists(syspath):
+            os.mkdir(syspath)
 
         if not os.path.exists(config_dir):
             os.mkdir(config_dir)
@@ -21,13 +22,13 @@ def create_config_path() -> bool:
 
 
 def get_month_directories() -> list:
-    if os.path.exists(sist_path):
+    if os.path.exists(syspath):
         return [
-            month for month in sorted(os.listdir(sist_path)) 
+            month for month in sorted(os.listdir(syspath)) 
             if not month.startswith(".")
             and not month == "config"
-            and os.path.isdir(os.path.join(sist_path, month))
-            and not os.path.isfile(os.path.join(sist_path, month))
+            and os.path.isdir(os.path.join(syspath, month))
+            and not os.path.isfile(os.path.join(syspath, month))
         ]
 
     return []
@@ -35,11 +36,11 @@ def get_month_directories() -> list:
 
 def set_initial_struct_dirs(work_month_path: str) -> bool:
     try:
-        if not os.path.exists(sist_path):
-            os.mkdir(sist_path)
+        if not os.path.exists(syspath):
+            os.mkdir(syspath)
         
         if WIN:
-            win_config_path = os.path.join(sist_path, config)
+            win_config_path = os.path.join(syspath, config)
             if os.path.exists(win_config_path):
                 os.system("attrib +h {}".format(win_config_path))
         
@@ -142,7 +143,7 @@ def move_file_to(path: str, filename: str) -> bool:
 
 
 def remove_directory(dirname: str) -> bool:   
-    dirpath: str = os.path.join(sist_path, dirname)
+    dirpath: str = os.path.join(syspath, dirname)
 
     if os.path.exists(dirpath):
         if not WIN: 
@@ -189,9 +190,18 @@ def select_dir() -> str:
     root = Tk()
     root.withdraw()
     root.attributes('-topmost', True)
-    dirpath = filedialog.askdirectory(title="Selecione o diretório dos arquivos")
+    dirpath = filedialog.askdirectory(title="Selecione o diretório dos arquivos", filetypes=[("all files", "*")])
     root.destroy()
     return dirpath
+
+
+def select_file() -> str:
+    root = Tk()
+    root.withdraw()
+    root.attributes('-topmost', True)
+    filepath = filedialog.askopenfilename(title="Selecionar arquivo", filetypes=[("all files", "*")])
+    root.destroy()
+    return filepath
 
 
 def open_dir(dirpath: str) -> None:

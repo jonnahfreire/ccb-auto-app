@@ -5,7 +5,8 @@ import tabula
 from app.models import models
 from app.models.models import *
 
-from app.config.globals import sist_path, extensions, accepted_accounts
+from app.config.globals import extensions, accepted_accounts
+from app.config.paths import syspath
 
 from app.utils.main import get_items_models_list
 from app.utils.filemanager import copy_file_to
@@ -307,7 +308,7 @@ def move_classified_files(
     filename: str = None
 
     work_month: str = "-".join(file["date"])[3:]
-    work_month_path: str = os.path.join(sist_path, work_month)
+    work_month_path: str = os.path.join(syspath, work_month)
 
     if not os.path.exists(work_month_path):
         set_initial_struct_dirs(work_month_path)
@@ -317,7 +318,7 @@ def move_classified_files(
         if file["expenditure"] is not None:
             base_account = file["cost-account"]
             sub_account = file["expenditure"]
-            base_account_path = os.path.join(sist_path, work_month, base_account)
+            base_account_path = os.path.join(syspath, work_month, base_account)
 
             for item in files:
                 if file["file-name"] in item and  ":".join(file["date"]) in item\
@@ -332,7 +333,7 @@ def move_classified_files(
         if file.get("insert-type") == "MOVINT":
             base_account = file["dest-account"]
             sub_account = "1415"
-            base_account_path = os.path.join(sist_path, work_month, base_account)
+            base_account_path = os.path.join(syspath, work_month, base_account)
 
             for item in files:
                 if file["file-name"] in item and ":".join(file["date"]) in item\
@@ -391,7 +392,7 @@ def check_name_pattern(item: dict) -> bool:
 
 def get_month_inserted_items(month: str) -> list:
     sleep(0.3)
-    work_month_path: str = os.path.join(sist_path, month)
+    work_month_path: str = os.path.join(syspath, month)
 
     if not os.path.isdir(work_month_path):
         return False
@@ -402,8 +403,8 @@ def get_month_inserted_items(month: str) -> list:
     files: list = []
     for item_dir in items_dirs:
         for _dir in item_dir:
-            path_1000: str = os.path.join(sist_path, month, "1000", _dir, "Lancados")
-            path_1010: str = os.path.join(sist_path, month, "1010", _dir, "Lancados")
+            path_1000: str = os.path.join(syspath, month, "1000", _dir, "Lancados")
+            path_1010: str = os.path.join(syspath, month, "1010", _dir, "Lancados")
             
             if os.path.exists(path_1000):
                 [files.append(item) for item in os.listdir(os.path.join(path_1000))]
