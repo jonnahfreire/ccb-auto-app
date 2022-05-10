@@ -9,7 +9,7 @@ selenium_brw_size = "1920,1080"
 screen_size = chrome_window_size.split(',')
 
 user_docs_path = path.join("/home", environ["USER"], "Documentos" or "Documents")\
-    if not sys.platform == "win32" else path.join(environ['USERPROFILE'], "Documentos" or "Documents")
+    if not sys.platform == "win32" else path.join(environ['USERPROFILE'], "Documents")
 
 
 sist_path = path.join(user_docs_path, sist_name)
@@ -189,4 +189,3 @@ debt_code_list = [
     "3500- PERDAS EVENTUAIS",
     "3501- INDENIZACOES"
 ]
-
