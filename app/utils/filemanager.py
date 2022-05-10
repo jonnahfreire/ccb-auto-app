@@ -190,7 +190,8 @@ def select_dir() -> str:
     root = Tk()
     root.withdraw()
     root.attributes('-topmost', True)
-    dirpath = filedialog.askdirectory(title="Selecione o diretório dos arquivos", filetypes=[("all files", "*")])
+    initial_dir = "C://Users" if WIN else "/home"
+    dirpath = filedialog.askdirectory(title="Selecione o diretório dos arquivos", initialdir=initial_dir)
     root.destroy()
     return dirpath
 
