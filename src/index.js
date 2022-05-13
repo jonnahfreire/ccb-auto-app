@@ -613,8 +613,6 @@ const startInsertions = async() => {
 
     const showBrowserWindow = await getBrowserWindowShow();
 
-    console.log("Show Beowser Window: ", showBrowserWindow);
-    
     getData(selectedMonth.replace("/", "-")).then(response => {
         const items1000 = response["1000"]
         const items1010 = response["1010"]
@@ -782,6 +780,8 @@ const fillContent = (itemList, account) => {
 const setData = (month) => {
     getData(month)
         .then(response => {
+            console.log(response);
+
             const items1000 = response["1000"].map(item => getMappedObject(item));
             const items1010 = response["1010"].map(item => getMappedObject(item));
 
@@ -790,6 +790,9 @@ const setData = (month) => {
             } else {
                 $(".status-container").addClass("d-none");
             }
+
+            console.log(items1000);
+            console.log(items1010);
 
             fillContent(items1000, "1000");
             fillContent(items1010, "1010");
