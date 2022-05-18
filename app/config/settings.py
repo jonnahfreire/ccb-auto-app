@@ -1,7 +1,7 @@
 import sqlite3
 from sqlite3 import Connection, Cursor
-from app.config.paths import settings_path
-
+from app.config.paths import settings_path, config_path
+from app.utils.main import get_version_from_file
 
 class Settings:
 
@@ -21,7 +21,8 @@ class Settings:
         try:
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS driver_settings (
-                    driver_path TEXT NULL
+                    driver_path TEXT NULL,
+                    driver_version TEXT NULL
                 )
             """)
             self.cursor.execute("""
@@ -51,22 +52,25 @@ class Settings:
             return False
 
     def set_chromedriver_path(self, *driver_path: tuple) -> bool:
+        driver_version: str =  get_version_from_file(driver_path[0] + " --version", config_path)
         try:
-            self.cursor.execute(f"INSERT INTO driver_settings (driver_path) VALUES(?)", (driver_path))
+            self.cursor.execute(
+                f"INSERT INTO driver_settings (driver_path, driver_version) VALUES(?,?)", 
+                (driver_path[0], driver_version))
             
             return True
         except Exception:
             return False    
     
-    def get_chromedriver_path(self) -> str:
+    def get_chromedriver_settings(self) -> tuple:
         try:
-            self.cursor.execute("SELECT driver_path FROM driver_settings")
-            chrome_driver_path = self.cursor.fetchone()
-            return chrome_driver_path[0]
+            self.cursor.execute("SELECT driver_path, driver_version FROM driver_settings")
+            chrome_driver_settings = self.cursor.fetchone()
+            return chrome_driver_settings
         except Exception:
             return None
     
-    def clear_driver_path(self) -> bool:
+    def clear_driver_settings(self) -> bool:
         try:
             self.cursor.execute("DELETE FROM driver_settings")
             return True
@@ -88,8 +92,8 @@ class Settings:
 def set_chromedriver_path(driver_path: str) -> bool:
     settings = Settings()
 
-    if get_chromedriver_path():
-        clear_chromedriver_path()
+    if get_chromedriver_settings():
+        clear_chromedriver_settings()
 
     success = settings.set_chromedriver_path(driver_path)
     settings.commit()
@@ -97,10 +101,21 @@ def set_chromedriver_path(driver_path: str) -> bool:
 
 
 def get_chromedriver_path() -> str:
+    return get_chromedriver_settings()["path"]
+
+
+def get_chromedriver_settings() -> dict:
     settings = Settings()
-    driver_path = settings.get_chromedriver_path()
+    driver_settings = settings.get_chromedriver_settings()
     settings.commit()
-    return driver_path
+
+    if driver_settings:
+        return {"path": driver_settings[0], "version": driver_settings[1]}
+    return {"path": "Caminho não definido", "version": "Versão: Não definido"}
+
+
+def get_chromedriver_version() -> str:
+        return get_chromedriver_settings()["version"]
 
 
 def set_browserwindow_show(show: bool) -> bool:
@@ -124,9 +139,9 @@ def get_browserwindow_show() -> bool:
     return show
 
 
-def clear_chromedriver_path() -> str:
+def clear_chromedriver_settings() -> str:
     settings = Settings()
-    success = settings.clear_driver_path()
+    success = settings.clear_driver_settings()
     settings.commit()
     return success
 
