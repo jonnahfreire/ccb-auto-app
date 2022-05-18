@@ -61,8 +61,12 @@ async function getData(month) {
     return await eel.get_data(month)()
 };
 
-async function getDriverPath() {
-    return await eel.get_driver_path()()
+async function getDriverInfo() {
+    return await eel.get_driver_settings()()
+};
+
+async function getDriverVersion() {
+    return await eel.get_chrome_version()()
 };
 
 async function setDriverPath(path) {
@@ -252,6 +256,7 @@ const handleSettingsClick = () => {
     const content = $(".content");
     const settingsContainer = $(".container-settings");
     const driverPath = _$("#driver-path");
+    const driverVersion = _$("#driver-version");
     
     containerContentHeader.classList.add("d-none");
     content.addClass("d-none");
@@ -271,10 +276,11 @@ const handleSettingsClick = () => {
         }
     };
 
-    getDriverPath().then(response => {
+    getDriverInfo().then(response => {
         response && (
-            driverPath.textContent = response.length > 100 ?
-                `${response.substring(0, 100)}...` : response
+            driverPath.textContent = response["path"].length > 100 ?
+            `${response.substring(0, 100)}...` : response["path"],
+            driverVersion.textContent = "ChromeDriver - "+response["version"]
         );
     })
 
@@ -285,6 +291,8 @@ const handleSettingsClick = () => {
                     driverPath.textContent = response.length > 100 ?
                     `${response.substring(0, 100)}...` : response
                 );
+                success && getDriverVersion().then(version => 
+                    driverVersion.textContent = "ChromeDriver - "+version);                
             })
         })
     })
@@ -780,8 +788,6 @@ const fillContent = (itemList, account) => {
 const setData = (month) => {
     getData(month)
         .then(response => {
-            console.log(response);
-
             const items1000 = response["1000"].map(item => getMappedObject(item));
             const items1010 = response["1010"].map(item => getMappedObject(item));
 
@@ -790,9 +796,6 @@ const setData = (month) => {
             } else {
                 $(".status-container").addClass("d-none");
             }
-
-            console.log(items1000);
-            console.log(items1010);
 
             fillContent(items1000, "1000");
             fillContent(items1010, "1010");
