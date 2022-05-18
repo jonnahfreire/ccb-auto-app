@@ -1,4 +1,5 @@
 import os, sys
+import subprocess
 from time import sleep
 
 # from PyPDF2 import PdfFileMerger
@@ -123,4 +124,28 @@ def get_items_models_list(module) -> list:
         for _class in get_class_list_by_module(module)    
     ][1:]
 
+
+def get_version_from_file(cmd: str, config_path: str) -> str:
+    with open(os.path.join(config_path, "driver-version.txt"), "w") as f:
+        subprocess.run(cmd, stdout=f)
+
+    with open(os.path.join(config_path, "driver-version.txt"), "r") as f:
+        line_content: str = f.readline()
+        if line_content is not None:
+            return line_content.split()[1]
+
+
+def get_stdout(command: str) -> str:
+    encoding = "ISO-8859-1"
+
+    command = subprocess.Popen(
+        command,
+        shell=True,
+        stdout=subprocess.PIPE,
+        stdin=subprocess.PIPE,
+        stderr=subprocess.PIPE)
+    
+    output_byte = command.stdout.read() + command.stderr.read()
+    output_str = str(output_byte.decode(encoding))
+    return output_str
 
