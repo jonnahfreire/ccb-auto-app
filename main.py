@@ -24,6 +24,8 @@ from app.config.globals import screen_size
 from app.config.paths import syspath
 from app.config.settings import set_chromedriver_path
 from app.config.settings import get_chromedriver_path
+from app.config.settings import get_chromedriver_settings
+from app.config.settings import get_chromedriver_version
 from app.config.settings import set_browserwindow_show
 from app.config.settings import get_browserwindow_show
 from app.config.credentials import Credential
@@ -56,6 +58,16 @@ def set_driver_path(driver_path: str) -> bool:
 @eel.expose
 def get_driver_path() -> str:
     return get_chromedriver_path()
+
+
+@eel.expose
+def get_driver_version() -> str:
+    return get_chromedriver_version()
+
+
+@eel.expose
+def get_driver_settings() -> dict:
+    return get_chromedriver_settings()
 
 
 @eel.expose
