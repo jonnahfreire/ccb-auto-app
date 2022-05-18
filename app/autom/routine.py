@@ -1,3 +1,4 @@
+import os
 from time import sleep
 
 from app.autom.main import Selenium
@@ -50,16 +51,14 @@ def insert_item(work_month: str, work_month_path:str,
 
 
 def upload_item_from(routine: Siga, file_path: str) -> None:
-    if routine.file_upload(file_path):
-        SUCCESSFUL_SENT.append(file_path)
-    else:
-        FAIL_SENDING.append(file_path)
+    routine.file_upload(file_path)
 
 
 def save_item(routine: Siga, file_path: str, item: dict,
     status: InsertionStatus) -> None:
     
     if routine.save(item):
+        SUCCESSFUL_SENT.append(file_path)
         status.set_finished(True)
         insertion_success_notification(item)
 
@@ -71,7 +70,7 @@ def save_item(routine: Siga, file_path: str, item: dict,
         document_already_exists_notification(item)
 
 
-def start(files_path: str, work_month: str, 
+def start(files_path: list, work_month: str, 
     user: dict, items_list: list, 
     no_window: bool, status: InsertionStatus) -> None:
     
@@ -189,10 +188,16 @@ def debt_insertion(routine: Siga, files_path: list, item: dict,
 
 
 
-def move_files(path: str, success: list) -> None:
+def move_files(path: list, success: list) -> None:
     for file in path:
         if file in success:
-            basedir: str = file[:file.rfind("/")]
+            basedir: str = None
+            if "\\" in file:
+                basedir = file[:file.rfind("\\")]
+            else:
+                basedir = file[:file.rfind("/")]
+
             create_dir(basedir, "Lancados")
-            move_file_to(f"{basedir}/Lancados/", file)
+            sent_path: str = os.path.join(basedir, "Lancados")
+            move_file_to(sent_path, file)
 
