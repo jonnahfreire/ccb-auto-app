@@ -1068,7 +1068,6 @@ body {width: 100%; height: 100%; user-select: none;}
 
 .browser-window-show-btn {
     display: flex;
-    /* flex-direction: column; */
     align-items: flex-start;
     justify-content: flex-start;
 
@@ -1100,10 +1099,21 @@ body {width: 100%; height: 100%; user-select: none;}
 }
 
 .driver-settings-input-block {
+    display: flex;
+    flex-direction: column;
     margin-top: 10px;
 }
 
-.driver-settings-input-block #driver-path {
+.driver-settings-input-block #driver-version {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 5px;
+    margin-bottom: 10px;
+}
+
+.driver-settings-input-block #driver-path,
+.driver-settings-input-block #driver-version {
     background-color: rgba(58, 58, 58, 0.05);
 
     width: max-content;
