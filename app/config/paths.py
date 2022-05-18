@@ -13,3 +13,5 @@ dbpath:            str = path.join(syspath, config, "user.db")
 logpath:           str = path.join(syspath, config, "logs.db")
 notification_path: str = path.join(syspath, config, "notifications.db")
 settings_path:     str = path.join(syspath, config, "settings.db")
+config_path:       str = path.join(syspath, config)
+
