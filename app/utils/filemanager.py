@@ -134,10 +134,10 @@ def get_files_by_account(files: list) -> tuple:
 def move_file_to(path: str, filename: str) -> bool:
     if os.path.exists(path):
         if not WIN: 
-            os.system(f"mv '{filename}' {path}")
+            os.system(f"mv \"{filename}\" {path}")
             return True
         else: # Windows Implementation
-            os.system(f"move '{filename}' {path}")
+            os.system(f"move \"{filename}\" {path}")
             return True 
     return False
 
