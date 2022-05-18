@@ -39,13 +39,16 @@ class BankExtractData:
         self.get_extract_data()
         
     def get_extract_data(self) -> list:
-        df = tabula.read_pdf(self.path, pages = "all")
-        data = [str(row).splitlines() for row in df]
+        try:
+            df = tabula.read_pdf(self.path, pages = "all")
+            data = [str(row).splitlines() for row in df]
 
-        for page in range(len(data)):
-            self.get_extract_modelized_data(data, page)
-        
-        return self.extract_data
+            for page in range(len(data)):
+                self.get_extract_modelized_data(data, page)
+            
+            return self.extract_data
+        except Exception as JavaNotFoundError:
+            print("Error: ", JavaNotFoundError)
 
     # despesas bancárias
     def get_bank_expenditures(self) -> list:
@@ -163,8 +166,11 @@ def get_data_from_filename(model, file: str) -> dict:
             model.type = "NOTA FISCAL"
             model.hist1 = "021"
             model.hist2 = "023"
-            sg_list: list = ["CF", "CF RC", "NF", "NF RC", "RC", "CP", "CP RC"] 
-            model.num = [data.replace(sg, "") for sg in sg_list][0].strip()
+            # sg_list: list = ["CF", "CF RC", "NF", "NF RC", "RC", "CP", "CP RC"] 
+            # model.num = [data.replace(sg, "") for sg in sg_list][0].strip()
+            model.num = data.replace("CF", "").replace("CF RC", "").replace("NF", "")\
+                .replace("NF RC", "").replace("RC", "").replace("CP", "")\
+                .replace("CP RC", "").strip()
                             
         if len(data) > 0 and data[:3] == "05_":
             model.cost_center = data.replace("_", "-").strip()
