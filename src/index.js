@@ -624,9 +624,6 @@ const startInsertions = async() => {
     getData(selectedMonth.replace("/", "-")).then(response => {
         const items1000 = response["1000"]
         const items1010 = response["1010"]
-
-        console.log("Items 1000: ", items1000);
-        console.log("Items 1010: ", items1010);
     
         const allItems = [...items1000, ...items1010];
         const items = $$(".debt-info");
