@@ -1156,18 +1156,23 @@ $(window).on('contextmenu', e => {
 })
 
 $(window).on("resize", (e) => {
-    if (window.innerWidth <= 680){
+    if (window.outerWidth <= 680){
         if (window.screenX <= 0) {
-            window.resizeTo(680, window.outerHeight);
+            window.resizeTo(700, window.outerHeight);
         }
         else {
             window.resizeTo(680, 600);
+            if (window.outerHeight <= 600) {
+                window.resizeTo(680, 600)
+            }
         }
+    }
+    if (window.outerHeight <= 600) {
+        window.resizeTo(window.outerWidth, 600)
     }
 })
 
 $(window).on('keyup', e => {
-    console.log(window.innerWidth, window.innerHeight, window.screenX, window.offsetTop)
     if (e.key === 93){
         e.preventDefault();
         return false;
