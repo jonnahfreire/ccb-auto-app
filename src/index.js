@@ -624,6 +624,9 @@ const startInsertions = async() => {
     getData(selectedMonth.replace("/", "-")).then(response => {
         const items1000 = response["1000"]
         const items1010 = response["1010"]
+
+        console.log("Items 1000: ", items1000);
+        console.log("Items 1010: ", items1010);
     
         const allItems = [...items1000, ...items1010];
         const items = $$(".debt-info");
@@ -786,6 +789,10 @@ const fillContent = (itemList, account) => {
 
 
 const setData = (month) => {
+    const text = "Buscando lançamentos, aguarde...";
+    $(alertBackdrop).get("strong", el => el.setText(text));
+    $(alertBackdrop).removeClass("d-none");
+
     getData(month)
         .then(response => {
             const items1000 = response["1000"].map(item => getMappedObject(item));
@@ -799,6 +806,7 @@ const setData = (month) => {
 
             fillContent(items1000, "1000");
             fillContent(items1010, "1010");
+            $(alertBackdrop).addClass("d-none");
     })
 }
 
@@ -1140,12 +1148,12 @@ window.onload = () => {
 }
 
 
-$(window).on('contextmenu', e => {
-    if (e.button == 2){
-        e.preventDefault();
-        return false;
-    }
-})
+// $(window).on('contextmenu', e => {
+//     if (e.button == 2){
+//         e.preventDefault();
+//         return false;
+//     }
+// })
 
 $(window).on('keyup', e => {
     if (e.key === 93){
