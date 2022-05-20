@@ -42,12 +42,24 @@ body {width: 100%; height: 100%; user-select: none;}
 }
 
 .backdrop-alert {
+    background-color: rgb(221, 221, 221);
     display: flex;
     align-items: center;
     justify-content: center;
+    
+    width: fit-content;
+    height: 60px;
+    padding: 20px;
+    margin: 0 auto;
+    
+    position: absolute;
+    top: 40%;
+    left: 0;
+    right: 0;
+    bottom: 0;
 
-    width: 360px;
-    margin: 20% auto;
+    border-radius: 15px;
+    box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.08);
 }
     
 .loading-alert strong {
