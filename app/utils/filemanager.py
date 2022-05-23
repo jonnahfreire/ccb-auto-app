@@ -86,15 +86,39 @@ def create_dir(path: str, dirname: str) -> bool:
 
 def get_files_path(work_path: str) -> list:
     files_path: list[str] = []
+    
+    if not isinstance(work_path, str): return []
 
     for dir in struct_dirs:
         for sub_dir in os.listdir(os.path.join(work_path, dir[0])):
             for file_name in os.listdir(os.path.join(work_path, dir[0], sub_dir)):
-                if file_name:
+                if file_name and not "Lancados" in file_name:
                     full_path:str = os.path.join(work_path, dir[0], 
                         os.path.join(work_path, dir[0], sub_dir), file_name)
                     files_path.append(full_path)
     return files_path
+
+
+def get_file_location(files_path: str, filename: str) -> str:
+    if files_path is not  None:
+        location: list = [
+            files_path[files_path.index(fp)]
+            for fp in files_path
+            if filename in fp
+            and fp is not None
+        ]
+        if len(location) > 0:
+            return location[0]
+    return None
+
+
+def get_all_files_path(working_dirs: list) -> list:
+    files_path:list[str] = [fp for fp in [get_files_path(path) for path in working_dirs]]
+    files_path_joined = []
+    for i in files_path:
+        for e in i:
+            files_path_joined.append(e)
+    return files_path_joined
 
 
 def list_files(base_path: str) -> list:
