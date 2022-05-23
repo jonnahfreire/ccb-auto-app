@@ -4,9 +4,10 @@ import eel
 
 from tkinter import Tk, messagebox
 
+from app.config.itemsdb import get_all_items
+
 from app.utils.main import reset_db, InsertionStatus
-from app.utils.filemanager import list_files, open_dir
-from app.utils.filemanager import get_files_by_account
+from app.utils.filemanager import open_dir
 from app.utils.filemanager import create_config_path
 from app.utils.filemanager import set_initial_struct_dirs
 from app.utils.filemanager import get_month_directories
@@ -16,7 +17,8 @@ from app.utils.filemanager import remove_directory
 from app.data.main import get_classified_files
 from app.data.main import get_month_inserted_items
 from app.data.main import move_classified_files
-from app.data.main import get_modelized_items
+from app.data.main import set_extract_file_data
+from app.data.main import set_fileitems_data
 
 from app.autom.routine import insert_item
 
@@ -28,6 +30,9 @@ from app.config.settings import get_chromedriver_settings
 from app.config.settings import get_chromedriver_version
 from app.config.settings import set_browserwindow_show
 from app.config.settings import get_browserwindow_show
+
+from app.config.itemsdb import get_item_id
+
 from app.config.credentials import Credential
 from app.config.user import User
 
@@ -83,6 +88,12 @@ def get_browser_window_show() -> bool:
 @eel.expose
 def get_month_directory_list() -> list:
     return get_month_directories()
+
+
+
+@eel.expose
+def get_id(table: str, item: dict) -> int:
+    return get_item_id(table, item)
 
 
 @eel.expose
@@ -189,10 +200,13 @@ def month_has_inserted_debts(month: str) -> bool:
     return len(get_month_inserted_items(month)) > 0
     
 
-@eel.expose 
-def get_files_from_folder() -> bool:
-    path: str = select_dir()
+@eel.expose
+def set_extract_data(filepath: str) -> bool:
+    return set_extract_file_data(filepath)
 
+
+@eel.expose 
+def get_files_from_folder(path: str) -> bool:
     success: bool = False
     if path is not None:
         classified_files = get_classified_files(path)
@@ -203,6 +217,7 @@ def get_files_from_folder() -> bool:
             if not success:
                 document_already_inserted(item)
         
+        set_fileitems_data()
     return success
 
 
@@ -219,30 +234,15 @@ def clear_status() -> None:
 
 
 @eel.expose
-def get_data(work_month: str, all: bool = False) -> dict:
-
+def get_data(work_month: str) -> dict:
     if work_month is None: return
-    work_month_path: str = os.path.join(syspath, work_month.replace("/", "-"))
+    return get_all_items(work_month)
+
+
+@eel.expose
+def set_files_data() -> bool:
+    return set_fileitems_data()
     
-    if ".pdf" in work_month_path or ".png" in work_month_path or ".jpg" in work_month_path:
-        return
-
-    files: list = list_files(work_month_path)
-    
-    if len(files) > 0:
-        items_1000, items_1010 = get_files_by_account(files)
-
-        modelized_items_1000: list[dict] = get_modelized_items(items_1000)
-        modelized_items_1010: list[dict] = get_modelized_items(items_1010)
-
-        if all:
-            all_items: list[dict] = modelized_items_1000 + modelized_items_1010
-            return {"all": all_items}
-
-        return {"1000": modelized_items_1000, "1010": modelized_items_1010}
-
-    return {"1000": [], "1010": []}
-
 
 def main() -> None:
     create_config_path()
