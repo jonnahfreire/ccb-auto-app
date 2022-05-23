@@ -9,9 +9,18 @@ from app.config.globals import extensions, accepted_accounts
 from app.config.paths import syspath
 
 from app.utils.main import get_items_models_list
-from app.utils.filemanager import copy_file_to
+from app.utils.filemanager import copy_file_to, select_file
+from app.utils.filemanager import select_file
 from app.utils.filemanager import set_initial_struct_dirs
 from app.utils.filemanager import get_month_directories
+from app.utils.filemanager import get_all_files_path
+from app.utils.filemanager import list_files
+from app.utils.filemanager import get_files_by_account
+from app.utils.filemanager import get_file_location 
+
+from app.config.itemsdb import set_item
+from app.config.itemsdb import get_all_items
+from app.config.itemsdb import get_extract_items
 
 from app.execlogs.notifications import document_already_inserted
 from app.execlogs.notifications import document_pattern_not_match
@@ -36,10 +45,12 @@ class BankExtractData:
         self.extract_data: list[dict] = []
         self.expenditures: list[dict] = []
         self.revenues: list[dict] = []
+        self.extract_month: str = None
 
-        self.get_extract_data()
+        self.__get_extract_data()
+        self.__set_extract_month()
         
-    def get_extract_data(self) -> list:
+    def __get_extract_data(self) -> None:
         try:
             df = tabula.read_pdf(self.path, pages = "all")
             data = [str(row).splitlines() for row in df]
@@ -47,7 +58,6 @@ class BankExtractData:
             for page in range(len(data)):
                 self.get_extract_modelized_data(data, page)
             
-            return self.extract_data
         except Exception as JavaNotFoundError:
             print("Error: ", JavaNotFoundError)
 
@@ -67,32 +77,55 @@ class BankExtractData:
 
         return self.revenues
     
+    def get_modelized_bank_revenues(self):
+        modelized_bank_revenues: list[dict] = []
+        model = Model1415()
+        for item in self.get_bank_revenues():
+            try:
+                if item.get("desc") == "RESG AUTOM":
+                    model.type      = item.get("desc")
+                    model.value     = item.get("value")
+                    model.doc_num   = item.get("doc-num")
+                    model.file_name = item.get("desc")
+                    model.date      = item.get("date").split("/")
+                    model.transform = "TRANSF. BANCARIA"
+                    model.orig_account = "1033"
+                    model.dest_account = "1010"
+                    model.hist = "031"
+                    model.file_type = "pdf"
+                    modelized_bank_revenues.append(model.get_mapped_data())
+            except AttributeError:
+                break
+        return modelized_bank_revenues
+
     def get_modelized_bank_expenditures(self):
         modelized_bank_expenditures: list[dict] = []
         model = Model3030()
         model2 = Model002()
         for item in self.get_bank_expenditures():
-            values = item.values()
-            if "DB CEST PJ" in values or "MANUT CAD" in values:
-                model.date = item.get("date").split("/")
+            try:
+                values = item.values()
+                if "DB CEST PJ" in values or "MANUT CAD" in values:
+                    model.date = item.get("date").split("/")
 
-                model.num = item.get("doc-num")
-                if item.get("desc") == "DEB CEST PJ":
-                    model.num = str(int(item.get("doc-num")[0]) + 1) + item.get("doc-num")[1:]
+                    model.num = item.get("doc-num")
+                    if item.get("desc") == "DEB CEST PJ":
+                        model.num = str(int(item.get("doc-num")[0]) + 1) + item.get("doc-num")[1:]
 
-                model.value     = item.get("value")
-                model.doc_num   = item.get("doc-num")
-                model.file_name = item.get("desc")
-                modelized_bank_expenditures.append(model.get_mapped_data())
+                    model.value     = item.get("value")
+                    model.doc_num   = item.get("doc-num")
+                    model.file_name = item.get("desc")
+                    modelized_bank_expenditures.append(model.get_mapped_data())
 
-            if item.get("desc") == "APLICACAO":
-                model2.value = item.get("value")
-                model2.num   = item.get("doc-num")
-                model2.doc_num   = item.get("doc-num")
-                model2.file_name = item.get("desc")
-                model2.date  = item.get("date").split("/")
-                modelized_bank_expenditures.append(model2.get_mapped_data())  
-        
+                if item.get("desc") == "APLICACAO":
+                    model2.value = item.get("value")
+                    model2.num   = item.get("doc-num")
+                    model2.doc_num   = item.get("doc-num")
+                    model2.file_name = item.get("desc")
+                    model2.date  = item.get("date").split("/")
+                    modelized_bank_expenditures.append(model2.get_mapped_data())  
+            except AttributeError:
+                break
         return modelized_bank_expenditures
 
     def get_extract_modelized_data(self, data: list, page: int) -> None:
@@ -129,16 +162,68 @@ class BankExtractData:
 
             if len(row) > 0:
                 model = {
-                    "date" : row[0],
-                    "doc-num"  : row[1],
-                    "desc" : row[2],
-                    "value": row[3],
-                    "type" : row[4]
+                    "date"   : row[0],
+                    "doc-num": row[1],
+                    "desc"   : row[2],
+                    "value"  : row[3],
+                    "type"   : row[4]
                 }
                 model["type"] == "C" and self.revenues.append(model)
                 model["type"] == "D" and self.expenditures.append(model)
-                self.extract_data.append(model)
+                if not model in self.extract_data:
+                    self.extract_data.append(model)
+    
+    def __set_extract_month(self) -> str:
+        months: list = [
+            item.get("date")[3:]
+            for item in self.extract_data
+            if item.get("date") is not None
+        ]
+        if len(months) > 0:
+            maxm: str = max(months)
+            minm: str = min(months)
+            if minm is None:
+                self.extract_month = maxm
+            elif maxm is None:
+                self.extract_month = minm
+            else:
+                self.extract_month = maxm if months.count(maxm) > months.count(minm) else minm
+    
+    def get_extract_month(self) -> str:
+        return self.extract_month
+
                 
+
+def get_extract_data(extract_path: str) -> dict:
+    if os.path.isfile(extract_path):
+        extract = BankExtractData(extract_path)
+        extract_month: str = extract.get_extract_month()
+        modelized_extract_expenditures: list[dict] = extract.get_modelized_bank_expenditures()
+        modelized_extract_revenues: list[dict] = extract.get_modelized_bank_revenues()
+
+        modelized_extract_data: dict = {
+            "month": extract_month.replace("/", "-"),
+            "data": modelized_extract_expenditures + modelized_extract_revenues
+        }
+        return modelized_extract_data
+    return {"month": None, "data": []}
+
+
+def set_extract_file_data(file: str) -> bool:
+    if file is None: return False
+
+    if file is not None:
+        data: dict = get_extract_data(file)
+        if len(data.get("data")) > 0:
+            path: str = os.path.join(syspath, data.get("month"), "1010", "10---EXTRATOS")
+
+            if os.path.exists(path):
+                copy_file_to(path, file.replace("/", "\\"))
+                
+                db_data = get_extract_items()
+                data = [item for item in data.get("data") if not item in db_data]
+                return set_item(data)
+    return False
 
 
 def get_data_from_filename(model, file: str) -> dict:
@@ -150,7 +235,7 @@ def get_data_from_filename(model, file: str) -> dict:
         data = data.upper()
 
         if len(data) > 0 and "CH SAQ" in data:
-            model.doc_num = data.split(" ")[-1].strip()
+            model.doc_num = data.split()[-1].strip()
 
         if len(data) > 0 and "SUPRIMENTO CAIXA" in data\
             or "SUPRIMENTO DE CAIXA" in data or "SUPRIMENTO" in data:
@@ -237,7 +322,7 @@ def get_data_from_filename(model, file: str) -> dict:
     return model.get_mapped_data()
 
 
-def get_modelized_items(items_list: list) -> list:
+def get_modelized_items(items_list: list, files_path: str = None) -> list:
     if not items_list: return []
 
     items_data:list = []
@@ -253,6 +338,7 @@ def get_modelized_items(items_list: list) -> list:
             
             if isinstance(db, str) and not db in inserted_files:
                 if check_name_pattern(item):
+                    item["location"] = get_file_location(files_path, item.get("file-name"))
                     items_data.append(item)
                 else:
                     document_pattern_not_match(item)
@@ -288,6 +374,46 @@ def get_unclassified_files_from(path: str) -> list:
     return files
 
 
+def set_fileitems_data() -> bool:
+    months: list = [month for month in os.listdir(syspath) if not "config" in month]
+    workings_paths: list = [
+        os.path.join(syspath, path) 
+        for path in months
+        if not ".pdf" in path \
+        or not ".png" in path \
+        or not ".jpg" in path
+    ]
+
+    files: list = [
+        file for file in [
+            list_files(path) 
+            for path in workings_paths
+        ]
+    ]
+
+    files_path: list = get_all_files_path(workings_paths)
+    if len(files) > 0:
+        items: list[dict] = []
+
+        for item in files:
+            items_1000, items_1010 = get_files_by_account(item)
+            
+            modelized_items_1000: list[dict] = []
+            modelized_items_1010: list[dict] = []
+
+            if len(items_1000) > 0:
+                modelized_items_1000 = get_modelized_items(items_1000, files_path)
+
+            if len(items_1010) > 0:
+                modelized_items_1010 = get_modelized_items(items_1010, files_path)
+                
+            items += [file for file in modelized_items_1000 + modelized_items_1010]
+        
+        items = [item for item in items if not item in get_all_items(return_type="list")]
+        return set_item(items)
+    return False
+
+    
 def get_classified_files(path:str) -> list:
     if isinstance(path, str) and os.path.exists(path):
         files: list[str] = get_unclassified_files_from(path)
@@ -357,30 +483,39 @@ def move_classified_files(
 
 
 def check_name_pattern(item: dict) -> bool:
-    if item["insert-type"] == "DEBT":
-        if len(item["date"]) == 3 and item["value"] is not None\
-            and item["num"] is not None and item["expenditure"] is not None\
-            and item["emitter"] is not None:
+    if item.get("insert-type") == "DEBT":
+        if len(item["date"]) == 3 and item.get("value") is not None\
+            and item.get("num") is not None and item.get("expenditure") is not None\
+            and item.get("emitter") is not None:
 
             # se for pagamento com dinheiro, e não com cheque
-            if item["cost-account"] == "1000" and item["doc-num"] is None\
-                and item["check-num"] == None:
+            if item.get("cost-account") == "1000" and item.get("doc-num") is None\
+                and item.get("check-num") == None:
                 return True
 
             # se for pagamento com cheque, e não um débito automático
-            if item["cost-account"] == "1010" and item["doc-num"] is None\
-                and item["check-num"] is not None:
+            if item.get("cost-account") == "1010" and item.get("doc-num") is None\
+                and item.get("payment-form") == "CHEQUE" and item.get("check-num") is not None:
                 return True
 
             # se for débito automático, e não um pagamento com cheque
-            if item["cost-account"] == "1010" and item["check-num"] is None\
-                and item["doc-num"] is not None:
+            if item.get("cost-account") == "1010" and item.get("check-num") == None\
+                and item.get("payment-form") == "DEBITO AUTOMATICO" and not item.get("doc-num") == None:
                 return True
 
     if item["insert-type"] == "MOVINT":
+        if item["type"] == "RESG AUTOM" and item["orig-account"] == "1033"\
+            and item["dest-account"] == "1010" and item["doc-num"] is not None\
+            and item["value"] is not None and len(item["date"]) == 3:
+            return True
+        
+        if item["type"] == "APLICACAO" and item["orig-account"] == "1010"\
+            and item["dest-account"] == "1033" and item["doc-num"] is not None\
+            and item["value"] is not None and len(item["date"]) == 3:
+            return True
+
         # se for retirada do banco para o caixa, ou da aplicação para o banco
         if item["orig-account"] == "1010" and item["dest-account"] == "1000"\
-            or item["orig-account"] == "1033" and item["dest-account"] == "1010"\
             and item["doc-num"] is not None and item["complement"] is not None\
             and str(item["type"]).upper() == "SAQ" and len(item["date"]) == 3\
             and item["value"] is not None:
