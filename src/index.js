@@ -1235,12 +1235,12 @@ window.onload = () => {
 }
 
 
-// $(window).on('contextmenu', e => {
-//     if (e.button == 2){
-//         e.preventDefault();
-//         return false;
-//     }
-// })
+$(window).on('contextmenu', e => {
+    if (e.button == 2){
+        e.preventDefault();
+        return false;
+    }
+})
 
 $(window).on("resize", (e) => {
     if (window.outerWidth <= 680){
