@@ -12,13 +12,17 @@ const containerContentHeader   = _$(".container-content-header");
 const content                  = _$(".container-content .content");
 const folderContextMenu        = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
-const timeout = 1000;
+const timeout = 10;
 const statusCheckInterval = 100;
 const automation = {"running": false};
 
 
-async function getFilesFromFolder() {
-    return await eel.get_files_from_folder()()
+async function getFilesFromFolder(path) {
+    return await eel.get_files_from_folder(path)()
+}
+
+async function selectDirectory() {
+    return await eel.get_folder_path()()
 }
 
 async function isUserSet() {
@@ -61,6 +65,14 @@ async function getData(month) {
     return await eel.get_data(month)()
 };
 
+async function getId(table, item) {
+    return await eel.get_id(table, item)()
+};
+
+async function setFilesData() {
+    return await eel.set_files_data()()
+};
+
 async function getDriverInfo() {
     return await eel.get_driver_settings()()
 };
@@ -71,6 +83,10 @@ async function getDriverVersion() {
 
 async function setDriverPath(path) {
     return await eel.set_driver_path(path)()
+};
+
+async function setExtractData(response) {
+    return await eel.set_extract_data(response)()
 };
 
 async function createWorkingDirectory(month) {
@@ -337,6 +353,7 @@ const handleContentClick = () => {
 };
 
 const handleBodyClick = () => {
+    $(".footer-btn .add-extract").addClass("d-none");
     $(".popover-finished-debts").addClass("d-none");
     $(".folder-context-menu").addClass("d-none");
     
@@ -374,11 +391,34 @@ const handleAddItems = () => {
         modalAlertSysRunning.show("Não é possível inserir despesas ou receitas enquanto existe lançamentos em andamento.");
         return false;
     }
-    getFilesFromFolder().then(response => {
-        notifications.getNotifications();
 
-        response && init();
-    });
+    selectDirectory().then(response => {
+        response && loadingAlert.show("Lendo Arquivos, aguarde...");
+
+        getFilesFromFolder(response).then(success => {
+            notifications.getNotifications();
+    
+            success && init();
+            loadingAlert.dismiss();
+        });
+    })
+};
+
+const hanldleAddExtract = () => {
+    if (automation.running) {
+        modalAlertSysRunning.show("Não é possível inserir despesas ou receitas enquanto existe lançamentos em andamento.");
+        return false;
+    }
+
+    selectFile().then(response => {
+        response && loadingAlert.show("Lendo Extrato, aguarde...");
+        response && setExtractData(response).then(success => {
+            notifications.getNotifications();
+        
+            success && init();
+            loadingAlert.dismiss();
+        });
+    })
 };
 
 const notifications = {
@@ -624,8 +664,9 @@ const startInsertions = async() => {
     getData(selectedMonth.replace("/", "-")).then(response => {
         const items1000 = response["1000"]
         const items1010 = response["1010"]
-    
-        const allItems = [...items1000, ...items1010];
+        const extractItems = response.extract
+
+        const allItems = [...items1000, ...items1010, ...extractItems];
         const items = $$(".debt-info");
         const files = {"success": [], "error": []};
     
@@ -718,6 +759,34 @@ function getPosition(el) {
     };
 }
 
+const hanldeOpenItemOptions = (model, item) => {
+    const options = model.querySelector(".item-options");
+
+    if (item.insertType == "MOVINT" || item.fileName == "DB CEST PJ") (
+        options.querySelector(".open-file-location").style.display = "none"
+    )
+
+    const optionsContainer = {
+        isShown: () => options.classList.contains("item-options-shown"),
+        show: () =>{
+            options.classList.add("item-options-shown");
+            options.style.height = "30px";
+            options.style.opacity = "1";
+            options.style.marginBottom = "10px";
+        },
+        hide: () => {
+            options.classList.remove("item-options-shown");
+            options.style.height = "0px";
+            options.style.opacity = "0";
+            options.style.marginBottom = "0px";
+        }
+    }
+    if (optionsContainer.isShown()){
+        optionsContainer.hide();
+    } else {
+        optionsContainer.show();
+    }
+}
 
 const fillContent = (itemList, account) => {
 
@@ -731,15 +800,22 @@ const fillContent = (itemList, account) => {
     
     account == "1010" && _$$(".account1010-content .model-item")
         .forEach(item => item.remove());
+    
+    account == "extract" && _$$(".extract-content .model-item")
+        .forEach(item => item.remove());
         
     if(itemList.length > 0) {
         itemList.forEach(item => {
             const itemValue = new Intl.NumberFormat(`pt-BR`, {
                 currency: `BRL`,
                 style: 'currency',
-            }).format(item.value.replace(",","."));
+            }).format(item.value.replace(".","").replace(",","."));
 
             const model = _$(".content-model .debt-info").cloneNode(true);
+
+            model.querySelector(".model-item-container").addEventListener("click", () => {
+                hanldeOpenItemOptions(model, item);
+            })
             
             if (item.fileType === "pdf") {
                 $(model).get(".file-type svg.pdf", el => el.removeClass("d-none"));
@@ -766,36 +842,51 @@ const fillContent = (itemList, account) => {
             $(model).get(".file-value", el => el.setText(itemValue));
 
             if (item.insertType === "MOVINT") {
-                $(model).get(".file-insert-type", el => el.setText(`${item.type} ${item.destAccount}`));
+                if (item.type == "RESG AUTOM" || item.type == "APLICACAO") {
+                    $(model).get(".file-insert-type", el => el.setText("DP " + item.origAccount));
+
+                } else {
+                    $(model).get(".file-insert-type", el => el.setText(`${item.type} ${item.destAccount}`));
+                }
 
             } else {
                 $(model).get(".file-insert-type", el => el.setText("DP " + item.expenditure));
             }
                
-            account === "1000" && $(".account1000-content .message").addClass("d-none");
-            account === "1010" && $(".account1010-content .message").addClass("d-none");
+            account === "1000"    && $(".account1000-content .message").addClass("d-none");
+            account === "1010"    && $(".account1010-content .message").addClass("d-none");
+            account === "extract" && $(".extract-content .message").addClass("d-none");
             
-            account === "1000" && _$(".account1000-content").append(model);
-            account === "1010" && _$(".account1010-content").append(model);
+            account === "1000"    && _$(".account1000-content").append(model);
+            account === "1010"    && _$(".account1010-content").append(model);
+            account === "extract" && _$(".extract-content").append(model);
         })
     } else {
-        account === "1000" && $(".account1000-content .message").removeClass("d-none");
-        account === "1010" && $(".account1010-content .message").removeClass("d-none");
+        account === "1000"    && $(".account1000-content .message").removeClass("d-none");
+        account === "1010"    && $(".account1010-content .message").removeClass("d-none");
+        account === "extract" && $(".extract-content .message").removeClass("d-none");
     }
 }
 
 
+const loadingAlert = {
+    show: (message) => {
+        $(alertBackdrop).get("strong", el => el.setText(message));
+        $(alertBackdrop).removeClass("d-none");
+    },
+    dismiss: () => $(alertBackdrop).addClass("d-none")
+};
+
 const setData = (month) => {
-    const text = "Buscando lançamentos, aguarde...";
-    $(alertBackdrop).get("strong", el => el.setText(text));
-    $(alertBackdrop).removeClass("d-none");
+    loadingAlert.show("Buscando lançamentos, aguarde...");
 
     getData(month)
         .then(response => {
-            const items1000 = response["1000"].map(item => getMappedObject(item));
-            const items1010 = response["1010"].map(item => getMappedObject(item));
+            const items1000    = response["1000"].map(item => getMappedObject(item));
+            const items1010    = response["1010"].map(item => getMappedObject(item));
+            const extractItems = response["extract"].map(item => getMappedObject(item));
 
-            if (items1000.length > 0 || items1010.length > 0) {
+            if (items1000.length > 0 || items1010.length > 0 || extractItems.length > 0) {
                 $(".status-container").removeClass("d-none");
             } else {
                 $(".status-container").addClass("d-none");
@@ -803,7 +894,8 @@ const setData = (month) => {
 
             fillContent(items1000, "1000");
             fillContent(items1010, "1010");
-            $(alertBackdrop).addClass("d-none");
+            fillContent(extractItems, "extract");
+            loadingAlert.dismiss();
     })
 }
 
@@ -1026,28 +1118,26 @@ const init = () => {
     createWorkingDirectory(currentWorkingMonth)
         .then(response => {
             if (response === null) {
-                const text = "Verificando diretório de trabalho, aguarde...";
-                $(alertBackdrop).get("strong", el => el.setText(text));
+                loadingAlert.show("Verificando diretório de trabalho, aguarde...");
 
             }else {
-                const text = "Criando diretório de trabalho, aguarde...";
-                $(alertBackdrop).get("strong", el => el.setText(text));
+                loadingAlert.show("Criando diretório de trabalho, aguarde...");
             }
             
             setTimeout(() => {
-                $(alertBackdrop).addClass("d-none")
+                loadingAlert.dismiss();
                 $(containerContentHeader).removeClass("d-none")
                 $(content).removeClass("d-none")
             }, timeout); // 2000
             
-            const text = "Verificando diretório de trabalho, aguarde...";
-            $(alertBackdrop).get("strong", el => el.setText(text));
+            loadingAlert.show("Verificando diretório de trabalho, aguarde...");
         })
     
     getMonthDirectoryList().then(response => {
         response && setDirectories(response, currentWorkingMonth);
     })
     setData(currentWorkingMonth);
+    loadingAlert.dismiss();
 }
 
 const handleMonthPopover = () => {
@@ -1082,11 +1172,6 @@ const handleFolderContextClick = () => {
     }
 }
 
-const splashScreen = {
-    "show": () => alertBackdrop.querySelector("strong").textContent = "Inicializando..",
-    "dismiss": () => alertBackdrop.classList.remove("d-none")
-}
-
 const listeners = {
     start: () => {
         // Set user
@@ -1100,6 +1185,12 @@ const listeners = {
 
         // Add Items
         $(".btn-add").on("click", handleAddItems);
+        $(".btn-add").on("contextmenu", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            $(".footer-btn .add-extract").removeClass("d-none");
+            $(".footer-btn .add-extract").on("click", hanldleAddExtract);
+        });
 
         // Create working month directory
         $(".btn-create").on("click", handleCreateWorkingMonth);
@@ -1128,10 +1219,9 @@ window.onload = () => {
     listeners.start();
 
     isUserSet().then(response => {
-        splashScreen.show();
+        loadingAlert.show("Inicializando, aguarde...");
         if(response) {
             containerContent.classList.remove("d-none");
-            splashScreen.dismiss();
             setSelectMonths();
             setTimeout(() => init(), timeout); //1000
 
@@ -1145,12 +1235,12 @@ window.onload = () => {
 }
 
 
-$(window).on('contextmenu', e => {
-    if (e.button == 2){
-        e.preventDefault();
-        return false;
-    }
-})
+// $(window).on('contextmenu', e => {
+//     if (e.button == 2){
+//         e.preventDefault();
+//         return false;
+//     }
+// })
 
 $(window).on("resize", (e) => {
     if (window.outerWidth <= 680){
