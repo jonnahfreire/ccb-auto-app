@@ -19,6 +19,7 @@ class BaseModel:
         self.doc_num: str = None
         self.file_type: str = None
         self.insert_type: str = "DEBT"
+        self.location: str = None
 
     def get_mapped_data(self) -> dict:
         return {
@@ -37,7 +38,8 @@ class BaseModel:
             "check-num": self.check_num,
             "doc-num": self.doc_num,
             "file-type": self.file_type,
-            "insert-type": self.insert_type
+            "insert-type": self.insert_type,
+            "location": self.location
         }
 
 # ----------------------------------
@@ -61,6 +63,7 @@ class Model1415:
         self.file_name: str = None
         self.file_type: str = None
         self.insert_type: str = "MOVINT"
+        self.location: str = None
 
     def get_mapped_data(self) -> dict:
         return {
@@ -76,7 +79,8 @@ class Model1415:
             "complement": self.complement, 
             "file-name": self.file_name,
             "file-type": self.file_type,
-            "insert-type": self.insert_type
+            "insert-type": self.insert_type,
+            "location": self.location
         }
 
 
@@ -101,8 +105,8 @@ class Model002(Model1415):
         self.orig_account: str = "1010"
         self.dest_account: str = "1033"
         self.file_type: str = "pdf"
-        self.receiver: str = "None"
-        self.complement: str = "None"
+        self.receiver: str = None
+        self.complement: str = None
 
 
 # ----------------------------------
@@ -218,13 +222,10 @@ class Model3030(BaseModel):
         self.expenditure: str = "3030"
         self.hist1: str = "012"
         self.emitter = "CAIXA ECONOMICA FEDERAL"
-        self.hist2: str = "None"
+        self.hist2: str = "012"
         self.cost_center: str = "ADM"
         self.cost_account: str = "1010"
         self.payment_form: str = "DEBITO AUTOMATICO"
-        self.file_name: str = "None"
-        self.check_num: str = "None"
-        self.doc_num: str = None
         self.file_type: str = "pdf"
         self.insert_type: str = "DEBT"
 
