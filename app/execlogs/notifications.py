@@ -146,6 +146,16 @@ def login_error_notification() -> None:
     })
 
 
+
+def access_error_notification() -> None:
+    insert_notification({
+        "icon": "danger",
+        "header": "Não foi possível acessar o sistema.",
+        "title": "ccb-auto: não conseguiu acessar o siga.",
+        "message": "Não foi possível carregar página."
+    })
+
+
 def document_pattern_not_match(item: dict) -> None:
     template: dict = {
         "icon": "danger",
