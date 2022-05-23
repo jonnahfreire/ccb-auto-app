@@ -173,7 +173,7 @@ class Siga:
 
             try:
                 # Inserts payment date
-                sleep(1)
+                sleep(2)
                 doc = self.driver.find_element_by_id("f_datapagamento")
                 doc.send_keys(debt["date"])
             except NoSuchElementException as ex:
@@ -417,10 +417,11 @@ class Siga:
             value.send_keys(item["value"])
             
             sleep(2)
-            receiver = self.driver.find_element(By.XPATH, receiver)
-            receiver.click()
-            sleep(0.5)
-            receiver.send_keys(item["receiver"])#"Congregação Cristã no Brasil"
+            if item["receiver"] is not None:
+                receiver = self.driver.find_element(By.XPATH, receiver)
+                receiver.click()
+                sleep(0.5)
+                receiver.send_keys(item["receiver"])#"Congregação Cristã no Brasil"
 
             sleep(2)
             self.driver.find_element(By.XPATH, orig_account_drop).click()
@@ -443,11 +444,12 @@ class Siga:
             hist_input.send_keys(item["hist"])
             hist_input.send_keys(Keys.RETURN)
 
-            sleep(2)
-            complement = self.driver.find_element(By.XPATH, complement)
-            complement.click()
-            sleep(0.5)
-            complement.send_keys(item["complement"])#"SUPRIMENTO DE CAIXA"
+            if item["complement"] is not None:
+                sleep(2)
+                complement = self.driver.find_element(By.XPATH, complement)
+                complement.click()
+                sleep(0.5)
+                complement.send_keys(item["complement"])#"SUPRIMENTO DE CAIXA"
             
             # sleep(2)
             # self.driver.find_element(By.ID, file_upload_input).send_keys(item[])

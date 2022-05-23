@@ -1,6 +1,7 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
+from selenium.common.exceptions import WebDriverException
 
 
 from app.config.globals import selenium_brw_size
@@ -19,12 +20,17 @@ class Selenium:
         self.target = target
         self.driver = None
 
-    def start(self):
-        self.driver = webdriver.Chrome(
-                        service=Service(get_chromedriver_path()), 
-                        options=self.chrome_options)
-        
-        self.driver.get(self.target)
+    def start(self) -> bool:
+        try:
+            self.driver = webdriver.Chrome(
+                            service=Service(get_chromedriver_path()), 
+                            options=self.chrome_options)
+            
+            self.driver.get(self.target)
+            return True
+        except WebDriverException as err:
+            print("WebDriverException: ", err)
+            return False
 
     def close(self) -> None:
         self.driver.close()

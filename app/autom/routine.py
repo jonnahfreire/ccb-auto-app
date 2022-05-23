@@ -10,10 +10,14 @@ from app.config.credentials import Credential
 
 from app.utils.main import InsertionStatus
 from app.utils.filemanager import create_dir
-from app.utils.filemanager import get_files_path, move_file_to
+from app.utils.filemanager import get_file_location
+from app.utils.filemanager import move_file_to
+from app.utils.filemanager import get_files_path
 
 from app.execlogs.notifications import *
 from app.data.main import check_name_pattern
+
+from app.config.itemsdb import set_inserted_item
 
 SUCCESSFUL_SENT: list = []
 FAIL_SENDING   : list = []
@@ -25,14 +29,6 @@ def set_initial_status(current: dict, status: InsertionStatus) -> None:
     status.set_finished(False)
     status.set_failed(False)
     status.set_started()
-
-
-def get_file_path(files_path: str, filename: str) -> str:
-    return [
-        files_path[files_path.index(fp)]
-        for fp in files_path
-        if filename in fp
-    ][0]
 
 
 def insert_item(work_month: str, work_month_path:str, 
@@ -58,15 +54,18 @@ def save_item(routine: Siga, file_path: str, item: dict,
     status: InsertionStatus) -> None:
     
     if routine.save(item):
-        SUCCESSFUL_SENT.append(file_path)
+        if file_path is not None:
+            SUCCESSFUL_SENT.append(file_path)
         status.set_finished(True)
+        set_inserted_item(item)
         insertion_success_notification(item)
 
     else:
         status.set_fail_cause(save_error_msg)
         status.set_failed(True)
-        FAIL_SENDING.append(file_path)
-        EXISTING_FILES.append(file_path)
+        if file_path is not None:
+            FAIL_SENDING.append(file_path)
+            EXISTING_FILES.append(file_path)
         document_already_exists_notification(item)
 
 
@@ -84,32 +83,40 @@ def start(files_path: list, work_month: str,
         set_initial_status(item, status)
 
         if check_name_pattern(item):
-            selenium.start()
-            siga: Siga = Siga(selenium.get_driver())
-            
-            if siga.login(username, passwd):
-                sleep(10)
-                siga.change_work_month_date(work_month)
-                sleep(4)
-                siga.open_tesouraria()
-                sleep(2)
+            if selenium.start():
+                siga: Siga = Siga(selenium.get_driver())
+                
+                if siga.login(username, passwd):
+                    sleep(10)
+                    siga.change_work_month_date(work_month)
+                    sleep(4)
+                    siga.open_tesouraria()
+                    sleep(2)
 
-                if item["insert-type"] == "MOVINT":
-                    if movint_insertion(siga, item, status):
-                        status.set_finished(True)
+                    if item["insert-type"] == "MOVINT":
+                        if movint_insertion(siga, item, status):
+                            status.set_finished(True)
 
-                if item["insert-type"] == "DEBT":
-                    if debt_insertion(siga, files_path, item, status):
-                        status.set_finished(True)
+                    if item["insert-type"] == "DEBT":
+                        if debt_insertion(siga, files_path, item, status):
+                            status.set_finished(True)
 
-            else:
-                login_error_notification()
-                status.set_access_error(access_error_msg)
+                else:
+                    login_error_notification()
+                    status.set_access_error(login_error_msg)
+                    selenium.close()
+                    break
+                sleep(3)
                 selenium.close()
+            else:
+                access_error_notification()
+                status.set_access_error(access_error_msg)
+                FAIL_SENDING.append(item)
+                status.set_failed(True)
+                status.set_fail_cause("Não foi possível acessar o sistema")
+                status.set_failed_all()
+                sleep(3)
                 break
-            sleep(3)
-            selenium.close()
-
         else:
             name_pattern_error_notification(item)
             FAIL_SENDING.append(item)
@@ -119,7 +126,6 @@ def start(files_path: list, work_month: str,
     # -----------------------------------------------------------------------------
     if status.errors["access_error"] is not None:
         return status.set_failed_all()
-
 
     if len(FAIL_SENDING) > 0 and len(SUCCESSFUL_SENT) > 0:
         sleep(2)
@@ -134,23 +140,29 @@ def start(files_path: list, work_month: str,
     else:
         sleep(2)
         status.set_finished_all()
+        
     move_files(files_path, SUCCESSFUL_SENT+EXISTING_FILES)
 
 
 def movint_insertion(routine: Siga, item: dict, status: InsertionStatus) -> bool:
     if routine.new_intern_transaction(item):
-        file_path = get_file_path(item["file-name"])
-
-        if file_path is not None:
-            upload_item_from(routine, file_path)
+        if item.get("type") == "RESG AUTOM" or item.get("type") == "APLICACAO":
             sleep(3)
-            save_item(routine, file_path, item, status)
+            save_item(routine, None, item, status)
             return True
         else:
-            filepath_error_notification(item)
-            status.set_failed(True)
-            status.set_fail_cause("Caminho do arquivo não foi encontrado!")
-            return False
+            file_path = get_file_location(item["file-name"])
+
+            if file_path is not None:
+                upload_item_from(routine, file_path)
+                sleep(3)
+                save_item(routine, file_path, item, status)
+                return True
+            else:
+                filepath_error_notification(item)
+                status.set_failed(True)
+                status.set_fail_cause("Caminho do arquivo não foi encontrado!")
+                return False
 
     return False
 
@@ -160,7 +172,12 @@ def debt_insertion(routine: Siga, files_path: list, item: dict,
     
     if routine.new_debt():    
         if routine.debt(item):
-            file_path = get_file_path(files_path, item["file-name"])
+            if item.get("type") == "RECIBO" and item.get("hist-1") == "012":
+                sleep(3)
+                save_item(routine, None, item, status)
+                return True
+
+            file_path = get_file_location(files_path, item["file-name"])
             
             if file_path is not None:
                 upload_item_from(routine, file_path)
