@@ -226,6 +226,12 @@ def set_extract_file_data(file: str) -> bool:
     return False
 
 
+def data_name_replacer(data: str) -> str:
+    return data.replace("CF", "").replace("CF RC", "").replace("NF", "")\
+        .replace("NF RC", "").replace("RC", "").replace("CP", "")\
+        .replace("CP RC", "").strip()
+
+
 def get_data_from_filename(model, file: str) -> dict:
     model.file_name = file.split("-")[0].strip()
     model.file_type = os.path.splitext(file)[1][1:]
@@ -250,9 +256,7 @@ def get_data_from_filename(model, file: str) -> dict:
             model.type = "RECIBO"
             model.hist1 = "024"
             model.hist2 = "024"
-            model.num = data.replace("CF", "").replace("CF RC", "").replace("NF", "")\
-                .replace("NF RC", "").replace("RC", "").replace("CP", "")\
-                .replace("CP RC", "").strip()
+            model.num = data_name_replacer(data)
 
         if len(data) > 0 and "NF" in data or "NF RC" in data \
             or "CF" in data or "CF RC" in data or "CP" in data\
@@ -260,9 +264,7 @@ def get_data_from_filename(model, file: str) -> dict:
             model.type = "NOTA FISCAL"
             model.hist1 = "021"
             model.hist2 = "023"
-            model.num = data.replace("CF", "").replace("CF RC", "").replace("NF", "")\
-                .replace("NF RC", "").replace("RC", "").replace("CP", "")\
-                .replace("CP RC", "").strip()
+            model.num = data_name_replacer(data)
                             
         if len(data) > 0 and data[:3] == "05_":
             model.cost_center = data.replace("_", "-").strip()
