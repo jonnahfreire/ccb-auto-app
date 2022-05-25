@@ -100,30 +100,37 @@ class Item:
             return None
     
     def get_item_id(self, table: str, _item: dict, month: str = None) -> int:
-        if month is None:
+        if month is None and table is not None:
             self.cursor.execute(f"SELECT oid, item FROM {table}")
-        else: self.cursor.execute(f"SELECT oid, item FROM {table} WHERE month='{month}'")
+
+        elif month is not None and table is not None: 
+            self.cursor.execute(f"SELECT oid, item FROM {table} WHERE month='{month}'")
+
         items = self.cursor.fetchall()
-        
-        return [item[0] for item in items if json.loads(item[1]).get("file-name") == _item["file-name"]][0]
+        id: list = [item[0] for item in items if json.loads(item[1]).get("file-name") == _item["file-name"]]
+        if len(id) > 0: return id[0]
+        else: return 0
 
     def set_inserted_item(self, type: int, month: str,  item: dict) -> tuple:
         try:
 
             if type == 1000:
                 id = self.get_item_id("item1000", item, month)
-                if self.cursor.execute(f"UPDATE item1000 SET inserted = 1 WHERE oid={id}"):
-                    return True
+                if id > 0:
+                    if self.cursor.execute(f"UPDATE item1000 SET inserted = 1 WHERE oid={id}"):
+                        return True
 
             if type == 1010:
                 id = self.get_item_id("item1010", item, month)
-                if self.cursor.execute(f"UPDATE item1010 SET inserted = {True} WHERE oid={id}"): 
-                    return True
+                if id > 0:
+                    if self.cursor.execute(f"UPDATE item1010 SET inserted = 1 WHERE oid={id}"): 
+                        return True
             
             if type == 10:
                 id = self.get_item_id("extract", item, month)
-                if self.cursor.execute(f"UPDATE extract SET inserted = {True} WHERE oid={id}"): 
-                    return True
+                if id > 0:
+                    if self.cursor.execute(f"UPDATE extract SET inserted = 1 WHERE oid={id}"): 
+                        return True
 
         except Exception:
             return None
@@ -169,16 +176,10 @@ class Item:
     
     def remove_item(self, id: int, table: str = None) -> bool:
         try:
-            if table == "1000":
-                self.cursor.execute(f"DELETE FROM item1000 WHERE oid = {id}")
-
-            if table == "1010":
-                self.cursor.execute(f"DELETE FROM item1010 WHERE oid = {id}")
-
-            if table == "extract":
-                self.cursor.execute(f"DELETE FROM extract WHERE oid = {id}")
-
-            return True
+            if table is not None:
+                self.cursor.execute(f"DELETE FROM {table} WHERE oid = {id}")
+                return True
+            return False
         except Exception:
             return False
     
@@ -210,7 +211,7 @@ def verify_insertion(items: list) -> bool:
             )
 
         if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1010"\
-            and not item.get("file-name") == "DB CEST PJ":
+            and not item.get("file-name") == "DB CEST PJ" and not item.get("file-name") == "MANUT CAD":
             success = item_obj.set_item(
                 1010,
                 json.dumps(item),
@@ -218,7 +219,8 @@ def verify_insertion(items: list) -> bool:
                 0
             )
 
-        if item.get("insert-type") == "MOVINT" or item.get("file-name") == "DB CEST PJ":
+        if item.get("insert-type") == "MOVINT" or item.get("file-name") == "DB CEST PJ"\
+            or item.get("file-name") == "MANUT CAD":
             success = item_obj.set_item(
                 10,
                 json.dumps(item),
@@ -228,6 +230,19 @@ def verify_insertion(items: list) -> bool:
 
     item_obj.commit()
     return success
+
+
+def get_item_table(item: dict) -> str:
+    if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1000":
+        return "item1000"
+
+    if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1010"\
+        and not item.get("file-name") == "DB CEST PJ" and not item.get("file-name") == "MANUT CAD":
+        return "item1010"
+
+    if item.get("insert-type") == "MOVINT" or item.get("file-name") == "DB CEST PJ"\
+        or item.get("file-name") == "MANUT CAD":
+        return "extract"
 
 
 def verify_update(item: dict) -> bool:
@@ -241,7 +256,7 @@ def verify_update(item: dict) -> bool:
         )
 
     if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1010"\
-        and not item.get("file-name") == "DB CEST PJ":
+        and not item.get("file-name") == "DB CEST PJ" and not item.get("file-name") == "MANUT CAD":
         success = item_obj.set_inserted_item(
             1010,
             get_item_month(item),
@@ -284,16 +299,19 @@ def objectfy(items1000: list = [], items1010: list = [], extractItems: list = []
     return (items1000, items1010, extractItems)
 
 
-def get_item_id(table: str, item: dict) -> int:
+def get_item_id(item: dict, table: str) -> int:
     item_obj = Item()
-    id: int = item_obj.get_item_id(table, item, get_item_month(item))
+    
+    month: str = get_item_month(item)
+    id: int = item_obj.get_item_id(table, item, month=month)
+
     item_obj.commit()
     return id
 
 
 def get_items1000(month: str = None, inserted: int = 0) -> list:
     item_obj = Item()
-    items: list = item_obj.get_extractItems(month, inserted)
+    items: list = item_obj.get_items1000(month, inserted)
     items,_,_ = objectfy(items1000=items)
 
     item_obj.commit()
@@ -349,6 +367,19 @@ def get_all_inserted_items(month: str = None) -> bool:
 
 def set_inserted_item(item: dict) -> bool:
     verify_update(item)
+
+
+def remove_item(item: dict) -> bool:
+    table: str = get_item_table(item)
+    id: int = get_item_id(item, table)
+
+    if id > 0:
+        item_obj = Item()
+        success = item_obj.remove_item(id, table)
+        item_obj.commit()
+        return success
+
+    return False
 
 
 def remove_all_items() -> bool:
