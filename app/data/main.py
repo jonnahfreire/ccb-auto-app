@@ -269,7 +269,7 @@ def get_data_from_filename(model, file: str) -> dict:
         if len(data) > 0 and data[:3] == "05_":
             model.cost_center = data.replace("_", "-").strip()
 
-        if len(data) > 0 and data.split(" ")[0].strip() == "CH":
+        if len(data) > 0 and data.split()[0].strip() == "CH":
             model.check_num = data.replace("CH", "").strip()
             model.payment_form = "CHEQUE"
             model.hist2 = "011" # CH Nº
@@ -298,21 +298,21 @@ def get_data_from_filename(model, file: str) -> dict:
         if len(data) > 0 and "R$" in data:
             model.value = data.replace("R$", "").strip()
         
-        if len(data) > 0 and data.split(" ")[0].strip() == "CH" or "DB AT" in data:
+        if len(data) > 0 and data.split()[0].strip() == "CH" or "DB AT" in data:
             model.cost_account = "1010"
 
         if len(data) > 0 and not data[:3] == "05_":
             model.cost_center = "ADM"
 
         if len(data) > 0 and not "NF" in data\
-            and not "CF" in data and not data.split(" ")[0].strip() == "CH"\
+            and not "CF" in data and not data.split()[0].strip() == "CH"\
             and not "DB AT" in data and not "05_" in data\
             and not data.count("_") == 2 and not ":" in data\
             and not "DP" in data and not "RC" in data and not "R$" in data:
             model.emitter = data.strip()
         
         if len(data) > 0 and not "NF" in data\
-            and not "CF" in data and not data.split(" ")[0].strip() == "CH"\
+            and not "CF" in data and not data.split()[0].strip() == "CH"\
             and not "DB AT" in data\
             and "RC" in data:
             model.type = "RECIBO"
