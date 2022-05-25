@@ -202,7 +202,7 @@ def get_extract_data(extract_path: str) -> dict:
         modelized_extract_revenues: list[dict] = extract.get_modelized_bank_revenues()
 
         modelized_extract_data: dict = {
-            "month": extract_month.replace("/", "-"),
+            "month": extract_month.replace("/", "-") if extract_month is not None else None,
             "data": modelized_extract_expenditures + modelized_extract_revenues
         }
         return modelized_extract_data
