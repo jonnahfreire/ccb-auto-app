@@ -19,47 +19,47 @@ const automation = {"running": false};
 
 async function getFilesFromFolder(path) {
     return await eel.get_files_from_folder(path)()
-}
+};
 
 async function selectDirectory() {
     return await eel.get_folder_path()()
-}
+};
 
 async function isUserSet() {
     return await eel.is_user_set()()
-}
+};
 
 async function getScreenSize() {
     return await eel.get_screen_size()()
-}
+};
 
 async function setUserCredentials(username, password) {
     return await eel.set_user_credential(username, password)()
-}
+};
 
 async function getUserName() {
     return await eel.get_username()()
-}
+};
 
 async function getStatus() {
     return await eel.get_current_status()()
-}
+};
 
 async function clearStatus() {
     return await eel.clear_status()()
-}
+};
 
 async function getSysPath() {
     return await eel.get_sys_path()()
-}
+;}
 
 async function openDirectory(path) {
     return await eel.open_directory(path)()
-}
+};
 
 async function selectFile() {
     return await eel.select_file_path()()
-}
+};
 
 async function getData(month) {
     return await eel.get_data(month)()
@@ -121,6 +121,10 @@ async function removeNotification(id) {
     return await eel.remove_notification(id)()
 };
 
+async function removeItemDocument(item) {
+    return await eel.remove_item_document(item)()
+};
+
 async function removeAllNotifications() {
     return await eel.clear_all_notifications()()
 };
@@ -139,7 +143,7 @@ async function getBrowserWindowShow() {
 
 async function monthHasInsertedDebts(month) {
     return await eel.month_has_inserted_debts(month)()
-}
+};
 
 const toggleInputPass = (el, inputElement) => {
     el.addEventListener('click', () => {
@@ -152,7 +156,7 @@ const toggleInputPass = (el, inputElement) => {
             el.classList.add('fa-eye');
         }
     });
-}
+};
 
 
 const handleFormCredentialSubmit = (e) => {
@@ -182,7 +186,6 @@ const handleFormCredentialSubmit = (e) => {
         
         // send to database
         setUserCredentials(username, pass).then(response => {
-            
             if (response) {
                 Array.prototype.slice.call(userCredentialInputs)
                     .forEach(input => input.value = "");
@@ -191,12 +194,12 @@ const handleFormCredentialSubmit = (e) => {
                 
                 setTimeout(() => {
                     containerUserRequest.classList.add("d-none");
-                    splashScreen.show();
+                    loadingAlert.show();
                 }, timeout);
                         
                 setTimeout(() => { 
                     containerContent.classList.remove("d-none");
-                    splashScreen.dismiss();
+                    loadingAlert.dismiss();
                     init();
                 }, timeout);
                 
@@ -210,8 +213,51 @@ const handleFormCredentialSubmit = (e) => {
         passEyeIcons.forEach(icon => icon.removeClass("d-none"));
         $(".pass-feedback").removeClass('d-none');
     }
+};
+
+const hasUpperCase = (word) => {
+    for (let letter of word) {
+        if (letter === letter.toUpperCase()){
+            return true;
+        }
+    }
 }
 
+const getUpperCaseLetterIndex = (word) => {
+    for(let letter of word) {
+        if (letter === letter.toUpperCase()) {
+            return word.indexOf(letter)
+        }
+    }
+}
+
+const getPythonMappedDictKey = obj => {
+    const map = {
+        "keys": [], 
+        "values": Object.values(obj)
+    }
+
+    Object.keys(obj).map(key => {
+        if (hasUpperCase(key)) {
+            index = getUpperCaseLetterIndex(key);
+            
+            key = key.slice(0, index) +"-"+ key.slice(index).toLowerCase();
+        }
+        map.keys.push(key);
+    });
+
+    const mapped = {"data": {}}
+
+    for (let index = 0; index < map.keys.length; index++) {
+        const key = map.keys[index];
+        const value = map.values[index]
+        
+        const item = mapped.data[`${key}`] = value;
+        if (!item in mapped) mapped.data = {...mapped.data, item}
+    }
+
+    return mapped.data;
+}
 
 const getMappedObject = obj => {
     const map = {
@@ -220,7 +266,6 @@ const getMappedObject = obj => {
     }
      
     Object.keys(obj).map(key => {
-        
         if (key.includes("-")) {
             key = key.split("-")
             const isNumber = Number.parseInt(key[1]) ? true: false;
@@ -284,7 +329,7 @@ const handleSettingsClick = () => {
             containerContentHeader.classList.remove("d-none");
     })
     
-    document.onkeyup = function(e) {
+    document.onkeyup = (e) => {
         if (e.altKey && e.key === "ArrowLeft") {
             settingsContainer.addClass("d-none");
             content.removeClass("d-none");
@@ -356,7 +401,7 @@ const handleBodyClick = () => {
     $(".footer-btn .add-extract").addClass("d-none");
     $(".popover-finished-debts").addClass("d-none");
     $(".folder-context-menu").addClass("d-none");
-    
+
     $(".folder-context-menu").removeClass("f-c-opacity");
 };
 
@@ -759,40 +804,102 @@ function getPosition(el) {
     };
 }
 
-const hanldeOpenItemOptions = (model, item) => {
-    const options = model.querySelector(".item-options");
+const handleRemoveItemAlertModal = {
+    show: () => {
+        $(".remove-item-modal-backdrop").removeClass("d-none");
 
-    if (item.insertType == "MOVINT" || item.fileName == "DB CEST PJ") (
-        options.querySelector(".open-file-location").style.display = "none"
+        // btn close (x)
+        $(".modal-remove-item .modal-remove-header svg").on("click", () => {
+            $(".remove-item-modal-backdrop").addClass("d-none");
+        })
+
+        //btn cancel
+        $(".modal-remove-item .modal-remove-footer .btn-cancel").on("click", () => {
+            $(".remove-item-modal-backdrop").addClass("d-none");
+        })
+    },
+    ok: (mappedItem, model, account) => {
+        $(".modal-remove-item .modal-remove-footer .btn-ok").on("click", () => {
+            $(".remove-item-modal-backdrop").addClass("d-none");
+
+            removeItemDocument(mappedItem).then(success => {
+                success && model.remove();
+    
+                if (account === "1000") {
+                    _$$(".account1000-content .debt-info").length == 0 &&
+                        $(".account1000-content .message").removeClass("d-none");
+                }   
+                if (account === "1010") {
+                    _$$(".account1010-content .debt-info").length == 0 &&
+                        $(".account1010-content .message").removeClass("d-none");
+                }  
+                if (account === "extract") {
+                    _$$(".extract-content .debt-info").length == 0 &&
+                        $(".extract-content .message").removeClass("d-none");
+                }   
+            })
+        })
+    }
+}
+
+
+const optionsContainer = {
+    options: null,
+    setItemOption: (item) => optionsContainer.options = item.querySelector(".item-options"),
+    isShown: () => optionsContainer.options.classList.contains("shown"),
+    show: () => {
+        optionsContainer.options.classList.add("shown");
+        optionsContainer.options.style.height = "30px";
+        optionsContainer.options.style.opacity = "1";
+        optionsContainer.options.style.marginBottom = "10px";
+    },
+    hide: () => {
+        optionsContainer.options.classList.remove("shown");
+        optionsContainer.options.style.height = "0px";
+        optionsContainer.options.style.opacity = "0";
+        optionsContainer.options.style.marginBottom = "0px";
+    },
+    toggle: () => {
+        if (optionsContainer.isShown()) optionsContainer.hide();
+        else optionsContainer.show();
+    }
+}
+
+
+const handleOpenItemOptions = (model, account, item) => {
+    const options = model.querySelector(".item-options");
+    const removeItem = options.querySelector(".remove-item");
+    const openFileLocation = options.querySelector(".open-file-location");
+    const location = item.location;
+    
+    if (item.insertType == "MOVINT" || item.fileName == "DB CEST PJ"
+        || item.fileName == "MANUT CAD") (
+        openFileLocation.classList.add("hidden-file-location")
     )
 
-    const optionsContainer = {
-        isShown: () => options.classList.contains("item-options-shown"),
-        show: () =>{
-            options.classList.add("item-options-shown");
-            options.style.height = "30px";
-            options.style.opacity = "1";
-            options.style.marginBottom = "10px";
-        },
-        hide: () => {
-            options.classList.remove("item-options-shown");
-            options.style.height = "0px";
-            options.style.opacity = "0";
-            options.style.marginBottom = "0px";
+    optionsContainer.setItemOption(model);
+    optionsContainer.toggle();
+
+    removeItem.addEventListener("click", () => {
+        if (automation.running) {
+            modalAlertSysRunning.show("Não é possível excluir items enquanto existe lançamentos em andamento.");
+            return false;
         }
-    }
-    if (optionsContainer.isShown()){
-        optionsContainer.hide();
-    } else {
-        optionsContainer.show();
+        mappedItem = getPythonMappedDictKey(item);
+        handleRemoveItemAlertModal.show();
+        handleRemoveItemAlertModal.ok(mappedItem, model, account);
+    });
+
+    if(location) {
+        openFileLocation.addEventListener("click", () => {
+            const dir = location.slice(0, location.lastIndexOf("\\"));
+            openDirectory(dir);
+        })
     }
 }
 
 const fillContent = (itemList, account) => {
-
-    if (automation.running) {
-        return false;
-    }
+    if (automation.running) return false;
 
     // clear content
     account == "1000" && _$$(".account1000-content .model-item")
@@ -814,7 +921,7 @@ const fillContent = (itemList, account) => {
             const model = _$(".content-model .debt-info").cloneNode(true);
 
             model.querySelector(".model-item-container").addEventListener("click", () => {
-                hanldeOpenItemOptions(model, item);
+                handleOpenItemOptions(model, account, item);
             })
             
             if (item.fileType === "pdf") {
