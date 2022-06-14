@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 
-from styles import *
+from .styles import *
 
 WIN = sys.platform == "win32"
 
@@ -78,7 +78,7 @@ class AlertModal(QWidget):
         self.modal_close.setMinimumSize(35, 35)
         self.modal_close.setMaximumSize(35, 35)
         self.modal_close.setMargin(10)
-        self.modal_close.setPixmap(QPixmap("assets/close.png"))
+        self.modal_close.setPixmap(QPixmap("view/assets/close.png"))
         self.modal_close.setStyleSheet(modal_btn_close_style)
 
         self.modal_body = QLabel(self.body, self.container)
@@ -160,7 +160,7 @@ class AlertLoading(QWidget):
         self.alert_container.setStyleSheet(context_menu_style if self.style is None else self.style)
         self.set_position(int(p_w/2)-int(container_w/2), int(p_h/2)-80-int(container_h/2))
 
-        self.movie = QMovie("assets/loading-line.gif")
+        self.movie = QMovie("view/assets/loading-line.gif")
         
         self.message_text = QLabel(self.message, self.alert_container)
         self.message_text.move(20, int(container_h/3))
@@ -261,7 +261,7 @@ class UserCredentialScreen(QDialog):
     def __init__(self, parent) -> None:
         super().__init__()
         self.parent = parent
-        loadUi("user-screen.ui", self)
+        loadUi("view/ui/user-screen.ui", self)
 
         self.username = self.userInput.text()
         self.password = self.passwordInput
@@ -281,18 +281,18 @@ class UserCredentialScreen(QDialog):
     def pass_eye_clicked(self):
         if self.password.echoMode() == QLineEdit.Password:
             self.password.setEchoMode(QLineEdit.Normal)
-            self.eye.setIcon(QIcon("assets/eye.png"))
+            self.eye.setIcon(QIcon("view/assets/eye.png"))
         else:
             self.password.setEchoMode(QLineEdit.Password)
-            self.eye.setIcon(QIcon("assets/hidden.png"))
+            self.eye.setIcon(QIcon("view/assets/hidden.png"))
     
     def pass_eye2_clicked(self):
         if self.confirm_pass.echoMode() == QLineEdit.Password:
             self.confirm_pass.setEchoMode(QLineEdit.Normal)
-            self.eye2.setIcon(QIcon("assets/eye.png"))
+            self.eye2.setIcon(QIcon("view/assets/eye.png"))
         else:
             self.confirm_pass.setEchoMode(QLineEdit.Password)
-            self.eye2.setIcon(QIcon("assets/hidden.png"))
+            self.eye2.setIcon(QIcon("view/assets/hidden.png"))
     
     def load_main_screen(self):
         main = MainScreen(self.parent)
@@ -306,7 +306,7 @@ class MainScreen(QDialog):
         super().__init__()
         self.parent = parent
 
-        loadUi("main-screen.ui", self)
+        loadUi("view/ui/main-screen.ui", self)
 
         self.mousePressEvent = self.handle_mouse_press
         self.status_container = self.leftStatusFrame
@@ -383,7 +383,7 @@ class MainScreen(QDialog):
             self.folder_context.show()
             
         self.folder.setStyleSheet(folder_style_active)
-        self.folderIcon.setPixmap(QPixmap(u"assets/folderOpen.png"))
+        self.folderIcon.setPixmap(QPixmap(u"view/assets/folderOpen.png"))
         print(self.folderMonthTitle.text())            
 
     def create_dir_clicked(self):
@@ -473,7 +473,7 @@ class Window(QStackedWidget):
     def load_window(self) -> None:
         self.setGeometry(self.left, self.top, self.width, self.height)
         self.setWindowTitle(self.title)
-        self.setWindowIcon(QtGui.QIcon("assets/favicon.png"))
+        self.setWindowIcon(QtGui.QIcon("view/assets/favicon.png"))
         self.show()
 
 

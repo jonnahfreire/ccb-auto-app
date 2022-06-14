@@ -223,7 +223,7 @@ border-radius: 0px;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>assets/hidden.png</normaloff>assets/hidden.png</iconset>
+       <normaloff>../assets/hidden.png</normaloff>../assets/hidden.png</iconset>
      </property>
     </widget>
     <widget class="QPushButton" name="passEye2">
@@ -247,7 +247,7 @@ border-radius: 0px;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>assets/hidden.png</normaloff>assets/hidden.png</iconset>
+       <normaloff>../assets/hidden.png</normaloff>../assets/hidden.png</iconset>
      </property>
     </widget>
    </widget>
