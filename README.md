@@ -22,14 +22,10 @@ possibilitando aos membros utilizar este tempo na realização de outas atividad
 
 ##### Front-end
 
-- Javascript
-- HTML5
-- CSS3
-- Bootstrap-v5.0.2
+- PyQt5
 
 ##### Libs
 
-- Eel==0.14.0
 - selenium==4.1.3
 - Tabula-py (Dependência: Java)
 
