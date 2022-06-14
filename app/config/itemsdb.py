@@ -66,9 +66,11 @@ class Item:
         except Exception:
             return False
 
-    def get_items1000(self, month: str = None, inserted: int = 0) -> tuple:
+    def get_items1000(self, month: str = None, inserted: int = 0, all: bool = False) -> tuple:
         try:
-            if month is None:
+            if all:
+                self.cursor.execute(f"SELECT item FROM extract")
+            elif month is None:
                 self.cursor.execute(f"SELECT item FROM item1000 WHERE inserted = {inserted}")
             else: self.cursor.execute(f"SELECT item FROM item1000 WHERE month='{month}' AND inserted = {inserted}")
             items = self.cursor.fetchall()
@@ -77,9 +79,11 @@ class Item:
         except Exception:
             return None
     
-    def get_items1010(self, month: str = None, inserted: int = 0) -> tuple:
+    def get_items1010(self, month: str = None, inserted: int = 0, all: bool = False) -> tuple:
         try:
-            if month is None:
+            if all:
+                self.cursor.execute(f"SELECT item FROM extract")
+            elif month is None:
                 self.cursor.execute(f"SELECT item FROM item1010 WHERE inserted = {inserted}")
             else: self.cursor.execute(f"SELECT item FROM item1010 WHERE month='{month}' AND inserted = {inserted}")
             items = self.cursor.fetchall()
@@ -88,11 +92,14 @@ class Item:
         except Exception:
             return None
     
-    def get_extractItems(self, month: str = None, inserted: int = 0) -> tuple:
+    def get_extractItems(self, month: str = None, inserted: int = 0, all: bool = False) -> tuple:
         try:
-            if month is None:
+            if all:
+                self.cursor.execute(f"SELECT item FROM extract")
+            elif month is None:
                 self.cursor.execute(f"SELECT item FROM extract WHERE inserted = {inserted}")
-            else: self.cursor.execute(f"SELECT item FROM extract WHERE month='{month}' AND inserted = {inserted}")
+            else: 
+                self.cursor.execute(f"SELECT item FROM extract WHERE month='{month}' AND inserted = {inserted}")
             items = self.cursor.fetchall()
 
             return items
@@ -111,25 +118,25 @@ class Item:
         if len(id) > 0: return id[0]
         else: return 0
 
-    def set_inserted_item(self, type: int, month: str,  item: dict) -> tuple:
+    def set_inserted_item(self, type: int, month: str,  item: dict, inserted: int) -> tuple:
         try:
 
             if type == 1000:
                 id = self.get_item_id("item1000", item, month)
                 if id > 0:
-                    if self.cursor.execute(f"UPDATE item1000 SET inserted = 1 WHERE oid={id}"):
+                    if self.cursor.execute(f"UPDATE item1000 SET inserted = {inserted} WHERE oid={id}"):
                         return True
 
             if type == 1010:
                 id = self.get_item_id("item1010", item, month)
                 if id > 0:
-                    if self.cursor.execute(f"UPDATE item1010 SET inserted = 1 WHERE oid={id}"): 
+                    if self.cursor.execute(f"UPDATE item1010 SET inserted = {inserted} WHERE oid={id}"): 
                         return True
             
             if type == 10:
                 id = self.get_item_id("extract", item, month)
                 if id > 0:
-                    if self.cursor.execute(f"UPDATE extract SET inserted = 1 WHERE oid={id}"): 
+                    if self.cursor.execute(f"UPDATE extract SET inserted = {inserted} WHERE oid={id}"): 
                         return True
 
         except Exception:
@@ -245,14 +252,15 @@ def get_item_table(item: dict) -> str:
         return "extract"
 
 
-def verify_update(item: dict) -> bool:
+def update(item: dict, inserted: int = 1) -> bool:
     item_obj = Item()
     success: bool = False
     if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1000":
         success = item_obj.set_inserted_item(
             1000,
             get_item_month(item),
-            item
+            item,
+            inserted
         )
 
     if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1010"\
@@ -260,14 +268,16 @@ def verify_update(item: dict) -> bool:
         success = item_obj.set_inserted_item(
             1010,
             get_item_month(item),
-            item
+            item,
+            inserted
         )
 
     if item.get("insert-type") == "MOVINT" or item.get("file-name") == "DB CEST PJ":
         success = item_obj.set_inserted_item(
             10,
             get_item_month(item),
-            item
+            item,
+            inserted
         )
 
     item_obj.commit()
@@ -309,31 +319,35 @@ def get_item_id(item: dict, table: str) -> int:
     return id
 
 
-def get_items1000(month: str = None, inserted: int = 0) -> list:
+def get_items1000(month: str = None, inserted: int = 0) -> dict:
     item_obj = Item()
     items: list = item_obj.get_items1000(month, inserted)
     items,_,_ = objectfy(items1000=items)
 
     item_obj.commit()
-    return items
+    return {"1000": items, "1010": [], "extract": []}
 
 
-def get_items1010(month: str = None, inserted: int = 0) -> list:
+def get_items1010(month: str = None, inserted: int = 0) -> dict:
     item_obj = Item()
     items: list = item_obj.get_items1010(month, inserted)
     _,items,_ = objectfy(items1010=items)
 
     item_obj.commit()
-    return items
+    return {"1000": [], "1010": items, "extract": []}
+    
 
 
-def get_extract_items(month: str = None, inserted: int = 0) -> list:
+def get_extract_items(month: str = None, inserted: int = 0, return_type: str = None, all: bool = False) -> dict:
     item_obj = Item()
-    extractItems: list = item_obj.get_extractItems(month, inserted)
+    extractItems: list = item_obj.get_extractItems(month, inserted, all)
     _,_,extractItems = objectfy(extractItems=extractItems)
 
+    if return_type == "list":
+        return extractItems
+
     item_obj.commit()
-    return extractItems
+    return {"1000": [], "1010": [], "extract": extractItems}
 
 
 def get_all_items(month: str = None, inserted: int = 0, return_type: str = None) -> dict:
@@ -365,8 +379,8 @@ def get_all_inserted_items(month: str = None) -> bool:
     return {"1000": items1000, "1010": items1010, "extract": extractItems}
 
 
-def set_inserted_item(item: dict) -> bool:
-    verify_update(item)
+def set_inserted_item(item: dict, inserted: int = 1) -> bool:
+    return update(item, inserted)
 
 
 def remove_item(item: dict) -> bool:

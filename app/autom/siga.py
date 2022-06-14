@@ -175,6 +175,7 @@ class Siga:
                 # Inserts payment date
                 sleep(2)
                 doc = self.driver.find_element_by_id("f_datapagamento")
+                sleep(1)
                 doc.send_keys(debt["date"])
             except NoSuchElementException as ex:
                 print("EXCEPTION INSERTING DOC PAYMENT DATE: ", ex)

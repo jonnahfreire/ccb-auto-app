@@ -220,7 +220,7 @@ def set_extract_file_data(file: str) -> bool:
             if os.path.exists(path):
                 copy_file_to(path, file.replace("/", "\\"))
                 
-                db_data = get_extract_items()
+                db_data = get_extract_items(return_type="list", all=True)
                 data = [item for item in data.get("data") if not item in db_data]
                 return set_item(data)
     return False

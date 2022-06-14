@@ -5,6 +5,9 @@ import eel
 from tkinter import Tk, messagebox
 
 from app.config.itemsdb import get_all_items
+from app.config.itemsdb import get_items1000
+from app.config.itemsdb import get_items1010
+from app.config.itemsdb import get_extract_items
 
 from app.utils.main import reset_db, InsertionStatus
 from app.utils.filemanager import open_dir
@@ -32,6 +35,8 @@ from app.config.settings import set_browserwindow_show
 from app.config.settings import get_browserwindow_show
 
 from app.config.itemsdb import get_item_id
+from app.config.itemsdb import remove_item
+from app.config.itemsdb import set_inserted_item
 
 from app.config.credentials import Credential
 from app.config.user import User
@@ -106,8 +111,23 @@ def open_directory(path: str) -> None:
 
 
 @eel.expose
-def remove_month_directory(dirname) -> bool:
+def remove_month_directory(dirname: str) -> bool:
     return remove_directory(dirname)
+
+
+@eel.expose
+def remove_item_document(item: dict) -> bool:
+    return remove_item(item)
+
+
+@eel.expose
+def set_item_as_sent(item: dict) -> bool:
+    return set_inserted_item(item)
+
+
+@eel.expose
+def restaure_sent_item(item: dict, inserted: int = 0) -> bool:
+    return set_inserted_item(item, inserted)
 
 
 @eel.expose
@@ -234,9 +254,21 @@ def clear_status() -> None:
 
 
 @eel.expose
-def get_data(work_month: str) -> dict:
+def get_data(work_month: str, items1000: bool,
+    items1010: bool, extract_items: bool, inserted: int) -> dict:
+    
     if work_month is None: return
-    return get_all_items(work_month)
+    if not items1000 and not items1010 and not extract_items:
+        return get_all_items(work_month, inserted)
+        
+    elif items1000 and not items1010 and not extract_items:
+        return get_items1000(work_month, inserted)
+
+    elif items1010 and not items1000 and not extract_items:
+        return get_items1010(work_month, inserted)
+
+    elif extract_items and not items1000 and not items1010:
+        return get_extract_items(work_month, inserted)
 
 
 @eel.expose
