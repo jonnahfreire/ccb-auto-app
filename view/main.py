@@ -1,7 +1,4 @@
-from ast import Load
-from email import message
 import sys, os
-from turtle import width
 
 from PyQt5.uic import loadUi
 from PyQt5 import *
