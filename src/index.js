@@ -12,7 +12,7 @@ const containerContentHeader   = _$(".container-content-header");
 const content                  = _$(".container-content .content");
 const folderContextMenu        = $(".folder-context-menu").this;
 const contextMenuCurrentFolder = {"element": "", "title": ""};
-const timeout = 10;
+const timeout = 1000;
 const statusCheckInterval = 100;
 const automation = {"running": false};
 
@@ -61,8 +61,10 @@ async function selectFile() {
     return await eel.select_file_path()()
 };
 
-async function getData(month) {
-    return await eel.get_data(month)()
+async function getData(month, items1000, 
+    items1010, extractItems, inserted) {
+    return await eel.get_data(month, items1000, 
+        items1010, extractItems, inserted)()
 };
 
 async function getId(table, item) {
@@ -71,6 +73,14 @@ async function getId(table, item) {
 
 async function setFilesData() {
     return await eel.set_files_data()()
+};
+
+async function setItemAsSent(item) {
+    return await eel.set_item_as_sent(item)()
+};
+
+async function restaureSentItems(item) {
+    return await eel.restaure_sent_item(item)()
 };
 
 async function getDriverInfo() {
@@ -401,6 +411,7 @@ const handleBodyClick = () => {
     $(".footer-btn .add-extract").addClass("d-none");
     $(".popover-finished-debts").addClass("d-none");
     $(".folder-context-menu").addClass("d-none");
+    $(".start-separated-container").addClass("d-none");
 
     $(".folder-context-menu").removeClass("f-c-opacity");
 };
@@ -449,7 +460,7 @@ const handleAddItems = () => {
     })
 };
 
-const hanldleAddExtract = () => {
+const handleAddExtract = () => {
     if (automation.running) {
         modalAlertSysRunning.show("Não é possível inserir despesas ou receitas enquanto existe lançamentos em andamento.");
         return false;
@@ -684,7 +695,7 @@ const updateStatus = (items, status, interval) => {
     }
 };
 
-const startInsertions = async() => {
+const startInsertions = async (only1000, only1010, onlyExtract, onlyInserted) => {
     if (automation.running) {
         modalAlertSysRunning.show("Já existe um processo em andamento, aguarde finalizar.");
         return false;
@@ -695,18 +706,13 @@ const startInsertions = async() => {
         return false;
     }
     
-    const selectedMonthDir = [...monthDirectories].filter(month => {
-            if ($(month).containClass("work-month-directory-selected")){
-                return month
-            }
-        })[0];
-    
-    const selectedMonth = $(selectedMonthDir).get(".folder-title", el => el.text());
-    const workMonthPath = await getWorkMonthPath(selectedMonth);
+    const selectedMonth = $(".month-directories .work-month-directory-selected")
+        .text().trim().replace("/", "-");
 
+    const workMonthPath = await getWorkMonthPath(selectedMonth);
     const showBrowserWindow = await getBrowserWindowShow();
 
-    getData(selectedMonth.replace("/", "-")).then(response => {
+    getData(selectedMonth, only1000, only1010, onlyExtract, onlyInserted).then(response => {
         const items1000 = response["1000"]
         const items1010 = response["1010"]
         const extractItems = response.extract
@@ -732,7 +738,9 @@ const startInsertions = async() => {
                 })
             }, statusCheckInterval);
         } else {
-            modalAlertItemsNotFound.show();
+            const selectedAccount = only1000?"1000":only1010?"1010":onlyExtract?"Extrato":"";
+            message = `Não foi encontrado lançamentos a ser realizado na conta ${selectedAccount}. Insira lançamentos.`;
+            modalAlertItemsNotFound.show(message);
         }
     })
 };
@@ -804,6 +812,21 @@ function getPosition(el) {
     };
 }
 
+const handleShowAccountEmptyItemsMessage = (account) => {
+    if (account === "1000") {
+        _$$(".account1000-content .debt-info").length == 0 &&
+            $(".account1000-content .message").removeClass("d-none");
+    }   
+    if (account === "1010") {
+        _$$(".account1010-content .debt-info").length == 0 &&
+            $(".account1010-content .message").removeClass("d-none");
+    }  
+    if (account === "extract") {
+        _$$(".extract-content .debt-info").length == 0 &&
+            $(".extract-content .message").removeClass("d-none");
+    }   
+}
+
 const handleRemoveItemAlertModal = {
     show: () => {
         $(".remove-item-modal-backdrop").removeClass("d-none");
@@ -824,19 +847,7 @@ const handleRemoveItemAlertModal = {
 
             removeItemDocument(mappedItem).then(success => {
                 success && model.remove();
-    
-                if (account === "1000") {
-                    _$$(".account1000-content .debt-info").length == 0 &&
-                        $(".account1000-content .message").removeClass("d-none");
-                }   
-                if (account === "1010") {
-                    _$$(".account1010-content .debt-info").length == 0 &&
-                        $(".account1010-content .message").removeClass("d-none");
-                }  
-                if (account === "extract") {
-                    _$$(".extract-content .debt-info").length == 0 &&
-                        $(".extract-content .message").removeClass("d-none");
-                }   
+                handleShowAccountEmptyItemsMessage(account);               
             })
         })
     }
@@ -870,6 +881,8 @@ const handleOpenItemOptions = (model, account, item) => {
     const options = model.querySelector(".item-options");
     const removeItem = options.querySelector(".remove-item");
     const openFileLocation = options.querySelector(".open-file-location");
+    const setSentItem = options.querySelector(".set-item-as-sent");
+    const restaureSentItem = options.querySelector(".restaure-sent-item");
     const location = item.location;
     
     if (item.insertType == "MOVINT" || item.fileName == "DB CEST PJ"
@@ -877,12 +890,18 @@ const handleOpenItemOptions = (model, account, item) => {
         openFileLocation.classList.add("hidden-file-location")
     )
 
+    if (!model.querySelector(".sent").classList.contains("d-none")) {
+        setSentItem.classList.add("d-none");
+        restaureSentItem.classList.remove("d-none");
+    }
+
     optionsContainer.setItemOption(model);
     optionsContainer.toggle();
 
     removeItem.addEventListener("click", () => {
         if (automation.running) {
-            modalAlertSysRunning.show("Não é possível excluir items enquanto existe lançamentos em andamento.");
+            modalAlertSysRunning.show("Não é possível excluir items\
+            enquanto existe lançamentos em andamento.");
             return false;
         }
         mappedItem = getPythonMappedDictKey(item);
@@ -896,9 +915,35 @@ const handleOpenItemOptions = (model, account, item) => {
             openDirectory(dir);
         })
     }
+
+    setSentItem.addEventListener("click", () => {
+        if (automation.running) {
+            modalAlertSysRunning.show("Não é possível atualizar\
+            items enquanto existe lançamentos em andamento.");
+            return false;
+        }
+        mappedItem = getPythonMappedDictKey(item);
+        setItemAsSent(mappedItem).then(success => {
+            success && model.remove();
+            handleShowAccountEmptyItemsMessage(account);
+        })
+    });
+
+    restaureSentItem.addEventListener("click", () => {
+        if (automation.running) {
+            modalAlertSysRunning.show("Não é possível restaurar\
+            items enquanto existe lançamentos em andamento.");
+            return false;
+        }
+        mappedItem = getPythonMappedDictKey(item);
+        restaureSentItems(mappedItem).then(success => {
+            success && model.remove();
+            handleShowAccountEmptyItemsMessage(account);
+        })
+    });
 }
 
-const fillContent = (itemList, account) => {
+const fillContent = (itemList, account, inserted=false) => {
     if (automation.running) return false;
 
     // clear content
@@ -919,6 +964,11 @@ const fillContent = (itemList, account) => {
             }).format(item.value.replace(".","").replace(",","."));
 
             const model = _$(".content-model .debt-info").cloneNode(true);
+
+            if (inserted > 0) {
+                model.querySelector(".not-started").classList.add("d-none");
+                model.querySelector(".sent").classList.remove("d-none");
+            }
 
             model.querySelector(".model-item-container").addEventListener("click", () => {
                 handleOpenItemOptions(model, account, item);
@@ -984,25 +1034,27 @@ const loadingAlert = {
     dismiss: () => $(alertBackdrop).addClass("d-none")
 };
 
-const setData = (month) => {
+const setData = (month, only1000=false, only1010=false,
+    onlyExtract=false, onlyInserted=0) => {
     loadingAlert.show("Buscando lançamentos, aguarde...");
 
-    getData(month)
-        .then(response => {
-            const items1000    = response["1000"].map(item => getMappedObject(item));
-            const items1010    = response["1010"].map(item => getMappedObject(item));
-            const extractItems = response["extract"].map(item => getMappedObject(item));
+    getData(month, only1000, only1010, onlyExtract, onlyInserted).then(response => {            
+        const items1000    = response["1000"].map(item => getMappedObject(item));
+        const items1010    = response["1010"].map(item => getMappedObject(item));
+        const extractItems = response["extract"].map(item => getMappedObject(item));
 
-            if (items1000.length > 0 || items1010.length > 0 || extractItems.length > 0) {
-                $(".status-container").removeClass("d-none");
-            } else {
-                $(".status-container").addClass("d-none");
-            }
+        if (items1000.length > 0 || items1010.length > 0 || extractItems.length > 0) {
+            $(".status-container").removeClass("d-none");
+        } else {
+            $(".status-container").addClass("d-none");
+        }
 
-            fillContent(items1000, "1000");
-            fillContent(items1010, "1010");
-            fillContent(extractItems, "extract");
-            loadingAlert.dismiss();
+        if (onlyInserted > 0) $(".status-container").addClass("d-none");
+
+        fillContent(items1000, "1000", onlyInserted);
+        fillContent(items1010, "1010", onlyInserted);
+        fillContent(extractItems, "extract", onlyInserted);
+        loadingAlert.dismiss();
     })
 }
 
@@ -1125,7 +1177,14 @@ const handleFolderClick = (directoryContainer, directoryModel, month) => {
             $(directoryModel).get(".bi-folder2-open", el => el.toggleClass("d-none"));
         }
 
-        setData(month);
+        _$$(".sent-items-filter").forEach(filter => 
+            filter.classList.remove("active-filter"));
+        
+        if (_$(".sent-items-filter").getAttribute("data-id") == "0"){
+            $(".sent-items-filter").addClass("active-filter");
+        }
+
+        setData(month, false, false, false, 0);
 
     } else {
         modalAlertSysRunning.show("Não é possível visualizar os mêses enquanto a automação está em andamento.");
@@ -1187,7 +1246,7 @@ const modalAlertSysRunning = {
 
 const modalAlertItemsNotFound = {
     backdrop: null,
-    show: () => {
+    show: (message) => {
         const backdrop = _$(".system-running-modal-backdrop")
         backdrop.classList.remove("d-none");
         modalAlertItemsNotFound.backdrop = backdrop;
@@ -1196,7 +1255,8 @@ const modalAlertItemsNotFound = {
             .textContent = "Atenção!";
 
         backdrop.querySelector(".modal-alert-running .alert-message")
-            .textContent = "Não foi encontrado lançamentos a ser realizado para o mês selecionado. Insira lançamentos.";
+            .textContent = !message == "" ? message :
+            "Não foi encontrado lançamentos a ser realizado para o mês selecionado. Insira lançamentos.";
 
         const btnClose = [
             backdrop.querySelector(".btn-ok"),
@@ -1279,6 +1339,16 @@ const handleFolderContextClick = () => {
     }
 }
 
+const handleFiltersClick = (filter) => {
+    const id = +filter.getAttribute("data-id");
+    filter.classList.add("active-filter");
+
+    const month = $(".month-directories .work-month-directory-selected")
+                    .text().trim().replace("/", "-");
+
+    setData(month, false, false, false, id);
+};
+
 const listeners = {
     start: () => {
         // Set user
@@ -1289,6 +1359,21 @@ const listeners = {
 
         // Automation Start
         $(".btn-start").on("click", startInsertions);
+        $(".btn-start").on("contextmenu", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            $(".footer-btn .start-separated-container").removeClass("d-none");
+
+        });
+        
+        $(".start-separated-container .start-only-1000")
+            .on("click", () => startInsertions(true, false, false, 0));
+
+        $(".start-separated-container .start-only-1010")
+            .on("click", () => startInsertions(false, true, false, 0));
+
+        $(".start-separated-container .start-only-extract")
+            .on("click", () => startInsertions(false, false, true, 0));
 
         // Add Items
         $(".btn-add").on("click", handleAddItems);
@@ -1296,9 +1381,23 @@ const listeners = {
             e.preventDefault();
             e.stopPropagation();
             $(".footer-btn .add-extract").removeClass("d-none");
-            $(".footer-btn .add-extract").on("click", hanldleAddExtract);
+            $(".footer-btn .add-extract").on("click", handleAddExtract);
         });
 
+        $$(".sent-items-filter").on("click", (e) => {
+            if (automation.running) {
+                modalAlertSysRunning
+                    .show("Não é possível filtrar despesas ou\
+                        receitas enquanto existe lançamentos em andamento.");
+                return false;
+            }
+            
+            _$$(".sent-items-filter").forEach(filter => 
+                filter.classList.remove("active-filter"));
+            
+            handleFiltersClick(e.target)
+        });
+        
         // Create working month directory
         $(".btn-create").on("click", handleCreateWorkingMonth);
 

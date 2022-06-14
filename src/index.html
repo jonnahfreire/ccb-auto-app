@@ -217,6 +217,11 @@
             <div class="content-container">
                 <div class="content-title desp-receitas">
                     <span>Despesas / Receitas</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z"/>
+                    </svg>
+                    <span class="sent-items-filter active-filter" data-id="0">Não lançados</span>
+                    <span class="sent-items-filter" data-id="1">Lançados</span>
                 </div>
                 <div class="base-accounts">
                     <div class="account1000">
@@ -267,6 +272,11 @@
                 <span class="add-extract d-none">Adicionar extrato</span>
                 <button type="button" class="btn btn-primary f-btn btn-sm btn-create">Criar Diretório</button>
                 <button type="button" class="btn btn-primary f-btn btn-sm btn-add">Adicionar</button>
+                <div class="start-separated-container d-none">
+                    <span class="start-item start-only-1000">Caixa 1000</span><span class="item-sep"></span>
+                    <span class="start-item start-only-1010">Banco 1010</span><span class="item-sep"></span>
+                    <span class="start-item start-only-extract">Extrato</span>
+                </div>
                 <button type="button" class="btn btn-success f-btn btn-sm btn-start">Iniciar Lançamentos</button>
             </div>
         </div> <!-- End Content -->
@@ -456,12 +466,13 @@
                     <span class="debt-item file-value"></span>
                     <span class="debt-item file-insert-type"></span>
                     
-                    <span class="debt-item status not-started bg-warning-2">Não iniciado</span>
+                    <span class="debt-item status not-started bg-warning-2">Não lançado</span>
                     <span class="debt-item status started bg-success d-none">
                         Iniciado
                         <span class="loading spinner-border ms-auto" role="status" aria-hidden="true" style="width: 18px; height: 18px;"></span>
                     </span>
                     <span class="debt-item status finished bg-primary d-none">Finalizado</span>
+                    <span class="debt-item status sent bg-primary d-none">Lançado</span>
                     <span class="debt-item status failed bg-danger d-none">
                         <span class="status-error">Falhou</span>
                         <span class="status-error-msg bg-danger d-none">
@@ -486,6 +497,20 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-folder-symlink" viewBox="0 0 16 16">
                             <path d="m11.798 8.271-3.182 1.97c-.27.166-.616-.036-.616-.372V9.1s-2.571-.3-4 2.4c.571-4.8 3.143-4.8 4-4.8v-.769c0-.336.346-.538.616-.371l3.182 1.969c.27.166.27.576 0 .742z"/>
                             <path d="m.5 3 .04.87a1.99 1.99 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14h10.348a2 2 0 0 0 1.991-1.819l.637-7A2 2 0 0 0 13.81 3H9.828a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 6.172 1H2.5a2 2 0 0 0-2 2zm.694 2.09A1 1 0 0 1 2.19 4h11.62a1 1 0 0 1 .996 1.09l-.636 7a1 1 0 0 1-.996.91H2.826a1 1 0 0 1-.995-.91l-.637-7zM6.172 2a1 1 0 0 1 .707.293L7.586 3H2.19c-.24 0-.47.042-.683.12L1.5 2.98a1 1 0 0 1 1-.98h3.672z"/>
+                        </svg>
+                    </div>
+                    <div class="option set-item-as-sent bg-success">
+                        <span>Marcar como lançado</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-check-square" viewBox="0 0 16 16">
+                            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                            <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
+                        </svg>
+                    </div>
+                    <div class="option restaure-sent-item bg-success d-none">
+                        <span>Restaurar</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-check-square" viewBox="0 0 16 16">
+                            <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                            <path d="M10.97 4.97a.75.75 0 0 1 1.071 1.05l-3.992 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.235.235 0 0 1 .02-.022z"/>
                         </svg>
                     </div>
                 </div>
