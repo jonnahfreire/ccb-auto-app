@@ -25,7 +25,7 @@
    <property name="styleSheet">
     <string notr="true">background-color: rgb(255, 255, 255);</string>
    </property>
-   <widget class="QFrame" name="frame">
+   <widget class="QFrame" name="appHeader">
     <property name="geometry">
      <rect>
       <x>-1</x>
@@ -150,7 +150,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../assets/notification.png</pixmap>
+      <pixmap>../assets/bell-fill.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -245,7 +245,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap>../assets/user.png</pixmap>
+      <pixmap>../assets/person-fill.png</pixmap>
      </property>
      <property name="scaledContents">
       <bool>true</bool>
@@ -372,115 +372,12 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>48</y>
-        <width>761</width>
-        <height>65</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">border: 0px;</string>
-      </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>761</width>
-         <height>65</height>
-        </rect>
-       </property>
-       <widget class="QFrame" name="folder">
-        <property name="geometry">
-         <rect>
-          <x>0</x>
-          <y>4</y>
-          <width>115</width>
-          <height>55</height>
-         </rect>
-        </property>
-        <property name="cursor">
-         <cursorShape>PointingHandCursor</cursorShape>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">background-color: rgb(67, 67, 255);
-border-radius: 10px;
-
-folder::clicked {
-	background-color:rgb(14, 6, 247);
-}</string>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <widget class="QLabel" name="folderIcon">
-         <property name="geometry">
-          <rect>
-           <x>11</x>
-           <y>9</y>
-           <width>38</width>
-           <height>38</height>
-          </rect>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">background: transparent;</string>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="pixmap">
-          <pixmap>../assets/folderClosed.png</pixmap>
-         </property>
-         <property name="scaledContents">
-          <bool>true</bool>
-         </property>
-        </widget>
-        <widget class="QLabel" name="folderMonthTitle">
-         <property name="geometry">
-          <rect>
-           <x>55</x>
-           <y>14</y>
-           <width>55</width>
-           <height>30</height>
-          </rect>
-         </property>
-         <property name="font">
-          <font>
-           <family>Segoe UI</family>
-           <pointsize>9</pointsize>
-           <weight>75</weight>
-           <bold>true</bold>
-          </font>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color: #fff;
-background: transparent;</string>
-         </property>
-         <property name="text">
-          <string>06/2022</string>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </widget>
-      </widget>
-     </widget>
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="workingMonthHeader">
       <property name="geometry">
        <rect>
         <x>16</x>
         <y>10</y>
-        <width>771</width>
+        <width>770</width>
         <height>30</height>
        </rect>
       </property>
@@ -515,39 +412,29 @@ color: rgb(89, 89, 89)</string>
        <number>0</number>
       </property>
      </widget>
-    </widget>
-    <widget class="QScrollArea" name="scrollArea_2">
-     <property name="geometry">
-      <rect>
-       <x>16</x>
-       <y>157</y>
-       <width>771</width>
-       <height>310</height>
-      </rect>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">border: 0px;</string>
-     </property>
-     <property name="widgetResizable">
-      <bool>true</bool>
-     </property>
-     <widget class="QWidget" name="scrollAreaWidgetContents_2">
+     <widget class="QFrame" name="listMonthContainer">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>771</width>
-        <height>310</height>
+        <x>16</x>
+        <y>45</y>
+        <width>770</width>
+        <height>70</height>
        </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
       </property>
      </widget>
     </widget>
-    <widget class="QLabel" name="label_3">
+    <widget class="QLabel" name="debtReceivingsHeader">
      <property name="geometry">
       <rect>
        <x>16</x>
        <y>120</y>
-       <width>771</width>
+       <width>770</width>
        <height>30</height>
       </rect>
      </property>
@@ -580,6 +467,22 @@ color: rgb(89, 89, 89)</string>
      </property>
      <property name="margin">
       <number>0</number>
+     </property>
+    </widget>
+    <widget class="QFrame" name="itemsContainer">
+     <property name="geometry">
+      <rect>
+       <x>16</x>
+       <y>152</y>
+       <width>770</width>
+       <height>315</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
      </property>
     </widget>
    </widget>
@@ -622,7 +525,13 @@ color: rgb(89, 89, 89)</string>
       <string notr="true">background: transparent;</string>
      </property>
      <property name="text">
-      <string>Copyright 2022 @jonnahfreire</string>
+      <string>Copyright 2022 &lt;a target=&quot;_blank&quot; href=&quot;https://github.com/jonnahfreire&quot;&gt;@jonnahfreire&lt;/a&gt;</string>
+     </property>
+     <property name="textFormat">
+      <enum>Qt::RichText</enum>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
