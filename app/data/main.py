@@ -52,7 +52,7 @@ class BankExtractData:
         
     def __get_extract_data(self) -> None:
         try:
-            df = tabula.read_pdf(self.path, pages = "all")
+            df = tabula.read_pdf(self.path, pages = "all_items")
             data = [str(row).splitlines() for row in df]
 
             for page in range(len(data)):
@@ -166,10 +166,10 @@ class BankExtractData:
                     "doc-num": row[1],
                     "desc"   : row[2],
                     "value"  : row[3],
-                    "type"   : row[4]
+                    "_type"   : row[4]
                 }
-                model["type"] == "C" and self.revenues.append(model)
-                model["type"] == "D" and self.expenditures.append(model)
+                model["_type"] == "C" and self.revenues.append(model)
+                model["_type"] == "D" and self.expenditures.append(model)
                 if not model in self.extract_data:
                     self.extract_data.append(model)
     
@@ -220,7 +220,7 @@ def set_extract_file_data(file: str) -> bool:
             if os.path.exists(path):
                 copy_file_to(path, file.replace("/", "\\"))
                 
-                db_data = get_extract_items(return_type="list", all=True)
+                db_data = get_extract_items(return_type="list", all_items=True)
                 data = [item for item in data.get("data") if not item in db_data]
                 return set_item(data)
     return False
@@ -458,8 +458,8 @@ def move_classified_files(
 
     # movimentação interna
     if "orig-account" in keys and "dest-account" in keys\
-        and "insert-type" in keys:
-        if file.get("insert-type") == "MOVINT":
+        and "insert-_type" in keys:
+        if file.get("insert-_type") == "MOVINT":
             base_account = file["dest-account"]
             sub_account = "1415"
             base_account_path = os.path.join(syspath, work_month, base_account)
@@ -485,7 +485,7 @@ def move_classified_files(
 
 
 def check_name_pattern(item: dict) -> bool:
-    if item.get("insert-type") == "DEBT":
+    if item.get("insert-_type") == "DEBT":
         if len(item["date"]) == 3 and item.get("value") is not None\
             and item.get("num") is not None and item.get("expenditure") is not None\
             and item.get("emitter") is not None:
@@ -505,13 +505,13 @@ def check_name_pattern(item: dict) -> bool:
                 and item.get("payment-form") == "DEBITO AUTOMATICO" and not item.get("doc-num") == None:
                 return True
 
-    if item["insert-type"] == "MOVINT":
-        if item["type"] == "RESG AUTOM" and item["orig-account"] == "1033"\
+    if item["insert-_type"] == "MOVINT":
+        if item["_type"] == "RESG AUTOM" and item["orig-account"] == "1033"\
             and item["dest-account"] == "1010" and item["doc-num"] is not None\
             and item["value"] is not None and len(item["date"]) == 3:
             return True
         
-        if item["type"] == "APLICACAO" and item["orig-account"] == "1010"\
+        if item["_type"] == "APLICACAO" and item["orig-account"] == "1010"\
             and item["dest-account"] == "1033" and item["doc-num"] is not None\
             and item["value"] is not None and len(item["date"]) == 3:
             return True
@@ -519,7 +519,7 @@ def check_name_pattern(item: dict) -> bool:
         # se for retirada do banco para o caixa, ou da aplicação para o banco
         if item["orig-account"] == "1010" and item["dest-account"] == "1000"\
             and item["doc-num"] is not None and item["complement"] is not None\
-            and str(item["type"]).upper() == "SAQ" and len(item["date"]) == 3\
+            and str(item["_type"]).upper() == "SAQ" and len(item["date"]) == 3\
             and item["value"] is not None:
             return True
         

@@ -224,7 +224,7 @@ def select_file() -> str:
     root = Tk()
     root.withdraw()
     root.attributes('-topmost', True)
-    filepath = filedialog.askopenfilename(title="Selecionar arquivo", filetypes=[("all files", "*")])
+    filepath = filedialog.askopenfilename(title="Selecionar arquivo", filetypes=[("all_items files", "*")])
     root.destroy()
     return filepath
 

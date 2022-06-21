@@ -93,11 +93,11 @@ def start(files_path: list, work_month: str,
                     siga.open_tesouraria()
                     sleep(2)
 
-                    if item["insert-type"] == "MOVINT":
+                    if item["insert-_type"] == "MOVINT":
                         if movint_insertion(siga, item, status):
                             status.set_finished(True)
 
-                    if item["insert-type"] == "DEBT":
+                    if item["insert-_type"] == "DEBT":
                         if debt_insertion(siga, files_path, item, status):
                             status.set_finished(True)
 
@@ -146,7 +146,7 @@ def start(files_path: list, work_month: str,
 
 def movint_insertion(routine: Siga, item: dict, status: InsertionStatus) -> bool:
     if routine.new_intern_transaction(item):
-        if item.get("type") == "RESG AUTOM" or item.get("type") == "APLICACAO":
+        if item.get("_type") == "RESG AUTOM" or item.get("_type") == "APLICACAO":
             sleep(3)
             save_item(routine, None, item, status)
             return True
@@ -172,7 +172,7 @@ def debt_insertion(routine: Siga, files_path: list, item: dict,
     
     if routine.new_debt():    
         if routine.debt(item):
-            if item.get("type") == "RECIBO" and item.get("hist-1") == "012":
+            if item.get("_type") == "RECIBO" and item.get("hist-1") == "012":
                 sleep(3)
                 save_item(routine, None, item, status)
                 return True

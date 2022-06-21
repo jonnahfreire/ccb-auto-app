@@ -128,11 +128,11 @@ def get_notifications() -> list:
 
 
 def insert_based_template_notification(template: dict, item: dict) -> None:
-    if item["insert-type"] == "MOVINT":
+    if item["insert-_type"] == "MOVINT":
         template["title"] = f'{item["file-name"]} - R$ {item["value"]}'
         insert_notification(template)
 
-    if item["insert-type"] == "DEBT":
+    if item["insert-_type"] == "DEBT":
         template["title"] = f'{item["file-name"]} - R$ {item["value"]} - DP {item["expenditure"]}'
         insert_notification(template)
 

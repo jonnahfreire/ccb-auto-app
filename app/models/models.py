@@ -23,7 +23,7 @@ class BaseModel:
 
     def get_mapped_data(self) -> dict:
         return {
-            "type": self.type,
+            "_type": self.type,
             "num": self.num,
             "date": self.date,
             "value": self.value,
@@ -37,8 +37,8 @@ class BaseModel:
             "file-name": self.file_name,
             "check-num": self.check_num,
             "doc-num": self.doc_num,
-            "file-type": self.file_type,
-            "insert-type": self.insert_type,
+            "file-_type": self.file_type,
+            "insert-_type": self.insert_type,
             "location": self.location
         }
 
@@ -67,7 +67,7 @@ class Model1415:
 
     def get_mapped_data(self) -> dict:
         return {
-            "type": self.type,
+            "_type": self.type,
             "date": self.date,
             "transform": self.transform,
             "doc-num": self.doc_num,
@@ -78,8 +78,8 @@ class Model1415:
             "hist": self.hist,
             "complement": self.complement, 
             "file-name": self.file_name,
-            "file-type": self.file_type,
-            "insert-type": self.insert_type,
+            "file-_type": self.file_type,
+            "insert-_type": self.insert_type,
             "location": self.location
         }
 

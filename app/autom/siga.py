@@ -86,14 +86,14 @@ class Siga:
             self.driver.find_element_by_id("f_data").send_keys(debt["date"])
             sleep(1)
             
-            # Inserts document type
+            # Inserts document _type
             try:
                 self.driver.find_element(By.XPATH, '//*[@id="select2-chosen-7"]').click()
                 sleep(1)
                 doc = self.driver.find_element(By.XPATH, '//*[@id="s2id_autogen7_search"]')
                 doc.click()
                 sleep(0.5)
-                doc.send_keys(debt["type"])
+                doc.send_keys(debt["_type"])
                 doc.send_keys(Keys.RETURN)
             except Exception as ex:
                 print("EXCEPTION INSERTING DOC TYPE: ", ex)
@@ -259,7 +259,7 @@ class Siga:
     def save(self, item: dict, save_btn: str = None) -> bool:
         document_already_exists: bool = False
         try:
-            if item["insert-type"] == "MOVINT":
+            if item["insert-_type"] == "MOVINT":
                 save_btn = btn_save_intern_transf
 
             if save_btn is not None:
@@ -270,7 +270,7 @@ class Siga:
             sleep(4)
             # modal ja existe documento com o mesmo numero
             try:
-                if not item["insert-type"] == "MOVINT":
+                if not item["insert-_type"] == "MOVINT":
                     modal_header_title = self.driver.find_element(By.XPATH, modal_header)
                     if modal_header_title.size != 0 or modal_header_title.is_diplayed():
                         document_already_exists = True
@@ -284,12 +284,12 @@ class Siga:
                     message += f"\n\t'Documento com o mesmo número já existe'"
                 insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
                 
-            if item["insert-type"] == "MOVINT" or item["payment-form"] == "CHEQUE":
+            if item["insert-_type"] == "MOVINT" or item["payment-form"] == "CHEQUE":
                 message = "Falha ao fechar modal de imprimir cópia de cheque"
                 close = '/html/body/div[18]/div/div/a[1]'
                 try:
                     try:
-                        if item["insert-type"] == "MOVINT":
+                        if item["insert-_type"] == "MOVINT":
                             close = '/html/body/div[13]/div/div/a[1]'
 
                         WebDriverWait(self.driver, 4)\
@@ -305,13 +305,13 @@ class Siga:
                             message += f"\n\t'Documento com o mesmo número já existe'"
                         insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
 
-                        if not item["insert-type"] == "MOVINT":
+                        if not item["insert-_type"] == "MOVINT":
                             return False
                         
                 except NoSuchElementException as ex:
                     insert_execlog(f"{red}Save Debt Exception: {yellow}\n\t{message}\n\t{ex.msg}{bg}\n")
 
-            if item["insert-type"] == "MOVINT":
+            if item["insert-_type"] == "MOVINT":
                 return True
 
             sleep(3)

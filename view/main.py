@@ -3,10 +3,10 @@ import sys
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QStackedWidget, QApplication
 
-from view.ui.mainscreen.main import MainScreen
+from view.ui.mainScreen.main import MainScreen
 from view.ui.settings.main import SettingsScreen
-from view.ui.userscreen.main import UserCredentialScreen
-from view.ui.alertloading.main import AlertLoading
+from view.ui.userScreen.main import UserCredentialScreen
+from view.ui.alertLoading.main import AlertLoading
 
 from app.main import is_user_set
 
@@ -34,10 +34,10 @@ class Window(QStackedWidget):
 
     def load_views(self):
         if not is_user_set():
-            self.user_credential_view = UserCredentialScreen(self, "view/ui/userscreen/user-screen.ui")
+            self.user_credential_view = UserCredentialScreen(self, "view/ui/userScreen/user-screen.ui")
             self.addWidget(self.user_credential_view)
         else:
-            self.main_view = MainScreen(self, "view/ui/mainscreen/main-screen.ui")
+            self.main_view = MainScreen(self, "view/ui/mainScreen/main-screen.ui")
             self.addWidget(self.main_view)
             self.settings_view = SettingsScreen(self, "view/ui/settings/settings.ui")
             self.addWidget(self.settings_view)

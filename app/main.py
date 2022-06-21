@@ -219,9 +219,10 @@ def clear_status() -> None:
     STATUS = None
 
 
-def get_data(work_month: str, items1000: bool,
-             items1010: bool, extract_items: bool, inserted: int) -> dict:
-    if work_month is None: return
+def get_data(work_month: str, items1000: bool = False,
+             items1010: bool = False, extract_items: bool = False, inserted: int = 0) -> dict:
+    if work_month is None:
+        return {}
     if not items1000 and not items1010 and not extract_items:
         return get_all_items(work_month, inserted)
 
