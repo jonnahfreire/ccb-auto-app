@@ -1,1 +1,1 @@
-python -m eel main.py src --onefile --noconsole --icon src/assets/robot.ico
+PyInstaller main.spec --onefile --icon view/assets/robot.ico
