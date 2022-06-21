@@ -18,3 +18,4 @@ old-release
 main.spec
 ANOTACOES.txt 
 access-token
+dist/*
