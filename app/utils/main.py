@@ -1,6 +1,8 @@
 import os, sys
 import subprocess
+import datetime
 from time import sleep
+
 
 # from PyPDF2 import PdfFileMerger
 from app.config.credentials import Credential
@@ -149,3 +151,21 @@ def get_stdout(command: str) -> str:
     output_str = str(output_byte.decode(encoding))
     return output_str
 
+
+def get_month_list() -> list:
+    today = datetime.datetime.now()
+    months = []
+    for m in range(12):
+        if m < 9: 
+            months.append("0"+str(m+1) + f"/{today.year}")
+        else: months.append(str(m+1) + f"/{today.year}")
+    
+    return months
+
+
+def get_current_month() -> str:
+    today = datetime.datetime.now()
+    if today.month < 9: 
+        return "0"+str(today.month) + f"/{today.year}"
+
+    return str(today.month) + f"/{today.year}"
