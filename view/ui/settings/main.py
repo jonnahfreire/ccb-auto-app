@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 
 from app.main import get_driver_settings, set_driver_path
 from app.config.paths import syslocal_path
-from ..alertloading.main import AlertLoading
+from ..alertLoading.main import AlertLoading
 
 from ..styles import *
 

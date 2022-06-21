@@ -47,7 +47,7 @@ class AlertLoading(QWidget):
         """
 
         @param top:
-        @type pos_left: int
+        @_type pos_left: int
         """
         self.alert_container.move(pos_left, top)
 

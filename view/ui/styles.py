@@ -245,6 +245,17 @@ insertion_item_style = """
     color: rgb(50, 50, 50);
 """
 
+content_item_style = """
+    background-color: rgb(250,250,250);
+    padding-left: 5px;
+    border-radius: 5px;
+    
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding: 5px;
+    
+    font-size: 10pt;
+"""
 settings_info_style = """
     background-color: rgb(245, 245, 245);
     border-radius: 5px;
