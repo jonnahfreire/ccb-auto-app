@@ -1,5 +1,6 @@
 from PyQt5.uic import loadUi
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt
 
 from app.main import get_driver_settings, set_driver_path
 from app.config.paths import syslocal_path
@@ -39,7 +40,8 @@ class SettingsScreen(QDialog):
                                           on_animation_end=self.set_driver_settings)
 
     def handle_back_click(self, event):
-        self.parent.setCurrentIndex(self.parent.currentIndex() - 1)
+        if event.buttons() == Qt.LeftButton:
+            self.parent.setCurrentIndex(self.parent.currentIndex() - 1)
 
     def set_driver_settings(self):
         drive_settings = get_driver_settings()
@@ -57,7 +59,7 @@ class SettingsScreen(QDialog):
 
     def handle_set_driver_path(self):
         filepath = QFileDialog.getOpenFileName(
-            self, 'Selecione o driver', syslocal_path, "Pdf files (*.exe *.bin)")[0]
+            self, 'Selecione o driver', syslocal_path, "Exe files (*.exe *.bin)")[0]
 
         if filepath is not None or len(filepath) > 0:
             self.alert_loading.start_animation()

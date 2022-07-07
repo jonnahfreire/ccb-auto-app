@@ -1,4 +1,3 @@
-
 # ------------------------------------
 class BaseModel:
 
@@ -23,7 +22,7 @@ class BaseModel:
 
     def get_mapped_data(self) -> dict:
         return {
-            "_type": self.type,
+            "type": self.type,
             "num": self.num,
             "date": self.date,
             "value": self.value,
@@ -33,14 +32,15 @@ class BaseModel:
             "hist-2": self.hist2,
             "cost-center": self.cost_center,
             "cost-account": self.cost_account,
-            "payment-form": self.payment_form, 
+            "payment-form": self.payment_form,
             "file-name": self.file_name,
             "check-num": self.check_num,
             "doc-num": self.doc_num,
-            "file-_type": self.file_type,
-            "insert-_type": self.insert_type,
+            "file-type": self.file_type,
+            "insert-type": self.insert_type,
             "location": self.location
         }
+
 
 # ----------------------------------
 # RECEITAS
@@ -67,7 +67,7 @@ class Model1415:
 
     def get_mapped_data(self) -> dict:
         return {
-            "_type": self.type,
+            "type": self.type,
             "date": self.date,
             "transform": self.transform,
             "doc-num": self.doc_num,
@@ -76,10 +76,10 @@ class Model1415:
             "dest-account": self.dest_account,
             "receiver": self.receiver,
             "hist": self.hist,
-            "complement": self.complement, 
+            "complement": self.complement,
             "file-name": self.file_name,
-            "file-_type": self.file_type,
-            "insert-_type": self.insert_type,
+            "file-type": self.file_type,
+            "insert-type": self.insert_type,
             "location": self.location
         }
 
@@ -230,7 +230,7 @@ class Model3030(BaseModel):
         self.insert_type: str = "DEBT"
 
 
-#----------------------------------
+# ----------------------------------
 class Model3300(BaseModel):
 
     def __init__(self) -> None:
@@ -268,4 +268,3 @@ class Model11102(BaseModel):
     def __init__(self) -> None:
         super().__init__()
         self.expenditure: str = "11102"
-

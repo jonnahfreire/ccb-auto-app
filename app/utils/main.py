@@ -1,16 +1,14 @@
-import os, sys
-import subprocess
 import datetime
-from time import sleep
+import os
+import subprocess
+import sys
 
-
+from app.cli.colors import *
 # from PyPDF2 import PdfFileMerger
 from app.config.credentials import Credential
-
 from app.execlogs.logs import *
-from app.cli.colors import *
 
-WIN = sys.platform == "win32" 
+WIN = sys.platform == "win32"
 
 
 # def merge_pdf(merge_list: list, filename: str):
@@ -39,10 +37,10 @@ class InsertionStatus:
             "start_insertion_error": None,
             "access_error": None
         }
-    
+
     def set_current(self, current: dict):
         self.current = current
-    
+
     def set_starting(self):
         self.starting = True
 
@@ -51,28 +49,28 @@ class InsertionStatus:
 
     def set_finished(self, finished: bool):
         self.finished = finished
-        
+
     def set_finished_all(self):
         self.finished_all = True
-    
+
     def set_finished_all_with_exceptions(self):
         self.finished_all_with_exceptions = True
-    
+
     def set_failed(self, failed: bool):
         self.failed = failed
 
     def set_failed_all(self):
         self.failed_all = True
-    
+
     def set_fail_cause(self, cause: str):
         self.fail_cause = cause
-    
+
     def set_insertion_error(self, error_msg):
         self.errors["start_insertion_error"] = error_msg
-    
+
     def set_access_error(self, error_msg):
         self.errors["access_error"] = error_msg
-    
+
     def get_status(self):
         return {
             "status": {
@@ -90,7 +88,6 @@ class InsertionStatus:
         }
 
 
-
 def reset_db() -> bool:
     return Credential().reset_all()
 
@@ -103,28 +100,28 @@ def get_class_list_by_module(module):
     md = module.__dict__
     return [
         md[c] for c in md if (
-            isinstance(md[c], type) 
-            and md[c].__module__ == module.__name__
+                isinstance(md[c], type)
+                and md[c].__module__ == module.__name__
         )
     ]
 
 
 def model_name_exists(module, model_name: str) -> bool:
     models_name = [
-        model.__name__ 
+        model.__name__
         for model in get_class_list_by_module(module)
     ]
     if model_name not in models_name:
         insert_execlog(f"{red}Model: {yellow}'{model_name}' Não encontrado{bg}")
 
     return model_name in models_name
-        
+
 
 def get_items_models_list(module) -> list:
     return [
-        _class.__name__[5:]
-        for _class in get_class_list_by_module(module)    
-    ][1:]
+               _class.__name__[5:]
+               for _class in get_class_list_by_module(module)
+           ][1:]
 
 
 def get_version_from_file(cmd: str, config_path: str) -> str:
@@ -146,7 +143,7 @@ def get_stdout(command: str) -> str:
         stdout=subprocess.PIPE,
         stdin=subprocess.PIPE,
         stderr=subprocess.PIPE)
-    
+
     output_byte = command.stdout.read() + command.stderr.read()
     output_str = str(output_byte.decode(encoding))
     return output_str
@@ -156,16 +153,17 @@ def get_month_list() -> list:
     today = datetime.datetime.now()
     months = []
     for m in range(12):
-        if m < 9: 
-            months.append("0"+str(m+1) + f"/{today.year}")
-        else: months.append(str(m+1) + f"/{today.year}")
-    
+        if m < 9:
+            months.append("0" + str(m + 1) + f"/{today.year}")
+        else:
+            months.append(str(m + 1) + f"/{today.year}")
+
     return months
 
 
 def get_current_month() -> str:
     today = datetime.datetime.now()
-    if today.month < 9: 
-        return "0"+str(today.month) + f"/{today.year}"
+    if today.month < 9:
+        return "0" + str(today.month) + f"/{today.year}"
 
     return str(today.month) + f"/{today.year}"

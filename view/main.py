@@ -27,20 +27,23 @@ class Window(QStackedWidget):
         self.setFixedHeight(self.height)
 
         self.alert_loading = AlertLoading(
-            self, p_w=self.width, p_h=self.height, infinity=False, duration=1000,
+            self, p_w=self.width, p_h=self.height, infinity=False, duration=2000,
             container_w=280, message="Iniciando, aguarde..",
             on_animation_end=self.load_views)
         self.alert_loading.start_animation()
 
     def load_views(self):
+        self.user_credential_view = UserCredentialScreen(self, "view/ui/userScreen/user-screen.ui")
+        self.addWidget(self.user_credential_view)
+        self.main_view = MainScreen(self, "view/ui/mainScreen/main-screen.ui")
+        self.addWidget(self.main_view)
+        self.settings_view = SettingsScreen(self, "view/ui/settings/settings.ui")
+        self.addWidget(self.settings_view)
+
         if not is_user_set():
-            self.user_credential_view = UserCredentialScreen(self, "view/ui/userScreen/user-screen.ui")
-            self.addWidget(self.user_credential_view)
+            self.setCurrentIndex(self.currentIndex()-1)
         else:
-            self.main_view = MainScreen(self, "view/ui/mainScreen/main-screen.ui")
-            self.addWidget(self.main_view)
-            self.settings_view = SettingsScreen(self, "view/ui/settings/settings.ui")
-            self.addWidget(self.settings_view)
+            self.setCurrentIndex(self.currentIndex()+1)
 
     def load_window(self) -> None:
         self.setGeometry(self.left, self.top, self.width, self.height)

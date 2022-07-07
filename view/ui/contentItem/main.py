@@ -45,10 +45,20 @@ class ContentItem(QWidget):
             self.item_container.setAlignment(Qt.AlignLeft)
 
             item_icon = self.set_icon()
-            item_name = self.create_item("NF " + item.get("num"))
+
+            filename = item.get("file-name")
+            if "DB AT" in filename:
+                filename = f"{item.get('file-name')[:5]} {item.get('num')}"
+
+            expenditure = item.get("expenditure")
+            if item.get("insert-type") == "MOVINT":
+                expenditure = item.get("orig-account")
+            expenditure = f"DP {expenditure}"
+
+            item_name = self.create_item(filename)
             item_date = self.create_item("/".join(item.get("date")))
-            item_value = self.create_item("R$ " + item.get("value"))
-            item_expenditure = self.create_item("DP " + item.get("expenditure"))
+            item_value = self.create_item("R$ {}".format(item.get('value'), "2f"))
+            item_expenditure = self.create_item(expenditure)
 
             self.item_container.addWidget(item_icon, index)
             self.item_container.addWidget(item_name, index)

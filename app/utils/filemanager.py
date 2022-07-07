@@ -1,5 +1,5 @@
 import os
-from tkinter import PhotoImage, Tk, filedialog
+from tkinter import Tk, filedialog
 from app.utils.main import WIN
 from app.config.globals import struct_dirs, debt_code_list
 from app.config.paths import syspath, config

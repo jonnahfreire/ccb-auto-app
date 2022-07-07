@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="widget" native="true">
+  <widget class="QWidget" name="userScreenContainer" native="true">
    <property name="geometry">
     <rect>
      <x>-1</x>
@@ -37,8 +37,10 @@ background-color: rgb(255, 255, 255);
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(239, 239, 239);
-border-radius: 10px;</string>
+     <string notr="true">background-color: rgb(249, 249, 249);
+
+border-radius: 10px;
+</string>
     </property>
     <property name="frameShape">
      <enum>QFrame::StyledPanel</enum>
@@ -67,9 +69,14 @@ border-radius: 10px;</string>
       <cursorShape>PointingHandCursor</cursorShape>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(73, 76, 255);
-color: #fff;
-border-radius: 5px;</string>
+      <string notr="true">QPushButton {
+	background-color:rgb(67, 67, 255);
+	color: #fff;
+	border-radius: 5px;
+}
+QPushButton:hover {
+	background-color:rgb(40, 32, 255);
+}</string>
      </property>
      <property name="text">
       <string>SALVAR</string>
@@ -160,19 +167,6 @@ border-bottom: 1px solid rgb(106, 106, 106);</string>
       <string>Senha</string>
      </property>
     </widget>
-    <widget class="QLabel" name="credentialErrorMessage">
-     <property name="geometry">
-      <rect>
-       <x>70</x>
-       <y>290</y>
-       <width>251</width>
-       <height>31</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
     <widget class="QLineEdit" name="confirmPasswordInput">
      <property name="geometry">
       <rect>
@@ -223,7 +217,7 @@ border-radius: 0px;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>../assets/hidden.png</normaloff>../assets/hidden.png</iconset>
+       <normaloff>../../../../qt-ui/view/assets/hidden.png</normaloff>../../../../qt-ui/view/assets/hidden.png</iconset>
      </property>
     </widget>
     <widget class="QPushButton" name="passEye2">
@@ -247,22 +241,229 @@ border-radius: 0px;</string>
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>../assets/hidden.png</normaloff>../assets/hidden.png</iconset>
+       <normaloff>../../../../qt-ui/view/assets/hidden.png</normaloff>../../../../qt-ui/view/assets/hidden.png</iconset>
      </property>
     </widget>
+    <widget class="QFrame" name="CredentialErrorMessageContainer">
+     <property name="geometry">
+      <rect>
+       <x>70</x>
+       <y>280</y>
+       <width>252</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 65, 65);
+
+border-radius: 5px;
+</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QLabel" name="msgIcon">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>6</y>
+        <width>22</width>
+        <height>22</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap>../../assets/exclamation-triangle-fill-white.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <property name="indent">
+       <number>-1</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="credentialErrorMessage">
+      <property name="geometry">
+       <rect>
+        <x>40</x>
+        <y>0</y>
+        <width>215</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+color: #fff;
+font: 9pt &quot;Segoe UI&quot;;
+font-weight: 600;</string>
+      </property>
+      <property name="text">
+       <string>error message</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
-   <widget class="QLabel" name="formFeedBack">
+   <widget class="QFrame" name="TopMessageFrameContainer">
     <property name="geometry">
      <rect>
       <x>210</x>
-      <y>30</y>
-      <width>381</width>
-      <height>41</height>
+      <y>10</y>
+      <width>380</width>
+      <height>80</height>
      </rect>
     </property>
-    <property name="text">
-     <string/>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
     </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QFrame" name="TopErrorMessageContainer">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>25</y>
+       <width>380</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 65, 65);
+
+border-radius: 5px;
+</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QLabel" name="TopMsgIcon">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>5</y>
+        <width>25</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap>../../assets/exclamation-triangle-fill-white.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="topErrorMessage">
+      <property name="geometry">
+       <rect>
+        <x>42</x>
+        <y>0</y>
+        <width>330</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+color: #fff;
+font: 9pt &quot;Segoe UI&quot;;
+font-weight: 600;</string>
+      </property>
+      <property name="text">
+       <string>error message</string>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QFrame" name="TopSuccessMessageContainer">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>25</y>
+       <width>380</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(40, 136, 31);
+
+border-radius: 5px;
+</string>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <widget class="QLabel" name="TopMsgIcon_2">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>5</y>
+        <width>25</width>
+        <height>25</height>
+       </rect>
+      </property>
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;</string>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+      <property name="pixmap">
+       <pixmap>../../assets/check-circle-fill-white.png</pixmap>
+      </property>
+      <property name="scaledContents">
+       <bool>true</bool>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
+     </widget>
+     <widget class="QLabel" name="topSuccessMessage">
+      <property name="geometry">
+       <rect>
+        <x>42</x>
+        <y>0</y>
+        <width>330</width>
+        <height>35</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+color: #fff;
+font: 9pt &quot;Segoe UI&quot;;
+font-weight: 600;</string>
+      </property>
+      <property name="text">
+       <string>success message</string>
+      </property>
+     </widget>
+    </widget>
    </widget>
   </widget>
  </widget>

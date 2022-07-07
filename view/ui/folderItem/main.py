@@ -12,6 +12,7 @@ class FolderItem(QWidget):
         super().__init__()
         self.parent = parent
         self.__id = 0
+        self.is_active = False
         self.item_parent = None
 
         self.container = QFrame()
@@ -44,6 +45,7 @@ class FolderItem(QWidget):
             self.set_active()
 
     def set_active(self):
+        self.is_active = True
         self.set_folder_open()
 
     def set_id(self, folder_id):
@@ -61,6 +63,7 @@ class FolderItem(QWidget):
         if self.container is not None:
             self.container.setStyleSheet(folder_style)
             self.folder_icon.setPixmap(QPixmap("view/assets/folder.png"))
+            self.is_active = False
 
     def set_month_text(self, text):
         self.month_text.setText(text)

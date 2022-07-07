@@ -1,1 +1,1 @@
-PyInstaller main.spec --onefile --icon view/assets/robot.ico
+PyInstaller main.spec --onefile --noconsole --icon view/assets/robot.ico

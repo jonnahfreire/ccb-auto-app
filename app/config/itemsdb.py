@@ -213,7 +213,7 @@ def verify_insertion(items: list) -> bool:
     item_obj = Item()
     success: bool = False
     for item in items:
-        if item.get("insert-_type") == "DEBT" and item.get("cost-account") == "1000":
+        if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1000":
             success = item_obj.set_item(
                 1000,
                 json.dumps(item),
@@ -221,7 +221,7 @@ def verify_insertion(items: list) -> bool:
                 0
             )
 
-        if item.get("insert-_type") == "DEBT" and item.get("cost-account") == "1010" \
+        if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1010" \
                 and not item.get("file-name") == "DB CEST PJ" and not item.get("file-name") == "MANUT CAD":
             success = item_obj.set_item(
                 1010,
@@ -230,7 +230,7 @@ def verify_insertion(items: list) -> bool:
                 0
             )
 
-        if item.get("insert-_type") == "MOVINT" or item.get("file-name") == "DB CEST PJ" \
+        if item.get("insert-type") == "MOVINT" or item.get("file-name") == "DB CEST PJ" \
                 or item.get("file-name") == "MANUT CAD":
             success = item_obj.set_item(
                 10,
@@ -244,14 +244,14 @@ def verify_insertion(items: list) -> bool:
 
 
 def get_item_table(item: dict) -> str:
-    if item.get("insert-_type") == "DEBT" and item.get("cost-account") == "1000":
+    if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1000":
         return "item1000"
 
-    if item.get("insert-_type") == "DEBT" and item.get("cost-account") == "1010" \
+    if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1010" \
             and not item.get("file-name") == "DB CEST PJ" and not item.get("file-name") == "MANUT CAD":
         return "item1010"
 
-    if item.get("insert-_type") == "MOVINT" or item.get("file-name") == "DB CEST PJ" \
+    if item.get("insert-type") == "MOVINT" or item.get("file-name") == "DB CEST PJ" \
             or item.get("file-name") == "MANUT CAD":
         return "extract"
 
@@ -259,7 +259,7 @@ def get_item_table(item: dict) -> str:
 def update(item: dict, inserted: int = 1) -> bool:
     item_obj = Item()
     success: bool = False
-    if item.get("insert-_type") == "DEBT" and item.get("cost-account") == "1000":
+    if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1000":
         success = item_obj.set_inserted_item(
             1000,
             get_item_month(item),
@@ -267,7 +267,7 @@ def update(item: dict, inserted: int = 1) -> bool:
             inserted
         )
 
-    if item.get("insert-_type") == "DEBT" and item.get("cost-account") == "1010" \
+    if item.get("insert-type") == "DEBT" and item.get("cost-account") == "1010" \
             and not item.get("file-name") == "DB CEST PJ" and not item.get("file-name") == "MANUT CAD":
         success = item_obj.set_inserted_item(
             1010,
@@ -276,7 +276,7 @@ def update(item: dict, inserted: int = 1) -> bool:
             inserted
         )
 
-    if item.get("insert-_type") == "MOVINT" or item.get("file-name") == "DB CEST PJ":
+    if item.get("insert-type") == "MOVINT" or item.get("file-name") == "DB CEST PJ":
         success = item_obj.set_inserted_item(
             10,
             get_item_month(item),
@@ -302,17 +302,17 @@ def objectify(items1000: tuple = (),
               extract_items: tuple = ()
               ) -> Tuple[List[Any], List[Any], List[Any]]:
     if len(items1000) > 0 and items1000 is not None:
-        items1000 = [json.loads(_item[0]) for _item in items1000]
+        items1000 = [json.loads(item[0]) for item in items1000]
     else:
         items1000 = []
 
     if len(items1010) > 0 and items1010 is not None:
-        items1010 = [json.loads(_item[0]) for _item in items1010]
+        items1010 = [json.loads(item[0]) for item in items1010]
     else:
         items1010 = []
 
     if len(extract_items) > 0 and extract_items is not None:
-        extract_items = [json.loads(_item[0]) for _item in extract_items]
+        extract_items = [json.loads(item[0]) for item in extract_items]
     else:
         extract_items = []
 

@@ -8,13 +8,14 @@ class AlertLoading(QWidget):
 
     def __init__(self, parent, p_w=0, p_h=0, container_w=200, container_h=50,
                  icon_w=30, icon_h=30, message=None, infinity=True, style=None, duration=3000,
-                 on_animation_end=None) -> None:
+                 on_animation_end=None, visible=False) -> None:
         super().__init__()
         self.parent = parent
         self.duration = duration
         self.infinity = infinity
         self.message = message
         self.style = style
+        self.visible = visible
 
         self.is_running = False
         self.on_animation_end = on_animation_end
@@ -43,24 +44,23 @@ class AlertLoading(QWidget):
         self.label_animation.setMaximumSize(icon_w, icon_h)
         self.label_animation.move(int(container_w - icon_w - 20), int(container_h / 4))
 
-    def set_position(self, pos_left=0, top=0):
-        """
+        if self.visible:
+            self.show()
 
-        @param top:
-        @_type pos_left: int
-        """
+    def set_position(self, pos_left=0, top=0):
         self.alert_container.move(pos_left, top)
 
-    def start_animation(self):
+    def start_animation(self) -> bool:
         self.movie.start()
-        self.alert_container.setVisible(True)
+        self.show()
         self.is_running = True
 
         if not self.infinity:
             timer = QTimer()
             timer.singleShot(self.duration, self.stop_animation)
+        return self.is_running
 
-    def stop_animation(self):
+    def stop_animation(self) -> bool:
         self.movie.stop()
         self.is_running = False
         self.hide()
@@ -68,9 +68,13 @@ class AlertLoading(QWidget):
         if self.on_animation_end is not None:
             if not self.is_running:
                 return self.on_animation_end()
+        return self.is_running
 
     def hide(self):
         self.alert_container.setVisible(False)
+
+    def show(self):
+        self.alert_container.setVisible(True)
 
     def set_style(self, style):
         self.alert_container.setStyleSheet(style)

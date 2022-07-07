@@ -202,7 +202,7 @@ modal_btn_ok_style = """
 """
 alert_loading_container_style = """
     QFrame {
-        background-color: rgb(221, 221, 221);
+        background-color: rgb(235, 235, 235);
         border-radius: 5px;
     }
 """
@@ -239,7 +239,7 @@ insertion_item_style = """
     background-color: rgb(250, 250, 250);
     border-radius: 5px;
 
-    font: 10pt 'Segoe UI';
+    font: 8pt 'Segoe UI';
     font-weight: 400;
     margin-bottom: 5px;
     color: rgb(50, 50, 50);

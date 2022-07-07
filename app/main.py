@@ -86,7 +86,7 @@ def get_month_directory_list() -> list:
 
 
 def get_id(table: str, item: dict) -> int:
-    return get_item_id(table, item)
+    return get_item_id(item, table)
 
 
 def get_sys_path() -> str:
@@ -165,8 +165,8 @@ def insert_new_item(month: str, work_month_path: str,
     clear_logs()
 
 
-def remove_notification(id: int) -> bool:
-    return delete_notification(id)
+def remove_notification(_id: int) -> bool:
+    return delete_notification(_id)
 
 
 def clear_all_notifications() -> bool:
@@ -240,8 +240,8 @@ def set_files_data() -> bool:
     return set_fileitems_data()
 
 
-def main() -> None:
-    create_config_path()
+def main() -> bool:
+    return create_config_path()
 
 
 if __name__ == "__main__":
