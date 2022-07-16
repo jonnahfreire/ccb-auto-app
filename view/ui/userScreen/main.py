@@ -1,5 +1,3 @@
-import time
-
 from PyQt5.QtCore import QTimer
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -11,7 +9,7 @@ from ..mainScreen.main import MainScreen
 from ..styles import set_element_shadow
 
 
-class UserCredentialScreen(QDialog):
+class UserCredentialScreen(QMainWindow):
 
     def __init__(self, parent, ui_path) -> None:
         super().__init__()
@@ -54,8 +52,8 @@ class UserCredentialScreen(QDialog):
 
         self.load_screen = AlertLoading(
             self,
-            p_w=800,
-            p_h=600,
+            p_w=self.parent.width,
+            p_h=self.parent.height,
             infinity=False,
             duration=2000,
             container_w=380,

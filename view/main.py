@@ -20,11 +20,9 @@ class Window(QStackedWidget):
         self.user_credential_view = None
         self.top = 100
         self.left = 300
-        self.width = 800
+        self.width = 900
         self.height = 600
         self.title = "CCB AUTO"
-        self.setFixedWidth(self.width)
-        self.setFixedHeight(self.height)
 
         self.alert_loading = AlertLoading(
             self, p_w=self.width, p_h=self.height, infinity=False, duration=2000,

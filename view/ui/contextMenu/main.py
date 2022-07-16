@@ -7,7 +7,7 @@ from view.ui.styles import context_item_style, set_element_shadow, context_menu_
 
 class ContextMenu(QWidget):
 
-    def __init__(self, parent, width=120, height=80):
+    def __init__(self, parent, width=120, height=80, left=0, top=0):
         super().__init__()
         self.parent = parent
 
@@ -16,6 +16,8 @@ class ContextMenu(QWidget):
         self.current_item = None
         self.width = width
         self.height = height
+        self.left = left
+        self.top = top
 
         self.context_menu_container = QFrame(self.parent)
         self.context_menu_container.setFrameShape(QFrame.StyledPanel)
@@ -28,7 +30,7 @@ class ContextMenu(QWidget):
         set_element_shadow(self.context_menu_container)
 
         self.context_menu_layout = QVBoxLayout(self.context_menu_container)
-        self.set_position(150, 100)
+        self.set_position(left, top)
 
     def set_position(self, left_pos, top):
         self.context_menu_container.move(left_pos, top)
@@ -80,8 +82,9 @@ class ContextMenu(QWidget):
         separator.setStyleSheet(u"background-color: rgb(206, 206, 206);")
         self.context_menu_layout.addWidget(separator)
 
-    def show(self):
+    def show(self, left=0, top=0):
         self.is_shown = True
+        self.set_position(left, top)
         self.context_menu_container.show()
 
     def hide(self):

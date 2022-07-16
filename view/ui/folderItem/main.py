@@ -58,6 +58,7 @@ class FolderItem(QWidget):
         if self.container is not None:
             self.container.setStyleSheet(folder_style_active)
             self.folder_icon.setPixmap(QPixmap("view/assets/folder-open.png"))
+            self.is_active = True
 
     def set_folder_closed(self):
         if self.container is not None:

@@ -15,6 +15,7 @@ class ListView(QListWidget):
         self.list_view_widget = QListWidget(self.parent)
         self.list_view_widget.setSelectionMode(QAbstractItemView.NoSelection)
         self.list_view_widget.setGeometry(x, y, width, height)
+        self.list_view_widget.setMinimumSize(width, height+100)
         self.list_view_widget.setFocusPolicy(Qt.NoFocus)
         self.list_view_widget.sortItems(Qt.AscendingOrder)
         self.list_view_widget.setStyleSheet(list_view_style)
@@ -83,6 +84,9 @@ class ListView(QListWidget):
 
     def get_items_count(self):
         return len(self.items)
+
+    def remove_current_item(self):
+        self.list_view_widget.takeItem(self.list_view_widget.currentRow())
 
     def clear(self):
         self.list_view_widget.clear()

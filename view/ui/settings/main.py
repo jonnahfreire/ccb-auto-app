@@ -9,7 +9,7 @@ from ..alertLoading.main import AlertLoading
 from ..styles import *
 
 
-class SettingsScreen(QDialog):
+class SettingsScreen(QMainWindow):
 
     def __init__(self, parent, ui_path) -> None:
         super().__init__()
@@ -33,7 +33,7 @@ class SettingsScreen(QDialog):
         self.driverPath.setMaximumSize(500, 30)
         self.selectDriverPathBtn.move(self.driverPath.width() + 25, self.selectDriverPathBtn.y())
 
-        self.alert_loading = AlertLoading(self, p_w=800, p_h=600,
+        self.alert_loading = AlertLoading(self, p_w=self.parent.width, p_h=self.parent.height,
                                           infinity=False, duration=2000,
                                           container_w=340,
                                           message="Salvando configurações, aguarde..",

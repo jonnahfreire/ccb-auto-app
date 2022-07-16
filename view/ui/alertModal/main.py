@@ -105,7 +105,11 @@ class AlertModal(QFrame):
     def set_position(self, left_pos, top):
         self.container.move(left_pos, top)
 
-    def show(self):
+    def show(self, allow_resize=True):
+        self.backdrop.setMinimumSize(self.parent.width(), self.parent.height())
+
+        self.set_position(int(self.backdrop.width() / 2) - int(self.container.width() / 2),
+                          int(self.backdrop.height() / 2) - 50 - int(self.container.height() / 2))
         self.backdrop.setVisible(True)
         self.backdrop.show()
 

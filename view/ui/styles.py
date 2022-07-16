@@ -104,6 +104,34 @@ btn_danger = """
     }
 """
 
+frame_bg_danger = """
+    QFrame {
+        background-color: """ + danger + """
+        border-radius: 5px;
+
+        color: #FFF;
+        font: 63 8pt "Segoe UI Semibold";
+        padding: 1px;
+    }
+    QFrame:hover {
+        background-color: """ + danger_hover + """
+    }
+"""
+
+frame_bg_success = """
+    QFrame {
+        background-color: """ + success + """
+        border-radius: 5px;
+
+        color: #FFF;
+        font: 63 8pt "Segoe UI Semibold";
+        padding: 1px;
+    }
+    QFrame:hover {
+        background-color: """ + success_hover + """
+    }
+"""
+
 app_header_bg = bg_primary
 
 status_error = """
@@ -260,4 +288,20 @@ settings_info_style = """
     background-color: rgb(245, 245, 245);
     border-radius: 5px;
     padding: 5px;
+"""
+
+btn_filters_style = """
+    QLabel {
+        background-color: rgb(225, 225, 225);
+        border-radius: 5px;
+        color: rgb(50, 50, 50);
+    }
+"""
+
+btn_filters_style_active = """
+    QLabel {
+        background-color: rgb(210, 210, 210);
+        border-radius: 5px;
+        color: rgb(50, 50, 50);
+    }
 """
